@@ -108,13 +108,11 @@ end)
 net.Receive("rptools_add_tag", function (_, ply)
     if not ply:IsAdmin() then return end
     RPTools.Tags.newTag(net.ReadString())
-    RPTools.Tags.sendTagRegister(ply)
 end)
 
 net.Receive("rptools_remove_tag", function (_, ply)
     if not ply:IsAdmin() then return end
     RPTools.Tags.removeTag(net.ReadString())
-    RPTools.Tags.sendTagRegister(ply)
 end)
 
 
