@@ -24,12 +24,13 @@ function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId)
         text = text;
         required_tag = required_tagId;
     }
+
+    duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
 end
 
 function RPTools.Whispers.removeWhisper(ent, id)
-
     ent.RPTools.whispers[RPTools.Whispers.formatId(id)] = nil
-
+    duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
 end
 
 function RPTools.Whispers.setAsReceived(ply, whisper_id)
@@ -135,4 +136,9 @@ net.Receive("rptools_remove_whisper", function(len, ply)
     net.WriteTable(ent.RPTools.whispers)
     net.Send(ply)
 
+end)
+
+duplicator.RegisterEntityModifier("rptools_whispers", function(_, ent, data)
+    ent.RPTools = ent.RPTools or {}
+    ent.RPTools.whispers = data
 end)
