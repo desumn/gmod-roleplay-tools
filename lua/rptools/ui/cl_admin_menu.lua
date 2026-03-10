@@ -43,6 +43,14 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         newTagEntry:SetPlaceholderText("Enter a new tag name...")
         panel:AddPanel(newTagEntry)
 
+
+        local colorMixer = vgui.Create("DColorMixer", panel)
+        colorMixer:SetPalette(true)
+        colorMixer:SetAlphaBar(true)
+        colorMixer:SetWangs(true)
+        colorMixer:SetColor(Color(180, 140, 255)) -- Couleur par défaut
+        panel:AddPanel(colorMixer)
+        
         local btnAdd = vgui.Create("DButton", panel)
         btnAdd:SetText("Add Tag")
         btnAdd.DoClick = function()
@@ -50,8 +58,8 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
             if tag ~= "" then
                 net.Start("rptools_add_tag")
                 net.WriteString(tag)
+                net.WriteColor(col)
                 net.SendToServer()
-                
 
                 newTagEntry:SetValue("")
             end
@@ -65,24 +73,25 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         panel:AddPanel(tagsList)
 
         tagsList.OnRowRightClick = function(smth, lineID, line)
-            local tagToRemove = line:GetValue(1)
+            local tagIDToRemove = line.tagID
+            local tagDisplayName = line:GetValue(1)
             
-            -- Petite fenêtre de confirmation native de GMod
-            Derma_Query("Do you really want to remove tag : " .. tagToRemove .. " ?", "Confirmation",
+            Derma_Query("Do you really want to remove tag : " .. tagDisplayName .. " ?", "Confirmation",
                 "Yes", function()
                     net.Start("rptools_remove_tag")
-                    net.WriteString(tagToRemove)
+                    net.WriteString(tagIDToRemove)
                     net.SendToServer()
                 end,
                 "No", function() end
             )
         end
-
+        
         hook.Add("RPTools_OnTagsUpdated", tagsList, function(self, register)
             if IsValid(self) then
                 self:Clear()
-                for _, tag in pairs(register) do
-                    self:AddLine(string.NiceName(tag))
+                for tagID, tagData in pairs(register) do
+                    local line = self:AddLine(tagData.name)
+                    line.tagID = tagID
                 end
             end
         end)
