@@ -16,7 +16,7 @@ net.Receive("rptools_player_tags", function (_, ply)
     hook.Run("RPTools_OnPlayerTagsUpdated", targetPlayer, playerTags)
 end)
 
-hook.Add( "AddToolMenuCategories", "RPTools Category", function()
+hook.Add( "AddToolMenuCategories", "RPTools_Category", function()
 	spawnmenu.AddToolCategory( "Utilities", "RPTools", "#RPTools" )
 end )
 
