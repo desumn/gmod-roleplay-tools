@@ -21,8 +21,6 @@ util.AddNetworkString("rptools_remove_whisper")
 util.AddNetworkString("rptools_open_editor")
 
 
-
-
 AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("RPTools/UI/cl_whisper_ui.lua")
 AddCSLuaFile("RPTools/ui/cl_admin_menu.lua")

@@ -5,11 +5,13 @@ RPTools.UI.registerList = RPTools.UI.registerList or {}
 
 
 net.Receive("rptools_register_list", function (_, ply)
+    if not ply:IsAdmin() then return end
     RPTools.UI.registerList = net.ReadTable(true)
     hook.Run("RPTools_OnTagsUpdated", RPTools.UI.registerList)
 end)
 
 net.Receive("rptools_player_tags", function (_, ply)
+    if not ply:IsAdmin() then return end
     local targetPlayer = net.ReadPlayer()
     local playerTags = net.ReadTable(true)
     print("table")

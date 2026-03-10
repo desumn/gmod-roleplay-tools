@@ -83,26 +83,31 @@ hook.Add("PlayerInitialSpawn", "RPTools_CreateTagTable", function (ply)
 end)
 
 net.Receive("rptools_register_list", function (_, ply)
+    if not ply:IsAdmin() then return end
     RPTools.Tags.sendTagRegister(ply)
 end)
 
 net.Receive("rptools_add_tag", function (_, ply)
+    if not ply:IsAdmin() then return end
     RPTools.Tags.newTag(net.ReadString())
     RPTools.Tags.sendTagRegister(ply)
 end)
 
 net.Receive("rptools_remove_tag", function (_, ply)
+    if not ply:IsAdmin() then return end
     RPTools.Tags.removeTag(net.ReadString())
     RPTools.Tags.sendTagRegister(ply)
 end)
 
 
 net.Receive("rptools_player_tags", function (_, ply)
+    if not ply:IsAdmin() then return end
     local target = net.ReadPlayer()
     RPTools.Tags.sendPlayerTags(ply, target)
 end)
 
 net.Receive("rptools_tag_player", function (_, ply)
+    if not ply:IsAdmin() then return end
     local tag = net.ReadString()
     local target = net.ReadPlayer()
     RPTools.Tags.tagPlayer(target, tag)
@@ -110,6 +115,7 @@ net.Receive("rptools_tag_player", function (_, ply)
 end)
 
 net.Receive("rptools_untag_player", function (_, ply)
+    if not ply:IsAdmin() then return end
     local tag = net.ReadString()
     local target = net.ReadPlayer()
     RPTools.Tags.untagPlayer(target, tag)
