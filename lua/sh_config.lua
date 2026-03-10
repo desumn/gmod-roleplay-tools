@@ -13,11 +13,10 @@ RPTools.Config.WhisperSound = "ambient/wind/wind_snippet1.wav"
 
 -- Which colors does the whisper dialog take?
 RPTools.Config.Colors = {
-    Background = function (alpha) Color(20, 20, 30, alpha) end,
-    Accent     = function (alpha) Color(180, 140, 255, alpha) end,
-    Text       = function (alpha) Color(220, 220, 220, alpha) end
+    Background = function (alpha) return Color(20, 20, 30, alpha) end,
+    Accent     = function (alpha) return Color(180, 140, 255, alpha) end,
+    Text       = function (alpha) return Color(220, 220, 220, alpha) end
 }
-
 
 -- Which prefix is used to log?
 RPTools.Config.LogPrefix = "[RPTools] "

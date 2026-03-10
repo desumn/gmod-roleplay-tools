@@ -22,9 +22,11 @@ util.AddNetworkString("rptools_open_editor")
 
 
 AddCSLuaFile("cl_init.lua")
+AddCSLuaFile("sh_config.lua")
 AddCSLuaFile("RPTools/UI/cl_whisper_ui.lua")
 AddCSLuaFile("RPTools/ui/cl_admin_menu.lua")
 
+include("sh_config.lua")
 include("RPTools/Utilities/sv_utils.lua")
 include("RPTools/Tags/sv_tags.lua")
 include("RPTools/Whispers/sv_whispers.lua")

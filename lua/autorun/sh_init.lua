@@ -5,7 +5,8 @@ PIXEL = PIXEL or {}
 
 local function loadAddon()
 
-    include("rptools/sh_config.lua")
+    AddCSLuaFile("sh_config.lua")
+    include("sh_config.lua")
     if SERVER then 
         include("sv_init.lua")
     end
@@ -14,8 +15,8 @@ local function loadAddon()
         include("cl_init.lua")
     end
 
-    include("sh_commands.lua")
 
 end
 
 loadAddon()
+

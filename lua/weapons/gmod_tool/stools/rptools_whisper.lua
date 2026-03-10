@@ -37,7 +37,6 @@ end
 
 if CLIENT then
     net.Receive("rptools_open_editor", function(_, ply)
-        if not ply:IsAdmin() then return end
         local target = net.ReadEntity()
         local whispers = net.ReadTable()
 
