@@ -10,7 +10,7 @@ function RPTools.Whispers.formatId(whisper_id)
     return whisper_id
 end
 
-function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId)
+function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId, distance, duration, soundUrl)
     if not RPTools.Tags.tagExists(required_tagId) then
         return nil, RPTools.Whispers.errors.tagNotFound
     end
@@ -23,6 +23,11 @@ function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId)
         id = RPTools.Whispers.formatId(whisper_id);
         text = text;
         required_tag = required_tagId;
+
+        distance = distance;
+        duration = duration;
+        soundUrl = soundUrl
+        
     }
 
     duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
@@ -50,13 +55,18 @@ function RPTools.Whispers.playerHasReceived(ply, whisper_id)
     end
 end
 
-function RPTools.Whispers.getWhispersForPlayer(ply, ent)
+function RPTools.Whispers.getWhispersForPlayer(ply, tr)
     local valid_whispers_ids = {}
+    local ent = tr.Entity
     if not ent.RPTools or not ent.RPTools.whispers then return valid_whispers_ids end
 
     for whisper_id, whisper_data in pairs(ent.RPTools.whispers) do
         if RPTools.Tags.playerTagged(ply, whisper_data.required_tag) then
-            valid_whispers_ids[#valid_whispers_ids+1] = whisper_id
+            local required_distance = whisper_data.distance
+            local actualDistance = ply:EyePos():Distance(tr.HitPos)
+            if actualDistance <= required_distance then
+                valid_whispers_ids[#valid_whispers_ids+1] = whisper_id
+            end
         end
     end
 
@@ -74,13 +84,13 @@ timer.Create("RPTools_WhisperCheck", RPTools.Config.WhisperTickRate, 0, function
 
         local tr = util.TraceLine({
             start = ply:EyePos();
-            endpos = ply:EyePos() + dir * RPTools.Whispers.Distance;
+            endpos = ply:EyePos() + dir * 2000;
             filter = { ply }
         })
 
         if not tr.Entity or not tr.Entity:IsValid() then continue end
 
-        local whisper_ids = RPTools.Whispers.getWhispersForPlayer(ply, tr.Entity)
+        local whisper_ids = RPTools.Whispers.getWhispersForPlayer(ply, tr)
         local unseen_whisper_ids = {}
 
         if table.IsEmpty(whisper_ids) then continue end
@@ -114,8 +124,11 @@ net.Receive("rptools_add_whisper", function(len, ply)
     local ent = net.ReadEntity()
     local tagId = net.ReadString()
     local text = net.ReadString()
+    local distance = net.ReadUInt(16)
+    local duration = net.ReadUInt(8)
+    local soundUrl = net.ReadString()
 
-    RPTools.Whispers.newWhisper(ent, RPTools.Whispers.generateWhisperID(), text, tagId)
+    RPTools.Whispers.newWhisper(ent, RPTools.Whispers.generateWhisperID(), text, tagId, distance, duration, soundUrl)
 
     net.Start("rptools_open_editor")
     net.WriteEntity(ent)

@@ -42,7 +42,7 @@ if CLIENT then
         if IsValid(RPTools.EditorFrame) then RPTools.EditorFrame:Close() end
 
         local f = vgui.Create("DFrame")
-        f:SetSize(500, 450)
+        f:SetSize(500, 600)
         f:SetTitle("Whisper Editor - " .. target:GetClass())
         f:Center()
         f:MakePopup()
@@ -50,7 +50,7 @@ if CLIENT then
 
         local addPanel = vgui.Create("DPanel", f)
         addPanel:Dock(TOP)
-        addPanel:SetTall(120)
+        addPanel:SetTall(250)
         addPanel:DockMargin(0, 0, 0, 10)
 
         local combo = vgui.Create("DComboBox", addPanel)
@@ -62,6 +62,28 @@ if CLIENT then
                 combo:AddChoice(data.name, id) 
             end
         end
+
+        local sliderDist = vgui.Create("DNumSlider", addPanel)
+        sliderDist:Dock(TOP)
+        sliderDist:DockMargin(5, 0, 5, 0)
+        sliderDist:SetText("Activation distance")
+        sliderDist:SetMinMax(50, 2000)
+        sliderDist:SetDecimals(0)
+        sliderDist:SetValue(RPTools.Config and RPTools.Config.WhisperDistance or 300)
+
+        local sliderDur = vgui.Create("DNumSlider", addPanel)
+        sliderDur:Dock(TOP)
+        sliderDur:DockMargin(5, 0, 5, 0)
+        sliderDur:SetText("Duration of whisper (in second)")
+        sliderDur:SetMinMax(1, 60)
+        sliderDur:SetDecimals(0)
+        sliderDur:SetValue(RPTools.Config and RPTools.Config.WhisperDuration or 10)
+
+        local txtSound = vgui.Create("DTextEntry", addPanel)
+        txtSound:Dock(TOP)
+        txtSound:DockMargin(5, 5, 5, 5)
+        txtSound:SetPlaceholderText("Path to sound played when discovering whisper...")
+        txtSound:SetValue(RPTools.Config and RPTools.Config.WhisperSound or "ambient/wind/wind_snippet1.wav")
 
         local txt = vgui.Create("DTextEntry", addPanel)
         txt:Dock(FILL)
@@ -82,8 +104,13 @@ if CLIENT then
 
             net.Start("rptools_add_whisper")
             net.WriteEntity(target)
-            net.WriteString(tagID) -- On envoie l'ID unique ici
+            net.WriteString(tagID)
             net.WriteString(txt:GetValue())
+
+            net.WriteUInt(sliderDist:GetValue(), 16)
+            net.WriteUInt(sliderDur:GetValue(), 8)
+            net.WriteString(txtSound:GetValue())
+
             net.SendToServer()
         end
 

@@ -33,7 +33,7 @@ net.Receive("show_whispers", function (_, ply)
 
     if shouldStartTimer then
         RPTools.UI.LastWhisperTime = RealTime()
-        surface.PlaySound(RPTools.UI.WhisperSound)
+        surface.PlaySound(whispers[1].soundUrl)
     end
 
 end)
@@ -59,8 +59,8 @@ hook.Add( "HUDPaint", "RPTools_DrawWhisperUI", function()
 
     if elapsed < 0.5 then
         alpha = (elapsed / 0.5) * 255
-    elseif elapsed > RPTools.UI.WhisperDuration - 1 then
-        alpha = ((RPTools.UI.WhisperDuration - elapsed) / 1) * 255
+    elseif elapsed > whisper.duration - 1 then
+        alpha = ((whisper.duration - elapsed) / 1) * 255
     end
 
     local tag = RPTools.UI.registerList[whisper.required_tag]
