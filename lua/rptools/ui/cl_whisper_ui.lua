@@ -33,7 +33,11 @@ net.Receive("show_whispers", function (_, ply)
 
     if shouldStartTimer then
         RPTools.UI.LastWhisperTime = RealTime()
-        surface.PlaySound(whispers[1].soundUrl)
+        if whispers[1].soundUrl and whispers[1].soundUrl ~= "" then
+            surface.PlaySound(whispers[1].soundUrl)
+        else
+            surface.PlaySound(RPTools.Config.WhisperSound)
+        end
     end
 
 end)
@@ -49,7 +53,7 @@ hook.Add( "HUDPaint", "RPTools_DrawWhisperUI", function()
 
     local whisper = RPTools.UI.WhisperStack[1]
 
-    if elapsed > RPTools.UI.WhisperDuration then
+    if elapsed > whisper.duration then
         table.remove(RPTools.UI.WhisperStack, 1)
         RPTools.UI.LastWhisperTime = RealTime()
         return
