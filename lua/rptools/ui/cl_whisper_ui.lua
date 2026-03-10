@@ -35,7 +35,7 @@ net.Receive("show_whispers", function (_, ply)
 
 end)
 
-hook.Add( "HUDPaint", "HUDPaint_DrawABox", function()
+hook.Add( "HUDPaint", "RPTools_DrawWhisperUI", function()
 
     if not RPTools.UI.WhisperStack[1] then
         RPTools.UI.WhisperEntity = nil
