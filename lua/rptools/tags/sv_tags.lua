@@ -13,13 +13,34 @@ end
 local tagTemplate = {
     id = "_"; -- Unique id, internal usage
     name = "No Name";
-    colour = function (alpha) return Color(180, 140, 255, alpha) end;
+    colour = Color(180, 140, 255);
 }
 
 local tagRegister = {}
 
-function RPTools.Tags.formatTag(tagname)
-    return string.lower(tagname)
+function RPTools.Tags.loadRegisterFromDB()
+    tagRegister = {}
+    local dbRegister = sql.Query([[SELECT * FROM rptools_tags;]])
+
+    if not dbRegister then return end
+
+    for _, dbTag in ipairs(dbRegister) do
+            local tagID = dbTag.id
+            local data = util.JSONToTable(dbTag.data)
+            
+            if not data then data = table.Copy(tagTemplate) end
+
+            local colour = data.colour
+            if colour then
+                data.colour = Color(colour.r, colour.g, colour.b, colour.a)
+            end
+
+            local tag = table.Copy(tagTemplate)
+            table.Merge(tag, data)
+            tagRegister[tag.id] = tag
+    end
+    hook.Run("RPTools_TagRegisterUpdated")
+
 end
 
 function RPTools.Tags.newTag(tagName, colour)
@@ -35,16 +56,17 @@ function RPTools.Tags.newTag(tagName, colour)
         colour = colour;
     }
 
-    table.Merge(tag, incompleteTag, true)
+    table.Merge(tag, incompleteTag)
 
-    tagRegister[tag.id] = tag
-    hook.Run("RPTools_TagRegisterUpdated")
+    local data = util.TableToJSON(tag)
+    sql.QueryTyped([[INSERT INTO rptools_tags (id, data) VALUES (?, ?);]], tag.id, data)
 
+    RPTools.Tags.loadRegisterFromDB()
 end
 
 function RPTools.Tags.removeTag(tagId)
-    tagRegister[tagId] = nil
-    hook.Run("RPTools_TagRegisterUpdated")
+    sql.QueryTyped([[DELETE FROM rptools_tags WHERE id = ?]], tagId)
+    RPTools.Tags.loadRegisterFromDB()
 end
 
 function RPTools.Tags.tagExists(tagId)
@@ -54,6 +76,19 @@ end
 function RPTools.Tags.getAllTags()
     return table.Copy(tagRegister)
 end
+
+function RPTools.Tags.getName(tagId)
+    if not RPTools.Tags.tagExists(tagId) then return end
+
+    return tagRegister[tagId]
+
+end
+
+function RPTools.Tags.getTagById(tagId)
+    if not RPTools.Tags.tagExists(tagId) then return end
+    return table.Copy(tagRegister[tagId])
+end
+
 
 hook.Add("RPTools_TagRegisterUpdated", "RPTools_SendRegisterToAdmin", function()
 
@@ -78,57 +113,6 @@ net.Receive("rptools_register_list", function (_, ply)
     net.Send(ply)
 end)
 
-function RPTools.Tags.tagPlayer(ply, tagId)
-    local steamid = ply:SteamID64()
-
-    if not RPTools.Tags.tagExists(formatted_tagname) then
-        return false, RPTools.Tags.error.tagNotFound
-    elseif not RPTools.Tags.playerTags[steamid] then
-        return false, RPTools.Tags.error.noPlayerTagsTable
-    else
-        RPTools.Tags.playerTags[steamid][formatted_tagname] = true
-        return true, nil
-    end
-end
-
-function RPTools.Tags.untagPlayer(ply, tagname)
-    local formatted_tagname = RPTools.Tags.formatTag(tagname)
-    local steamid = ply:SteamID64()
-
-    if not RPTools.Tags.tagExists(formatted_tagname) then
-        return false, RPTools.Tags.error.tagNotFound
-    elseif not RPTools.Tags.playerTags[steamid] then
-        return false, RPTools.Tags.error.noPlayerTagsTable
-    else
-        RPTools.Tags.playerTags[steamid][formatted_tagname] = nil
-        return true, nil
-    end
-end
-
-function RPTools.Tags.playerTagged(ply, tagname)
-    local steamid = ply:SteamID64()
-    if not RPTools.Tags.playerTags[steamid] then
-        return false
-    else
-        return RPTools.Tags.playerTags[ply:SteamID64()][RPTools.Tags.formatTag(tagname)] or false
-    end
-end
-
-function RPTools.Tags.sendPlayerTags(ply, target)
-    net.Start("rptools_player_tags")
-    net.WritePlayer(target)
-    net.WriteTable(table.GetKeys(RPTools.Tags.playerTags[target:SteamID64()] or {}), true)
-    net.Send(ply)
-end
-
-hook.Add("PlayerInitialSpawn", "RPTools_CreateTagTable", function (ply)
-
-    local steamid = ply:SteamID64()
-    RPTools.Tags.playerTags[steamid] = RPTools.Tags.playerTags[steamid] or {}
-    print("[RPTools] Player " .. ply:Nick() .. "(" .. steamid .. ")" .. " tags initialized.")
-
-end)
-
 net.Receive("rptools_add_tag", function (_, ply)
     if not ply:IsAdmin() then return end
     RPTools.Tags.newTag(net.ReadString(), net.ReadColor())
@@ -137,6 +121,94 @@ end)
 net.Receive("rptools_remove_tag", function (_, ply)
     if not ply:IsAdmin() then return end
     RPTools.Tags.removeTag(net.ReadString())
+end)
+
+local playerTags = {}
+
+
+function RPTools.Tags.loadPlayerTagsFromDB(ply)
+    if not ply:IsValid() then return end
+    local steamid = ply:SteamID64()
+    playerTags[steamid] = {}
+    local tag_ids = sql.QueryTyped([[SELECT tagId FROM rptools_player_tags WHERE Steamid64 = ?]], steamid)
+
+    if not tag_ids then return end
+
+    for _, tagId in ipairs(tag_ids) do
+        playerTags[steamid][tagId.tagId] = true
+    end
+    hook.Run("RPTools_PlayerTagsUpdated", ply)
+
+end
+
+function RPTools.Tags.tagPlayer(ply, tagId)
+
+
+    if not ply:IsValid() then return end
+    if not RPTools.Tags.tagExists(tagId) then return end
+
+    local steamid = ply:SteamID64()
+
+    sql.QueryTyped([[INSERT INTO rptools_player_tags (SteamID64, tagID) VALUES (?, ?)]], steamid, tagId)
+    RPTools.Tags.loadPlayerTagsFromDB(ply)
+
+end
+
+function RPTools.Tags.untagPlayer(ply, tagId)
+
+    if not ply:IsValid() then return end
+    if not RPTools.Tags.tagExists(tagId) then return end
+
+    local steamid = ply:SteamID64()
+
+    sql.QueryTyped([[DELETE FROM rptools_player_tags WHERE SteamID64 = ? AND tagId = ?]], steamid, tagId)
+
+    RPTools.Tags.loadPlayerTagsFromDB(ply)
+end
+
+function RPTools.Tags.playerTagged(ply, tagId)
+    local steamid = ply:SteamID64()
+    if not playerTags[steamid] then
+        return false
+    else
+        return playerTags[ply:SteamID64()][tagId] or false
+    end
+end
+
+function RPTools.Tags.sendPlayerTags(ply, target)
+    net.Start("rptools_player_tags")
+    net.WritePlayer(target)
+    net.WriteTable(table.GetKeys(playerTags[target:SteamID64()] or {}), true)
+    net.Send(ply)
+end
+
+hook.Add("PlayerInitialSpawn", "RPTools_CreateTagTable", function (ply)
+
+    RPTools.Tags.loadPlayerTagsFromDB(ply)
+
+    local steamid = ply:SteamID64()
+    print("[RPTools] Player " .. ply:Nick() .. "(" .. steamid .. ")" .. " tags initialized.")
+
+end)
+
+hook.Add("PlayerDisconnected", "RPTools_FreeTagTable", function (ply)
+    local steamid = ply:SteamID64()
+    playerTags[steamid] = nil
+    print("[RPTools] Player " .. ply:Nick() .. "(" .. steamid .. ")" .. " tags cleared from memory.")
+end)
+
+hook.Add("RPTools_PlayerTagsUpdated", "RPTools_SendPlayerTagsToAdmin", function(target)
+
+    local admin_table = {}
+    for _, player in ipairs(player.GetAll()) do
+        if player:IsValid() and player:IsAdmin() then 
+            table.insert(admin_table, player)
+        end
+    end
+
+    if #admin_table > 0 then
+        RPTools.Tags.sendPlayerTags(admin_table, target)
+    end
 end)
 
 net.Receive("rptools_player_tags", function (_, ply)
@@ -150,6 +222,11 @@ net.Receive("rptools_tag_player", function (_, ply)
     local tag = net.ReadString()
     local target = net.ReadPlayer()
     RPTools.Tags.tagPlayer(target, tag)
-    RPTools.Tags.sendPlayerTags(ply, target)
 end)
 
+net.Receive("rptools_untag_player", function (_, ply)
+    if not ply:IsAdmin() then return end
+    local tag = net.ReadString()
+    local target = net.ReadPlayer()
+    RPTools.Tags.untagPlayer(target, tag)
+end)

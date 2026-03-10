@@ -1,17 +1,17 @@
 
 RPTools.UI = RPTools.UI or {}
+RPTools.Tags = RPTools.Tags or {}
 
 RPTools.UI.registerList = RPTools.UI.registerList or {}
 
 net.Receive("rptools_register_list", function (_, ply)
-    RPTools.UI.registerList = net.ReadTable(true)
+    RPTools.UI.registerList = net.ReadTable()
     hook.Run("RPTools_OnTagsUpdated", RPTools.UI.registerList)
 end)
 
 net.Receive("rptools_player_tags", function (_, ply)
     local targetPlayer = net.ReadPlayer()
     local playerTags = net.ReadTable(true)
-    PrintTable(playerTags)
 
     hook.Run("RPTools_OnPlayerTagsUpdated", targetPlayer, playerTags)
 end)
@@ -39,30 +39,25 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         lblTitle:SetDark(true)
         panel:AddPanel(lblTitle)
 
-        local newTagEntry = vgui.Create("DTextEntry", panel)
-        newTagEntry:SetPlaceholderText("Enter a new tag name...")
-        panel:AddPanel(newTagEntry)
-
-
-        local colorMixer = vgui.Create("DColorMixer", panel)
-        colorMixer:SetPalette(true)
-        colorMixer:SetAlphaBar(true)
-        colorMixer:SetWangs(true)
-        colorMixer:SetColor(Color(180, 140, 255)) -- Couleur par défaut
-        panel:AddPanel(colorMixer)
+        local txtName = vgui.Create("DTextEntry", panel) -- Utilise panel
+        txtName:SetPlaceholderText("Tag name...")
+        panel:AddPanel(txtName) -- Indispensable pour l'affichage
         
-        local btnAdd = vgui.Create("DButton", panel)
-        btnAdd:SetText("Add Tag")
-        btnAdd.DoClick = function()
-            local tag = newTagEntry:GetValue()
-            if tag ~= "" then
-                net.Start("rptools_add_tag")
-                net.WriteString(tag)
-                net.WriteColor(col)
-                net.SendToServer()
+        local mixer = vgui.Create("DColorMixer", panel)
+        mixer:SetPalette(true)
+        mixer:SetAlphaBar(false)
+        panel:AddPanel(mixer)
 
-                newTagEntry:SetValue("")
-            end
+        local btnAdd = vgui.Create("DButton", panel)
+        btnAdd:SetText("Créer le Tag")
+        btnAdd.DoClick = function()
+            local name = txtName:GetValue()
+            if name == "" then return end
+
+            net.Start("rptools_add_tag")
+            net.WriteString(name)
+            net.WriteColor(mixer:GetColor())
+            net.SendToServer()
         end
         panel:AddPanel(btnAdd)
 
@@ -72,26 +67,37 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         tagsList:AddColumn("Tags (Right-click to remove)")
         panel:AddPanel(tagsList)
 
-        tagsList.OnRowRightClick = function(smth, lineID, line)
-            local tagIDToRemove = line.tagID
-            local tagDisplayName = line:GetValue(1)
-            
-            Derma_Query("Do you really want to remove tag : " .. tagDisplayName .. " ?", "Confirmation",
-                "Yes", function()
-                    net.Start("rptools_remove_tag")
-                    net.WriteString(tagIDToRemove)
-                    net.SendToServer()
-                end,
-                "No", function() end
-            )
+        function RPTools.Tags.RefreshList(list, dataTable)
+            list:Clear()
+            for id, data in pairs(dataTable) do
+                local line = list:AddLine(data.name, " ")
+                line.tagID = id
+
+            line.Columns[2].Paint = function(self, w, h)
+                draw.RoundedBox(4, 5, 2, w - 10, h - 4, data.colour)
+            end
+
+            end
         end
-        
+
+       tagsList.OnRowRightClick = function(self, lineID, line)
+            local menu = DermaMenu()
+            menu:AddOption("Supprimer", function()
+                net.Start("rptools_remove_tag")
+                net.WriteString(line.tagID) -- Utilise l'ID stocké dans la ligne
+                net.SendToServer()
+            end):SetIcon("icon16/delete.png")
+            menu:Open()
+        end
+
         hook.Add("RPTools_OnTagsUpdated", tagsList, function(self, register)
-            if IsValid(self) then
-                self:Clear()
-                for tagID, tagData in pairs(register) do
-                    local line = self:AddLine(tagData.name)
-                    line.tagID = tagID
+            if not IsValid(self) then return end
+            self:Clear()
+            for tagID, tagData in pairs(register) do
+                local line = self:AddLine(tagData.name, " ")
+                line.tagID = tagID
+                line.Columns[2].Paint = function(s, w, h)
+                    draw.RoundedBox(4, 5, 2, w - 10, h - 4, tagData.colour)
                 end
             end
         end)
@@ -125,42 +131,40 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         checkboxContainer:SetPaintBackground(false)
         panel:AddPanel(checkboxContainer)
 
-        hook.Add("RPTools_OnPlayerTagsUpdated", checkboxContainer, function(self, targetPly, plyOwnedTags)
-            if IsValid(self) then
-                self:Clear()
-                
-                local yOffset = 0
-                for _, tagName in pairs(RPTools.UI.registerList) do
-                    
-                    local chk = vgui.Create("DCheckBoxLabel", self)
-                    chk:SetPos(0, yOffset)
-                    chk:SetText(string.NiceName(tagName))
-                    chk:SetDark(true)
-                    chk:SizeToContents()
+        hook.Add("RPTools_OnPlayerTagsUpdated", checkboxContainer, function(self, targetPly, plyOwnedIDs)
+            if not IsValid(self) then return end
+            self:Clear()
+            local yOffset = 0
+            for id, data in pairs(RPTools.UI.registerList) do     
+                local chk = vgui.Create("DCheckBoxLabel", self)
+                chk:SetPos(10, yOffset)
+                chk:SetText(data.name)
+                chk:SetTextColor(data.colour)
+                chk:SetDark(true)
+                chk:SizeToContents()
 
-                    local hasTag = false
-                    for _, ownedTag in pairs(plyOwnedTags) do
-                        if ownedTag == tagName then hasTag = true break end
-                    end
-                    
-                    chk:SetValue(hasTag)
-
-                    chk.OnChange = function(s, state)
-                        if state then
-                            net.Start("rptools_tag_player")
-                        else
-                            net.Start("rptools_untag_player")
-                        end
-                        net.WriteString(tagName)
-                        net.WriteEntity(targetPly)
-                        net.SendToServer()
-                    end
-
-                    yOffset = yOffset + 25
+                local hasTag = false
+                for _, ownedID in pairs(plyOwnedIDs) do
+                    if ownedID == id then hasTag = true break end
                 end
                 
-                self:SetTall(yOffset)
+                chk:SetValue(hasTag)
+
+                chk.OnChange = function(s, state)
+                    if state then
+                        net.Start("rptools_tag_player")
+                    else
+                        net.Start("rptools_untag_player")
+                    end
+                        net.WriteString(id)
+                        net.WriteEntity(targetPly)
+                    net.SendToServer()
+                end
+
+                yOffset = yOffset + 25
             end
+            
+            self:SetTall(yOffset)
         end)
 
         net.Start("rptools_register_list")

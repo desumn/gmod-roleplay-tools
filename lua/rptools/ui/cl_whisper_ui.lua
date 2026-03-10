@@ -1,4 +1,5 @@
 
+
 surface.CreateFont("RPTools_WhisperTag", {
     font = "Roboto",
     size = 22,
@@ -12,6 +13,8 @@ surface.CreateFont("RPTools_WhisperText", {
 })
 
 RPTools.UI = RPTools.UI or {}
+
+RPTools.UI.registerList = RPTools.UI.registerList or {}
 
 RPTools.UI.WhisperDuration = RPTools.Config.WhisperDuration
 RPTools.UI.WhisperSound = RPTools.Config.WhisperSound
@@ -60,15 +63,17 @@ hook.Add( "HUDPaint", "RPTools_DrawWhisperUI", function()
         alpha = ((RPTools.UI.WhisperDuration - elapsed) / 1) * 255
     end
 
+    local tag = RPTools.UI.registerList[whisper.required_tag]
+
     local bgColor = RPTools.Config.Colors.Background(alpha * 0.8)
-    local tagColor = RPTools.Config.Colors.Accent(alpha)
+    local tagColor = ColorAlpha(tag.colour, alpha)
     local textColor = RPTools.Config.Colors.Text(alpha)
 
-    local tag = string.upper(whisper.required_tag)
+    local tagName = string.upper(tag.name)
     local text = whisper.text
 
     surface.SetFont("RPTools_WhisperTag")
-    local tagW, tagH = surface.GetTextSize(tag .. " — ")
+    local tagW, tagH = surface.GetTextSize(tagName .. " — ")
 
     surface.SetFont("RPTools_WhisperText")
     local textW, textH = surface.GetTextSize(text)
@@ -80,7 +85,7 @@ hook.Add( "HUDPaint", "RPTools_DrawWhisperUI", function()
 
     draw.RoundedBox(6, x, y, totalW, h, bgColor)
 
-    draw.SimpleText(tag .. " — ", "RPTools_WhisperTag", x + 16, y + h / 2, tagColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+    draw.SimpleText(tagName .. " — ", "RPTools_WhisperTag", x + 16, y + h / 2, tagColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 
     draw.SimpleText(text, "RPTools_WhisperText", x + 16 + tagW, y + h / 2, textColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
 

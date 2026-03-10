@@ -58,7 +58,9 @@ if CLIENT then
         combo:DockMargin(5, 5, 5, 5)
         combo:SetValue("Select a Tag...")
         if RPTools.UI.registerList then
-            for _, tag in pairs(RPTools.UI.registerList) do combo:AddChoice(tag) end
+            for id, data in pairs(RPTools.UI.registerList) do 
+                combo:AddChoice(data.name, id) 
+            end
         end
 
         local txt = vgui.Create("DTextEntry", addPanel)
@@ -71,9 +73,16 @@ if CLIENT then
         btn:Dock(BOTTOM)
         btn:SetText("AJOUTER LE WHISPER")
         btn.DoClick = function()
+            local _, tagID = combo:GetSelected() 
+    
+            if not tagID then 
+                notification.AddLegacy("Please select a tag!", NOTIFY_ERROR, 3)
+                return 
+            end
+
             net.Start("rptools_add_whisper")
             net.WriteEntity(target)
-            net.WriteString(combo:GetValue())
+            net.WriteString(tagID) -- On envoie l'ID unique ici
             net.WriteString(txt:GetValue())
             net.SendToServer()
         end
@@ -84,8 +93,15 @@ if CLIENT then
         list:AddColumn("Text")
 
         for id, data in pairs(whispers) do
-            local line = list:AddLine(data.required_tag, data.text)
+            local tagInfo = RPTools.UI.registerList[data.required_tag]
+            local displayName = tagInfo and tagInfo.name or "Tag Inconnu (" .. data.required_tag .. ")"
+    
+            local line = list:AddLine(displayName, data.text)
             line.whisperID = id
+    
+            if tagInfo then
+                line.Columns[1]:SetTextColor(tagInfo.colour)
+            end
         end
 
         list.OnRowRightClick = function(p, id, line)

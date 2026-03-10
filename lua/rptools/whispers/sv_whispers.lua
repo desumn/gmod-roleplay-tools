@@ -10,19 +10,19 @@ function RPTools.Whispers.formatId(whisper_id)
     return whisper_id
 end
 
-function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tag)
-    if not RPTools.Tags.tagExists(required_tag) then
+function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId)
+    if not RPTools.Tags.tagExists(required_tagId) then
         return nil, RPTools.Whispers.errors.tagNotFound
     end
 
     ent.RPTools = ent.RPTools or {}
 
-    ent.RPTools.whispers = ent.RPTools.whispers or {} 
+    ent.RPTools.whispers = ent.RPTools.whispers or {}
 
     ent.RPTools.whispers[RPTools.Whispers.formatId(whisper_id)] = {
         id = RPTools.Whispers.formatId(whisper_id);
         text = text;
-        required_tag = RPTools.Tags.formatTag(required_tag);
+        required_tag = required_tagId;
     }
 end
 
@@ -111,10 +111,10 @@ net.Receive("rptools_add_whisper", function(len, ply)
     if not ply:IsAdmin() then return end
     
     local ent = net.ReadEntity()
-    local tag = net.ReadString()
+    local tagId = net.ReadString()
     local text = net.ReadString()
 
-    RPTools.Whispers.newWhisper(ent, RPTools.Whispers.generateWhisperID(), text, tag)
+    RPTools.Whispers.newWhisper(ent, RPTools.Whispers.generateWhisperID(), text, tagId)
 
     net.Start("rptools_open_editor")
     net.WriteEntity(ent)

@@ -24,3 +24,4 @@ RPTools.Config.LogPrefix = "[RPTools] "
 -- How often (in seconds) do the server if a player can receive a whisper?
 RPTools.Config.WhisperTickRate = 0.5
 
+

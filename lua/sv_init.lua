@@ -20,13 +20,28 @@ util.AddNetworkString("rptools_remove_whisper")
 
 util.AddNetworkString("rptools_open_editor")
 
-
 AddCSLuaFile("cl_init.lua")
-AddCSLuaFile("sh_config.lua")
 AddCSLuaFile("RPTools/UI/cl_whisper_ui.lua")
 AddCSLuaFile("RPTools/ui/cl_admin_menu.lua")
 
-include("sh_config.lua")
 include("RPTools/Utilities/sv_utils.lua")
 include("RPTools/Tags/sv_tags.lua")
 include("RPTools/Whispers/sv_whispers.lua")
+
+sql.Query([[CREATE TABLE IF NOT EXISTS rptools_tags(
+    id TEXT PRIMARY KEY,
+    data TEXT
+);]])
+
+sql.Query([[PRAGMA foreign_keys = ON;]])
+
+
+sql.Query([[CREATE TABLE IF NOT EXISTS rptools_player_tags(
+    SteamID64 TEXT,
+    tagId TEXT,
+    PRIMARY KEY (steamid64, tagId),
+    FOREIGN KEY (tagId) REFERENCES rptools_tags(id) ON DELETE CASCADE
+);]])
+
+RPTools.Tags.loadRegisterFromDB()
+

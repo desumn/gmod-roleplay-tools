@@ -14,6 +14,7 @@ local function loadAddon()
     if CLIENT then 
         include("cl_init.lua")
     end
+    include("sh_commands.lua")
 
 
 end

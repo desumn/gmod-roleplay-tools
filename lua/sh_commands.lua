@@ -39,7 +39,7 @@ concommand.Add("rptools_tag_register", function (ply, _, args, _)
 
     if ply:IsValid() and not ply:IsAdmin() then return end
 
-    local tableString = table.ToString(RPTools.Tags.tagRegister)
+    local tableString = table.ToString(RPTools.Tags.getAllTags())
 
     RPTools.Utilities.logToPlayer(ply, tableString)
 
