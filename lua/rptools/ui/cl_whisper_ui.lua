@@ -13,9 +13,8 @@ surface.CreateFont("RPTools_WhisperText", {
 
 RPTools.UI = RPTools.UI or {}
 
-
-
-RPTools.UI.WhisperDuration = 10
+RPTools.UI.WhisperDuration = RPTools.Config.WhisperDuration
+RPTools.UI.WhisperSound = RPTools.Config.WhisperSound
 RPTools.UI.LastWhisperTime = nil
 RPTools.UI.WhisperStack = {}
 
@@ -31,7 +30,7 @@ net.Receive("show_whispers", function (_, ply)
 
     if shouldStartTimer then
         RPTools.UI.LastWhisperTime = RealTime()
-        surface.PlaySound("ambient/wind/wind_snippet1.wav")
+        surface.PlaySound(RPTools.UI.WhisperSound)
     end
 
 end)
@@ -61,9 +60,9 @@ hook.Add( "HUDPaint", "HUDPaint_DrawABox", function()
         alpha = ((RPTools.UI.WhisperDuration - elapsed) / 1) * 255
     end
 
-    local bgColor = Color(20, 20, 30, alpha * 0.8)
-    local tagColor = Color(180, 140, 255, alpha)
-    local textColor = Color(220, 220, 220, alpha)
+    local bgColor = RPTools.Config.Colors.Background(alpha * 0.8)
+    local tagColor = RPTools.Config.Colors.Accent(alpha)
+    local textColor = RPTools.Config.Colors.Text(alpha)
 
     local tag = string.upper(whisper.required_tag)
     local text = whisper.text

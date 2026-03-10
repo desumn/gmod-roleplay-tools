@@ -5,6 +5,7 @@ PIXEL = PIXEL or {}
 
 local function loadAddon()
 
+    include("rptools/sh_config.lua")
     if SERVER then 
         include("sv_init.lua")
     end
@@ -17,9 +18,4 @@ local function loadAddon()
 
 end
 
-if PIXEL.UI then
-    loadAddon()
-    return
-end
-
-hook.Add("PIXEL.UI.FullyLoaded", "RPTools.WaitForPixelUI", loadAddon)
+loadAddon()

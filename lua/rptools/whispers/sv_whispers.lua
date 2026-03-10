@@ -1,7 +1,7 @@
 
 RPTools.Whispers = RPTools.Whispers or {}
 RPTools.Whispers.receivedWhispers = RPTools.Whispers.receivedWhispers or {}
-RPTools.Whispers.Distance = 300
+RPTools.Whispers.Distance = RPTools.Config.WhisperDistance
 RPTools.Whispers.errors = {
     tagNotFound = 0;
 }
@@ -67,7 +67,7 @@ function RPTools.Whispers.generateWhisperID()
     return os.time() .. "-" .. math.random(1000, 9999)
 end
 
-timer.Create("RPTools_WhisperCheck", 0.5, 0, function()
+timer.Create("RPTools_WhisperCheck", RPTools.Config.WhisperTickRate, 0, function()
     for _, ply in ipairs(player.GetAll()) do
         local dir = ply:EyeAngles():Forward()
 
