@@ -127,6 +127,22 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
             end
         end
 
+        local btnClearAll = vgui.Create("DButton", panel)
+        btnClearAll:SetText("CLEAR ALL PLAYER TAGS")
+        btnClearAll:SetTextColor(Color(255, 50, 50))
+        btnClearAll.DoClick = function()
+            Derma_Query(
+                "Are you sure you want to REMOVE ALL TAGS from ALL PLAYERS? This action is irreversible.",
+                "Confirm clean-up",
+                "Yes, clear everything.", function()
+                    net.Start("rptools_nuke_player_tags")
+                    net.SendToServer()
+                end,
+                "Actually, no", function() end
+            )
+        end
+        panel:AddPanel(btnClearAll)
+
         local checkboxContainer = vgui.Create("DPanel", panel)
         checkboxContainer:SetPaintBackground(false)
         panel:AddPanel(checkboxContainer)

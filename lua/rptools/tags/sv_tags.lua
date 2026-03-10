@@ -11,7 +11,7 @@ function RPTools.Tags.generateTagID()
 end
 
 local tagTemplate = {
-    id = "_"; -- Unique id, internal usage
+    id = "_";
     name = "No Name";
     colour = Color(180, 140, 255);
 }
@@ -182,6 +182,20 @@ function RPTools.Tags.sendPlayerTags(ply, target)
     net.Send(ply)
 end
 
+function RPTools.Tags.clearAllPlayerTags()
+    sql.Query([[DELETE FROM rptools_player_tags;]])
+
+    for steamid, _ in pairs(playerTags) do
+        playerTags[steamid] = {}
+    end
+
+    for _, target in ipairs(player.GetAll()) do
+        hook.Run("RPTools_PlayerTagsUpdated", target)
+    end
+
+    print("[RPTools] All player tags have been cleared from the database.")
+end
+
 hook.Add("PlayerInitialSpawn", "RPTools_CreateTagTable", function (ply)
 
     RPTools.Tags.loadPlayerTagsFromDB(ply)
@@ -229,4 +243,11 @@ net.Receive("rptools_untag_player", function (_, ply)
     local tag = net.ReadString()
     local target = net.ReadPlayer()
     RPTools.Tags.untagPlayer(target, tag)
+end)
+
+net.Receive("rptools_nuke_player_tags", function(len, ply)
+    if not ply:IsAdmin() then return end
+    RPTools.Tags.clearAllPlayerTags()
+
+    ply:ChatPrint("[RPTools] L'inventaire de tags de TOUS les joueurs a été réinitialisé.")
 end)
