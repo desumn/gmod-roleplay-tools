@@ -6,7 +6,6 @@ RPTools = RPTools or {}
 RPTools.UI = RPTools.UI or {}
 
 if CLIENT then
-    -- Textes d'aide
     language.Add("tool.rptools_whisper.name", "Whispers")
     language.Add("tool.rptools_whisper.desc", "Select an entity to manage its whispers")
     language.Add("tool.rptools_whisper.0", "Left Click: Select Entity")
@@ -36,7 +35,7 @@ if SERVER then
 end
 
 if CLIENT then
-    net.Receive("rptools_open_editor", function(_, ply)
+    net.Receive("rptools_open_editor", function(_, _)
         local target = net.ReadEntity()
         local whispers = net.ReadTable()
 

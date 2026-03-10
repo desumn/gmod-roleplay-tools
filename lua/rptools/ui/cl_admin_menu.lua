@@ -14,7 +14,6 @@ net.Receive("rptools_player_tags", function (_, ply)
     PrintTable(playerTags)
 
     hook.Run("RPTools_OnPlayerTagsUpdated", targetPlayer, playerTags)
-
 end)
 
 hook.Add( "AddToolMenuCategories", "CustomCategory", function()
@@ -159,4 +158,11 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         net.SendToServer()
 
     end)
+end)
+
+hook.Add("SpawnMenuOpen", "RPTools_SyncAdminMenu", function()
+    if LocalPlayer():IsAdmin() then
+        net.Start("rptools_register_list")
+        net.SendToServer()
+    end
 end)

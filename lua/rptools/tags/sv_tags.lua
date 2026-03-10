@@ -14,10 +14,12 @@ end
 
 function RPTools.Tags.newTag(tagname)
     RPTools.Tags.tagRegister[RPTools.Tags.formatTag(tagname)] = true
+    hook.Run("RPTools_TagRegisterUpdated")
 end
 
 function RPTools.Tags.removeTag(tagname)
     RPTools.Tags.tagRegister[RPTools.Tags.formatTag(tagname)] = nil
+    hook.Run("RPTools_TagRegisterUpdated")
 end
 
 function RPTools.Tags.tagExists(tagname)
@@ -82,6 +84,22 @@ hook.Add("PlayerInitialSpawn", "RPTools_CreateTagTable", function (ply)
 
 end)
 
+hook.Add("RPTools_TagRegisterUpdated", "RPTools_SendRegisterToAdmin", function()
+
+    local admin_table = {}
+    for _, player in ipairs(player:GetAll()) do
+        if player:IsValid() and player:IsAdmin() then 
+            table.insert(admin_table, player)
+        end
+    end
+
+    if #admin_table > 0 then
+        net.Start("rptools_register_list")
+        net.WriteTable(table.GetKeys(RPTools.Tags.tagRegister), true)
+        net.Send(admin_table)
+    end
+end)
+
 net.Receive("rptools_register_list", function (_, ply)
     if not ply:IsAdmin() then return end
     RPTools.Tags.sendTagRegister(ply)
@@ -114,10 +132,3 @@ net.Receive("rptools_tag_player", function (_, ply)
     RPTools.Tags.sendPlayerTags(ply, target)
 end)
 
-net.Receive("rptools_untag_player", function (_, ply)
-    if not ply:IsAdmin() then return end
-    local tag = net.ReadString()
-    local target = net.ReadPlayer()
-    RPTools.Tags.untagPlayer(target, tag)
-    RPTools.Tags.sendPlayerTags(ply, target)
-end)
