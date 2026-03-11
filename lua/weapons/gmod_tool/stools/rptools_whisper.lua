@@ -25,7 +25,6 @@ if CLIENT then
 
     RPTools.UI.SelectedEntity = nil
     RPTools.UI.SelectedWhispers = {}
-    RPTools.UI.SelectedCopyWhispers = {}
 end
 
 if SERVER then
@@ -56,14 +55,15 @@ if SERVER then
 
         if self:GetStage() == 0 then
             if not ent.RPTools or not ent.RPTools.whispers or ent.RPTools.whispers == {} then return false end
-            RPTools.UI.SelectedCopyWhispers = table.Copy(ent.RPTools.whispers)
+            if not ply.RPTools then ply.RPTools = {} end
+            ply.RPTools.SelectedCopyWhispers = table.Copy(ent.RPTools.whispers)
             self:SetStage(1)
 
         elseif self:GetStage() == 1 then
             ent.RPTools = ent.RPTools or {}
             ent.RPTools.whispers = ent.RPTools.whispers or {}
 
-            for oldId, whisper in pairs(RPTools.UI.SelectedCopyWhispers) do
+            for oldId, whisper in pairs(ply.RPTools.SelectedCopyWhispers) do
                 local newId = RPTools.Whispers.generateWhisperID()
                 if ent.RPTools.whispers[oldId] then continue end
                 RPTools.Whispers.copyWhisper(ent, newId, whisper)
@@ -81,7 +81,7 @@ if SERVER then
 
         if self:GetStage() == 1 then 
             self:SetStage(0)
-            RPTools.UI.SelectedCopyWhispers = {}
+            ply.RPTools.SelectedCopyWhispers = {}
         end
 
         return true
