@@ -58,7 +58,7 @@ if SERVER then
             if not ply.RPTools then ply.RPTools = {} end
             ply.RPTools.SelectedCopyWhispers = table.Copy(ent.RPTools.whispers)
             self:SetStage(1)
-
+            ply:SendLua([[notification.AddLegacy( "Copied ]] .. table.Count(ply.RPTools.SelectedCopyWhispers) .. [[ whispers.", NOTIFY_GENERIC, 2 )]])
         elseif self:GetStage() == 1 then
             ent.RPTools = ent.RPTools or {}
             ent.RPTools.whispers = ent.RPTools.whispers or {}
@@ -69,6 +69,7 @@ if SERVER then
                 RPTools.Whispers.copyWhisper(ent, newId, whisper)
             end
             self:SetStage(0)
+            ply:SendLua([[notification.AddLegacy( "Pasted ]] .. table.Count(ply.RPTools.SelectedCopyWhispers) .. [[ whispers.", NOTIFY_GENERIC, 2 )]])
         end
 
         return true
@@ -79,9 +80,10 @@ if SERVER then
 
         if not ply:IsAdmin() then return false end
 
-        if self:GetStage() == 1 then 
-            self:SetStage(0)
+        if self:GetStage() == 1 then
             ply.RPTools.SelectedCopyWhispers = {}
+            self:SetStage(0)
+            ply:SendLua([[notification.AddLegacy( "Cleared Whispers clipboard.", NOTIFY_CLEANUP, 2 )]])
         end
 
         return true

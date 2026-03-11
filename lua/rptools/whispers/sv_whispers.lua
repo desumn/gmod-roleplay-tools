@@ -17,8 +17,6 @@ function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId, dist
 
     ent.RPTools = ent.RPTools or {}
 
-    if not ent.RPTools.whispers or not table.IsEmpty(ent.RPtools.whispers) then ent:SetNW2Bool("rptools_has_whispers", true) end
-
     ent.RPTools.whispers = ent.RPTools.whispers or {}
 
     ent.RPTools.whispers[RPTools.Whispers.formatId(whisper_id)] = {
@@ -31,6 +29,8 @@ function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId, dist
         soundUrl = soundUrl
     }
 
+    ent:SetNW2Bool("rptools_has_whispers", true)
+
     duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
 end
 
@@ -40,13 +40,12 @@ function RPTools.Whispers.copyWhisper(ent, whisper_id, whisper)
 
     ent.RPTools = ent.RPTools or {}
 
-    if not ent.RPTools.whispers or not table.IsEmpty(ent.RPtools.whispers) then ent:SetNW2Bool("rptools_has_whispers", true) end
-
     ent.RPTools.whispers = ent.RPTools.whispers or {}
 
     new_whisper.id = whisper_id
 
     ent.RPTools.whispers[RPTools.Whispers.formatId(whisper_id)] = new_whisper
+    ent:SetNW2Bool("rptools_has_whispers", true)
 
     duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
 end
@@ -54,7 +53,7 @@ end
 function RPTools.Whispers.removeWhisper(ent, id)
     ent.RPTools.whispers[RPTools.Whispers.formatId(id)] = nil
 
-    if table.IsEmpty(ent.RPtools.whispers) then ent:SetNW2Bool("rptools_has_whispers", false) end
+    if table.IsEmpty(ent.RPTools.whispers) then ent:SetNW2Bool("rptools_has_whispers", false) end
 
     duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
 end
