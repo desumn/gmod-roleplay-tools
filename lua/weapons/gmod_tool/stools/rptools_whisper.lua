@@ -6,12 +6,26 @@ RPTools = RPTools or {}
 RPTools.UI = RPTools.UI or {}
 
 if CLIENT then
+
+    TOOL.Information = {
+        { name = "left", stage = 0 },
+        { name = "right_copy", stage = 0, icon = "gui/rmb.png" },
+        
+        { name = "left", stage = 1 },
+        { name = "right_paste", stage = 1, icon = "gui/rmb.png" },
+        { name = "reload", stage = 1 }
+    }
+
     language.Add("tool.rptools_whisper.name", "Whispers")
-    language.Add("tool.rptools_whisper.desc", "Select an entity to manage its whispers")
-    language.Add("tool.rptools_whisper.0", "Left Click: Select Entity")
+    language.Add("tool.rptools_whisper.desc", "Manage an entity whispers")
+    language.Add("tool.rptools_whisper.left", "Open entity's whisper menu")
+    language.Add("tool.rptools_whisper.right_copy", "Copy entity whispers")
+    language.Add("tool.rptools_whisper.right_paste", "Paste entity whispers")
+    language.Add("tool.rptools_whisper.reload", "Cancel copy")
 
     RPTools.UI.SelectedEntity = nil
     RPTools.UI.SelectedWhispers = {}
+    RPTools.UI.SelectedCopyWhispers = {}
 end
 
 if SERVER then
@@ -32,6 +46,47 @@ if SERVER then
 
         return true
     end
+
+    function TOOL:RightClick(trace)
+        local ent = trace.Entity
+        local ply = self:GetOwner()
+
+        if not IsValid(ent) or ent:IsPlayer() or ent:IsWorld() then return false end
+        if not ply:IsAdmin() then return false end
+
+        if self:GetStage() == 0 then
+            if not ent.RPTools or not ent.RPTools.whispers or ent.RPTools.whispers == {} then return false end
+            RPTools.UI.SelectedCopyWhispers = table.Copy(ent.RPTools.whispers)
+            self:SetStage(1)
+
+        elseif self:GetStage() == 1 then
+            ent.RPTools = ent.RPTools or {}
+            ent.RPTools.whispers = ent.RPTools.whispers or {}
+
+            for oldId, whisper in pairs(RPTools.UI.SelectedCopyWhispers) do
+                local newId = RPTools.Whispers.generateWhisperID()
+                if ent.RPTools.whispers[oldId] then continue end
+                RPTools.Whispers.copyWhisper(ent, newId, whisper)
+            end
+            self:SetStage(0)
+        end
+
+        return true
+    end
+
+      function TOOL:Reload(_)
+        local ply = self:GetOwner()
+
+        if not ply:IsAdmin() then return false end
+
+        if self:GetStage() == 1 then 
+            self:SetStage(0)
+            RPTools.UI.SelectedCopyWhispers = {}
+        end
+
+        return true
+    end
+
 end
 
 if CLIENT then

@@ -27,6 +27,7 @@ util.AddNetworkString("rptools_clear_player_tags")
 AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("RPTools/UI/cl_whisper_ui.lua")
 AddCSLuaFile("RPTools/ui/cl_admin_menu.lua")
+AddCSLuaFile("sh_commands.lua")
 
 include("RPTools/Utilities/sv_utils.lua")
 include("RPTools/Tags/sv_tags.lua")

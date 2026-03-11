@@ -17,7 +17,7 @@ function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId, dist
 
     ent.RPTools = ent.RPTools or {}
 
-    if not ent.RPTools.whispers or ent.RPtools.whispers == {} then ent:SetNW2Bool("rptools_has_whispers", true) end
+    if not ent.RPTools.whispers or ent.RPtools.whispers ~= {} then ent:SetNW2Bool("rptools_has_whispers", true) end
 
     ent.RPTools.whispers = ent.RPTools.whispers or {}
 
@@ -29,8 +29,24 @@ function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId, dist
         distance = distance;
         duration = duration;
         soundUrl = soundUrl
-        
     }
+
+    duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
+end
+
+
+function RPTools.Whispers.copyWhisper(ent, whisper_id, whisper)
+    local new_whisper = table.Copy(whisper)
+
+    ent.RPTools = ent.RPTools or {}
+
+    if not ent.RPTools.whispers or ent.RPTools.whispers ~= {} then ent:SetNW2Bool("rptools_has_whispers", true) end
+
+    ent.RPTools.whispers = ent.RPTools.whispers or {}
+
+    new_whisper.id = whisper_id
+
+    ent.RPTools.whispers[RPTools.Whispers.formatId(whisper_id)] = new_whisper
 
     duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
 end
@@ -80,7 +96,7 @@ function RPTools.Whispers.getWhispersForPlayer(ply, tr)
 end
 
 function RPTools.Whispers.generateWhisperID()
-    return os.time() .. "-" .. math.random(1000, 9999)
+    return "whisper:" .. os.time() .. "-" .. math.random(1000, 9999)
 end
 
 timer.Create("RPTools_WhisperCheck", RPTools.Config.WhisperTickRate, 0, function()
