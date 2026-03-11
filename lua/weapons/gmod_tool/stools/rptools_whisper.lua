@@ -75,7 +75,7 @@ if SERVER then
         return true
     end
 
-      function TOOL:Reload(_)
+    function TOOL:Reload(trace)
         local ply = self:GetOwner()
 
         if not ply:IsAdmin() then return false end
@@ -85,6 +85,38 @@ if SERVER then
             self:SetStage(0)
             ply:SendLua([[notification.AddLegacy( "Cleared Whispers clipboard.", NOTIFY_CLEANUP, 2 )]])
         end
+
+        local ent = trace.Entity
+		if IsValid(ent) and ent.RPTools and ent.RPTools.whispers and not table.IsEmpty(ent.RPTools.whispers) then
+			local whispers = ent.RPTools.whispers
+			local max = table.Count(whispers)
+			local weapon = self:GetWeapon()
+
+			local current = weapon:GetNW2Int("RPTools_SelectedIdx", 0) + 1
+			if current > max then current = 1 end
+
+			local i = 0
+			for _, data in pairs(whispers) do
+				i = i + 1
+				if i == current then
+					weapon:SetNW2Int("RPTools_SelectedIdx", current)
+					weapon:SetNW2String("RPTools_SelectedText", data.text)
+					weapon:SetNW2String("RPTools_SelectedTag", data.required_tag)
+					weapon:SetNW2Int("RPTools_SelectedDist", data.distance)
+					break
+				end
+			end
+
+			ply:SendLua([[surface.PlaySound("buttons/lightswitch2.wav")]])
+			return true
+		else
+			local weapon = self:GetWeapon()
+			weapon:SetNW2Int("RPTools_SelectedIdx", 0)
+			weapon:SetNW2String("RPTools_SelectedText", 0)
+			weapon:SetNW2String("RPTools_SelectedTag", "")
+			weapon:SetNW2Int("RPTools_SelectedDist", 0)
+			return false
+		 end
 
         return true
     end
@@ -201,6 +233,33 @@ if CLIENT then
             m:Open()
         end
     end)
+
+	function TOOL:DrawToolScreen(width, height)
+		local weapon = self:GetWeapon()
+		local idx = weapon:GetNW2Int("RPTools_SelectedIdx", 0)
+
+		surface.SetDrawColor(20, 20, 30)
+		surface.DrawRect(0, 0, width, height)
+
+		if idx > 0 then
+			local tagID = weapon:GetNW2String("RPTools_SelectedTag", "")
+			local text = weapon:GetNW2String("RPTools_SelectedText", "")
+			local dist = weapon:GetNW2Int("RPTools_SelectedDist", 0)
+			
+			local tag = RPTools.UI.registerList[tagID]
+			local tagCol = tag and tag.colour or color_white
+
+			draw.SimpleText("WHISPER " .. idx, "RPTools_ToolScreenText", width / 2, 35, color_white, TEXT_ALIGN_CENTER)
+			draw.SimpleText(tag and string.upper(tag.name) or "TAG", "RPTools_ToolScreenTag", width / 2, 90, tagCol, TEXT_ALIGN_CENTER)
+			
+			local displayTxt = (string.len(text) > 35) and (string.Left(text, 32) .. "...") or text
+			draw.DrawText(displayTxt, "RPTools_ToolScreenText", width / 2, 135, color_white, TEXT_ALIGN_CENTER)
+			
+			draw.SimpleText("RANGE : " .. dist .. "u", "RPTools_ToolScreenText", width / 2, height - 35, Color(150, 150, 150), TEXT_ALIGN_CENTER)
+		else
+			draw.SimpleText("RELOAD TO CYCLE", "RPTools_ToolScreenText", width / 2, height / 2, Color(100, 100, 100), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+		end
+	end
 
 end
 

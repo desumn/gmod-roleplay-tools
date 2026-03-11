@@ -126,3 +126,30 @@ hook.Add("PreDrawHalos", "RPTools_WhisperToolGunHalo", function()
 end)
 
 
+hook.Add("PostDrawTranslucentRenderables", "RPTools_WhisperRangePreview", function()
+    local ply = LocalPlayer()
+    if not ply:IsValid() or not ply:IsAdmin() then return end
+    local weapon = ply:GetActiveWeapon()
+
+    if not IsValid(weapon) or weapon:GetClass() ~= "gmod_tool" then return end
+    local tool = ply:GetTool()
+    if not tool or tool:GetMode() ~= "rptools_whisper" then return end
+
+    local dist = weapon:GetNW2Int("RPTools_SelectedDist", 0)
+    if dist <= 0 then return end
+
+    local tr = ply:GetEyeTrace()
+    local ent = tr.Entity
+
+    if IsValid(ent) and ent:GetNW2Bool("rptools_has_whispers", false) then
+        local tagID = weapon:GetNW2String("RPTools_SelectedTag", "")
+        local tag = RPTools.UI.registerList[tagID]
+        local col = tag and tag.colour or Color(180, 140, 255)
+
+        render.SetColorMaterial()
+        render.DrawWireframeSphere(ent:GetPos(), dist, 30, 30, col, true)
+        
+        render.DrawSphere(ent:GetPos(), dist, 30, 30, ColorAlpha(col, 10))
+    end
+    
+end)
