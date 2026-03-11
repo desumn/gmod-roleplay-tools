@@ -89,6 +89,15 @@ function RPTools.Tags.getTagById(tagId)
     return table.Copy(tagRegister[tagId])
 end
 
+function RPTools.Tags.findTagByName(tagName)
+    local tagId = nil
+    for _, tag in pairs(tagRegister) do
+        if string.lower(tag.name) == string.lower(tagName) then
+            tagId = tag.id
+        end
+    end
+    return tagId
+end
 
 hook.Add("RPTools_TagRegisterUpdated", "RPTools_SendRegisterToAdmin", function()
 
@@ -107,7 +116,6 @@ hook.Add("RPTools_TagRegisterUpdated", "RPTools_SendRegisterToAdmin", function()
 end)
 
 net.Receive("rptools_register_list", function (_, ply)
-    if not RPTools.CanAdmin(ply) then return end
     net.Start("rptools_register_list")
     net.WriteTable(RPTools.Tags.getAllTags())
     net.Send(ply)

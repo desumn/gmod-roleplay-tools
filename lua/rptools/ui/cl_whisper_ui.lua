@@ -1,5 +1,3 @@
-
-
 surface.CreateFont("RPTools_WhisperTag", {
     font = "Roboto",
     size = 22,
@@ -14,7 +12,7 @@ surface.CreateFont("RPTools_WhisperText", {
 
 RPTools.UI = RPTools.UI or {}
 
-RPTools.UI.registerList = RPTools.UI.registerList or {}
+RPTools.UI.registerList = {}
 
 RPTools.UI.WhisperDuration = RPTools.Config.WhisperDuration
 RPTools.UI.WhisperSound = RPTools.Config.WhisperSound
@@ -39,6 +37,9 @@ net.Receive("show_whispers", function (_, ply)
             surface.PlaySound(RPTools.Config.WhisperSound)
         end
     end
+
+    net.Start("rptools_register_list")
+    net.SendToServer()
 
 end)
 
@@ -68,6 +69,8 @@ hook.Add( "HUDPaint", "RPTools_DrawWhisperUI", function()
     end
 
     local tag = RPTools.UI.registerList[whisper.required_tag]
+
+    if not tag then return end
 
     local bgColor = RPTools.Config.Colors.Background(alpha * 0.8)
     local tagColor = ColorAlpha(tag.colour, alpha)

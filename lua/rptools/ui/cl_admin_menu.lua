@@ -2,12 +2,12 @@
 RPTools.UI = RPTools.UI or {}
 RPTools.Tags = RPTools.Tags or {}
 
-local registerList = {}
+RPTools.UI.registerList = {}
 local playersTags = {}
 
 net.Receive("rptools_register_list", function (_, ply)
-    registerList = net.ReadTable()
-    hook.Run("RPTools_OnTagsUpdated", registerList)
+    RPTools.UI.registerList = net.ReadTable()
+    hook.Run("RPTools_OnTagsUpdated", RPTools.UI.registerList)
 end)
 
 net.Receive("rptools_player_tags", function (_, ply)
@@ -24,7 +24,7 @@ end)
 local function OpenCrossReferenceMenu()
     if IsValid(RPTools.AdminDashboard) then RPTools.AdminDashboard:Remove() end
 
-    net.Start("rptools_register_list") 
+    net.Start("rptools_register_list")
     net.SendToServer()
     
     for _, p in ipairs(player.GetAll()) do
@@ -184,7 +184,7 @@ local function OpenCrossReferenceMenu()
         local filterT = string.lower(self.SearchTags:GetValue())
         local filterP = string.lower(self.SearchPlayers:GetValue())
 
-        for id, data in pairs(registerList) do
+        for id, data in pairs(RPTools.UI.registerList) do
             if string.find(string.lower(data.name), filterT, 1, true) then
                 local card = self.ListTags:Add("DButton")
                 card:Dock(TOP)
@@ -288,7 +288,7 @@ local function OpenCrossReferenceMenu()
                     local textOffsetX = 20
 
                     if self.SelectionMode == "TAG" and self.ActiveTagID then
-                        local tagData = registerList[self.ActiveTagID]
+                        local tagData = RPTools.UI.registerList[self.ActiveTagID]
                         if tagData then
                             local colAlpha = hasActiveTag and 255 or 50
                             stripeColor = ColorAlpha(tagData.colour, colAlpha)
