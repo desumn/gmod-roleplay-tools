@@ -2,272 +2,360 @@
 RPTools.UI = RPTools.UI or {}
 RPTools.Tags = RPTools.Tags or {}
 
-RPTools.UI.registerList = RPTools.UI.registerList or {}
+local registerList = {}
+local playersTags = {}
 
 net.Receive("rptools_register_list", function (_, ply)
-    RPTools.UI.registerList = net.ReadTable()
-    hook.Run("RPTools_OnTagsUpdated", RPTools.UI.registerList)
+    registerList = net.ReadTable()
+    hook.Run("RPTools_OnTagsUpdated", registerList)
 end)
 
 net.Receive("rptools_player_tags", function (_, ply)
     local targetPlayer = net.ReadPlayer()
     local playerTags = net.ReadTable(true)
 
+    if not targetPlayer:IsValid() then return end
+
+    playersTags[targetPlayer:SteamID64()] = playerTags
+
     hook.Run("RPTools_OnPlayerTagsUpdated", targetPlayer, playerTags)
 end)
 
-hook.Add( "AddToolMenuCategories", "RPTools_Category", function()
-	spawnmenu.AddToolCategory( "Utilities", "RPTools", "#RPTools" )
-end )
+local function OpenCrossReferenceMenu()
+    if IsValid(RPTools.AdminDashboard) then RPTools.AdminDashboard:Remove() end
 
-surface.CreateFont("RPTools_MenuTitle", {
-    font = "Roboto",
-    size = 20,
-    weight = 800,
-})
-
-hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
+    net.Start("rptools_register_list") 
+    net.SendToServer()
     
-    spawnmenu.AddToolMenuOption("Utilities", "RPTools", "RPTools_Tag_Management", "#Tags Management", "", "", function(panel)
-        
-        panel:ClearControls()
+    for _, p in ipairs(player.GetAll()) do
+        net.Start("rptools_player_tags") 
+        net.WriteEntity(p) 
+        net.SendToServer()
+    end
 
-        if not LocalPlayer():IsAdmin() then
-            local lblAdmin = vgui.Create("DLabel", panel)
-            lblAdmin:SetText("Admin-only menu")
-            lblAdmin:SetDark(true)
-            panel:AddPanel(lblAdmin)
-            return
+    local FRAME = vgui.Create("DFrame")
+    RPTools.AdminDashboard = FRAME
+    FRAME:SetSize(900, 600)
+    FRAME:Center()
+    FRAME:MakePopup()
+    FRAME:SetTitle("")
+    
+    FRAME.Paint = function(s, w, h)
+        draw.RoundedBox(6, 0, 0, w, h, RPTools.Config.Colors.Background())
+        draw.RoundedBoxEx(6, 0, 0, w, 40, RPTools.Config.Colors.Panel(), true, true, false, false)
+        draw.SimpleText("RPTools — Tag Management Dashboard", "DermaLarge", 15, 20, RPTools.Config.Colors.Text(), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+        
+        surface.SetDrawColor(200, 200, 200, 100)
+        surface.DrawRect(w/2, 40, 1, h - 40)
+    end
+
+    local btnClose = vgui.Create("DButton", FRAME)
+    btnClose:SetSize(30, 30)
+    btnClose:SetPos(FRAME:GetWide() - 35, 5)
+    btnClose:SetText("✕")
+    btnClose:SetFont("DermaDefaultBold")
+    btnClose:SetTextColor(RPTools.Config.Colors.Text())
+    btnClose.Paint = nil
+    btnClose.DoClick = function() FRAME:Close() end
+
+    FRAME.SelectionMode = "NONE"
+    FRAME.ActivePlayer = nil
+    FRAME.ActiveTagID = nil
+
+    local pnlTags = vgui.Create("DPanel", FRAME)
+    pnlTags:Dock(LEFT)
+    pnlTags:SetWide(430)
+    pnlTags:DockMargin(15, 15, 15, 15)
+    pnlTags.Paint = nil
+
+    local lblTags = vgui.Create("DLabel", pnlTags)
+    lblTags:Dock(TOP)
+    lblTags:SetText("TAGS REGISTER")
+    lblTags:SetFont("DermaDefaultBold")
+    lblTags:SetTextColor(RPTools.Config.Colors.TextMuted())
+    lblTags:DockMargin(0, 0, 0, 10)
+
+    FRAME.SearchTags = vgui.Create("DTextEntry", pnlTags)
+    FRAME.SearchTags:Dock(TOP)
+    FRAME.SearchTags:SetTall(30)
+    FRAME.SearchTags:DockMargin(0, 0, 0, 10)
+    FRAME.SearchTags:SetPlaceholderText("Search tag...")
+
+    FRAME.ListTags = vgui.Create("DScrollPanel", pnlTags)
+    FRAME.ListTags:Dock(FILL)
+    FRAME.ListTags:DockMargin(0, 0, 0, 15)
+
+    local btnNewTag = vgui.Create("DButton", pnlTags)
+    btnNewTag:Dock(BOTTOM)
+    btnNewTag:SetTall(40)
+    btnNewTag:SetText("+ CREATE NEW TAG")
+    btnNewTag:SetTextColor(color_white)
+    btnNewTag.Paint = function(s, w, h)
+        local col = s:IsHovered() and Color(50, 50, 55) or RPTools.Config.Colors.Accent()
+        draw.RoundedBox(4, 0, 0, w, h, col)
+    end
+    btnNewTag.DoClick = function()
+        local popup = vgui.Create("DFrame")
+        popup:SetSize(350, 260)
+        popup:Center()
+        popup:SetTitle("")
+        popup:MakePopup()
+        popup:DoModal()
+        
+        popup.Paint = function(s, w, h)
+            draw.RoundedBox(6, 0, 0, w, h, RPTools.Config.Colors.Background())
+            draw.RoundedBoxEx(6, 0, 0, w, 30, RPTools.Config.Colors.Panel(), true, true, false, false)
+            draw.SimpleText("Create a New Tag", "DermaDefaultBold", 10, 15, RPTools.Config.Colors.Text(), TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
         end
 
-        local lblTitle = vgui.Create("DLabel", panel)
-        lblTitle:SetText("Tag Management")
-        lblTitle:SetFont("RPTools_MenuTitle")
-        lblTitle:SetDark(true)
-        lblTitle:SizeToContents()
-        lblTitle:DockMargin(0, 0, 0, 5)
-        panel:AddPanel(lblTitle)
+        local btnClosePopup = vgui.Create("DButton", popup)
+        btnClosePopup:SetSize(30, 30)
+        btnClosePopup:SetPos(popup:GetWide() - 30, 0)
+        btnClosePopup:SetText("✕")
+        btnClosePopup:SetTextColor(RPTools.Config.Colors.Text())
+        btnClosePopup.Paint = nil
+        btnClosePopup.DoClick = function() popup:Close() end
 
-        local txtName = vgui.Create("DTextEntry", panel)
-        txtName:SetPlaceholderText("Tag name...")
-        panel:AddPanel(txtName)
-        
-        local mixer = vgui.Create("DColorMixer", panel)
-        mixer:SetTall(110)
-        mixer:SetPalette(false)
-        mixer:SetAlphaBar(false)
-        mixer:SetWangs(true)
-        panel:AddPanel(mixer)
+        local formContainer = vgui.Create("DPanel", popup)
+        formContainer:Dock(FILL)
+        formContainer:DockMargin(15, 10, 15, 15)
+        formContainer.Paint = nil
 
-        local btnAdd = vgui.Create("DButton", panel)
-        btnAdd:SetText("Create Tag")
-        btnAdd:SetIcon("icon16/tag_blue_add.png")
-        btnAdd.DoClick = function()
-            local name = txtName:GetValue()
-            if name == "" then return end
+        local entryName = vgui.Create("DTextEntry", formContainer)
+        entryName:Dock(TOP)
+        entryName:SetTall(30)
+        entryName:DockMargin(0, 0, 0, 10)
+        entryName:SetPlaceholderText("Tag Name...")
+
+        local colorMixer = vgui.Create("DColorMixer", formContainer)
+        colorMixer:Dock(FILL)
+        colorMixer:DockMargin(0, 0, 0, 15)
+        colorMixer:SetPalette(false)
+        colorMixer:SetAlphaBar(false)
+        colorMixer:SetWangs(true)
+
+        local btnSave = vgui.Create("DButton", formContainer)
+        btnSave:Dock(BOTTOM)
+        btnSave:SetTall(35)
+        btnSave:SetText("SAVE NEW TAG")
+        btnSave:SetTextColor(color_white)
+        btnSave.Paint = function(s, w, h)
+            local col = s:IsHovered() and Color(50, 50, 55) or RPTools.Config.Colors.Accent()
+            draw.RoundedBox(4, 0, 0, w, h, col)
+        end
+        btnSave.DoClick = function()
+            local name = entryName:GetValue()
+            if string.Trim(name) == "" then return end
 
             net.Start("rptools_add_tag")
             net.WriteString(name)
-            net.WriteColor(mixer:GetColor())
+            net.WriteColor(colorMixer:GetColor())
             net.SendToServer()
-            txtName:SetValue("")
-        end
-        panel:AddPanel(btnAdd)
-
-        local tagsSearchBar = vgui.Create("DTextEntry", panel)
-        tagsSearchBar:SetPlaceholderText("Search for a tag...")
-        tagsSearchBar:SetUpdateOnType(true)
-        panel:AddPanel(tagsSearchBar)
-
-        local tagsList = vgui.Create("DListView", panel)
-        tagsList:SetTall(150)
-        tagsList:SetMultiSelect(false)
-        tagsList:AddColumn("Tags (Right-click to remove)")
-        panel:AddPanel(tagsList)
-
-        local function refreshList(list, dataTable, filter)
-            list:Clear()
-            filter = filter and string.lower(filter) or ""
-            for id, data in pairs(dataTable) do
-                if string.find(string.lower(data.name), filter, 1, true) then
-                    local line = list:AddLine(data.name, " ")
-                    line.tagID = id
-                    line.Columns[2].Paint = function(self, w, h)
-                    draw.RoundedBox(4, 5, 2, w - 10, h - 4, data.colour)
-                end
-            end
-
-            end
-        end
-
-        tagsSearchBar.OnValueChange = function(self, filter)
-            refreshList(tagsList, RPTools.UI.registerList, filter)
-        end
-
-       tagsList.OnRowRightClick = function(self, lineID, line)
-            local menu = DermaMenu()
-            menu:AddOption("Supprimer", function()
-                net.Start("rptools_remove_tag")
-                net.WriteString(line.tagID) -- Utilise l'ID stocké dans la ligne
-                net.SendToServer()
-            end):SetIcon("icon16/delete.png")
-            menu:Open()
-        end
-
-        hook.Add("RPTools_OnTagsUpdated", tagsList, function(self, register)
-            if not IsValid(self) then return end
-            refreshList(self, register, tagsSearchBar:GetValue())
-        end)
-
-        local spacer = vgui.Create("DPanel", panel)
-        spacer:SetTall(15)
-        spacer.Paint = function(self, w, h)
-            draw.RoundedBox(0, 10, h/2, w-20, 1, Color(0, 0, 0, 50)) 
-        end
-        panel:AddPanel(spacer)
-
-
-        local lblTitlePlayers = vgui.Create("DLabel", panel)
-        lblTitlePlayers:SetText("Player Tags Management")
-        lblTitlePlayers:SetFont("RPTools_MenuTitle")
-        lblTitlePlayers:SetDark(true)
-        lblTitlePlayers:SizeToContents()
-        lblTitlePlayers:DockMargin(0, 0, 0, 5)
-        panel:AddPanel(lblTitlePlayers)
-
-        local searchBar = vgui.Create("DTextEntry", panel)
-        searchBar:SetPlaceholderText("Search for a player...")
-        searchBar:SetUpdateOnType(true)
-        panel:AddPanel(searchBar)
-
-        local plyList = vgui.Create("DListView", panel)
-        plyList:SetTall(150)
-        plyList:SetMultiSelect(false)
-        plyList:AddColumn("Connected players")
-        panel:AddPanel(plyList)
-
-        local function RefreshPlayerList(filter)
-            plyList:Clear()
-            filter = filter and string.lower(filter) or ""
-            for _, ply in ipairs(player.GetAll()) do
-                if string.find(string.lower(ply:Nick()), filter, 1, true) then
-                    local line = plyList:AddLine(ply:Nick())
-                    line.playerEnt = ply
-                end
-            end
-        end
-
-        RefreshPlayerList()
-
-        searchBar.OnValueChange = function(self, value)
-            RefreshPlayerList(value)
-        end
-
-        plyList.OnRowSelected = function(self, rowIndex, row)
-            local selectedPlayer = row.playerEnt
             
-            if IsValid(selectedPlayer) then
-                net.Start("rptools_player_tags")
-                net.WriteEntity(selectedPlayer)
-                net.SendToServer()
-            end
+            popup:Close()
         end
+    end
 
-        plyList.OnRowRightClick = function(self, rowIndex, row)
-            local selectedPlayer = row.playerEnt
-            if not IsValid(selectedPlayer) then return end
+    local pnlPlayers = vgui.Create("DPanel", FRAME)
+    pnlPlayers:Dock(FILL) -- Prend tout le reste de la place à droite
+    pnlPlayers:DockMargin(15, 15, 15, 15)
+    pnlPlayers.Paint = nil
 
-            local menu = DermaMenu()
-            menu:AddOption("Clear tags", function()
-                Derma_Query(
-                    "Are you sure you want to clear " .. selectedPlayer:Nick() .. "'s tags ?",
-                    "Clear player tags",
-                    "Yes", function()
-                        net.Start("rptools_clear_player_tags")
-                        net.WriteEntity(selectedPlayer)
-                        net.SendToServer()
-                    end,
-                    "Nah", function() end
-                )
-            end):SetIcon("icon16/tag_blue_delete.png")
-            menu:Open()
-        end
+    local lblPlayers = vgui.Create("DLabel", pnlPlayers)
+    lblPlayers:Dock(TOP)
+    lblPlayers:SetText("CONNECTED PLAYERS")
+    lblPlayers:SetFont("DermaDefaultBold")
+    lblPlayers:SetTextColor(RPTools.Config.Colors.TextMuted())
+    lblPlayers:DockMargin(0, 0, 0, 10)
 
-        local btnClearAll = vgui.Create("DButton", panel)
-        btnClearAll:SetText("CLEAR ALL PLAYER TAGS")
-        btnClearAll:SetTextColor(Color(255, 50, 50))
-        btnClearAll.DoClick = function()
-            Derma_Query(
-                "Are you sure you want to REMOVE ALL TAGS from ALL PLAYERS? This action is irreversible.",
-                "Confirm clean-up",
-                "Yes, clear everything.", function()
-                    net.Start("rptools_nuke_player_tags")
-                    net.SendToServer()
-                end,
-                "Actually, no", function() end
-            )
-        end
-        panel:AddPanel(btnClearAll)
+    FRAME.SearchPlayers = vgui.Create("DTextEntry", pnlPlayers)
+    FRAME.SearchPlayers:Dock(TOP)
+    FRAME.SearchPlayers:SetTall(30)
+    FRAME.SearchPlayers:DockMargin(0, 0, 0, 10)
+    FRAME.SearchPlayers:SetPlaceholderText("Search player...")
 
-        local checkboxContainer = vgui.Create("DPanel", panel)
-        checkboxContainer:SetPaintBackground(false)
-        panel:AddPanel(checkboxContainer)
+    FRAME.ListPlayers = vgui.Create("DScrollPanel", pnlPlayers)
+    FRAME.ListPlayers:Dock(FILL)
 
-        hook.Add("RPTools_OnPlayerTagsUpdated", checkboxContainer, function(self, targetPly, plyOwnedIDs)
-            if not IsValid(self) then return end
-            self:Clear()
+    FRAME.RefreshUI = function(self)
+        self.ListTags:Clear()
+        self.ListPlayers:Clear()
+        
+        local filterT = string.lower(self.SearchTags:GetValue())
+        local filterP = string.lower(self.SearchPlayers:GetValue())
 
-            local lblTarget = vgui.Create("DLabel", self)
-            lblTarget:SetPos(10, 5)
-            lblTarget:SetText(targetPly:Nick() .. "'s tags: ")
-            lblTarget:SetFont("DermaDefaultBold")
-            lblTarget:SetDark(true)
-            lblTarget:SizeToContents()
-            
-            local yOffset = 25
-            for id, data in pairs(RPTools.UI.registerList) do     
-                local chk = vgui.Create("DCheckBoxLabel", self)
-                chk:SetPos(10, yOffset)
-                chk:SetText(data.name)
-                chk:SetTextColor(data.colour)
-                chk:SetDark(true)
-                chk:SizeToContents()
-
-                local hasTag = false
-                for _, ownedID in pairs(plyOwnedIDs) do
-                    if ownedID == id then hasTag = true break end
-                end
+        for id, data in pairs(registerList) do
+            if string.find(string.lower(data.name), filterT, 1, true) then
+                local card = self.ListTags:Add("DButton")
+                card:Dock(TOP)
+                card:SetTall(45)
+                card:DockMargin(0, 0, 10, 5)
+                card:SetText("")
                 
-                chk:SetValue(hasTag)
-
-                chk.OnChange = function(s, state)
-                    if state then
-                        net.Start("rptools_tag_player")
-                    else
-                        net.Start("rptools_untag_player")
+                card.Paint = function(s, w, h)
+                    local isHovered = s:IsHovered()
+                    local isActive = (self.SelectionMode == "TAG" and self.ActiveTagID == id)
+                    
+                    local playerHasTag = false
+                    if self.SelectionMode == "PLAYER" and IsValid(self.ActivePlayer) then
+                        local cache = playersTags[self.ActivePlayer:SteamID64()] or {}
+                        playerHasTag = table.HasValue(cache, id)
                     end
-                        net.WriteString(id)
-                        net.WriteEntity(targetPly)
-                    net.SendToServer()
+
+                    local bgColor = RPTools.Config.Colors.Panel()
+                    if isActive then bgColor = RPTools.Config.Colors.Background() 
+                    elseif isHovered then bgColor = RPTools.Config.Colors.Hover() end
+
+                    draw.RoundedBox(4, 0, 0, w, h, bgColor)
+                    
+                    local colAlpha = (self.SelectionMode == "PLAYER" and not playerHasTag) and 80 or 255
+                    local finalCol = ColorAlpha(data.colour, colAlpha)
+                    draw.RoundedBoxEx(4, 0, 0, 8, h, finalCol, true, false, true, false)
+                    
+                    local txtCol = (self.SelectionMode == "PLAYER" and not playerHasTag) and RPTools.Config.Colors.TextMuted() or RPTools.Config.Colors.Text()
+                    draw.SimpleText(data.name, "DermaDefaultBold", 20, h/2, txtCol, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+
+                    if self.SelectionMode == "PLAYER" and playerHasTag then
+                        surface.SetDrawColor(255, 255, 255, 255)
+                        surface.SetMaterial(Material("icon16/tick.png"))
+                        surface.DrawTexturedRect(w - 25, h/2 - 8, 16, 16)
+                    end
                 end
 
-                yOffset = yOffset + 25
+                card.DoClick = function()
+                    if self.SelectionMode == "PLAYER" and IsValid(self.ActivePlayer) then
+                        local cache = playersTags[self.ActivePlayer:SteamID64()] or {}
+                        if table.HasValue(cache, id) then net.Start("rptools_untag_player") else net.Start("rptools_tag_player") end
+                        net.WriteString(id)
+                        net.WriteEntity(self.ActivePlayer)
+                        net.SendToServer()
+                    elseif self.SelectionMode == "TAG" and self.ActiveTagID == id then
+                        self.SelectionMode = "NONE"
+                        self.ActiveTagID = nil
+                        self:RefreshUI()
+                    else
+                        self.SelectionMode = "TAG"
+                        self.ActiveTagID = id
+                        self.ActivePlayer = nil
+                        self:RefreshUI()
+                    end
+                end
+
+                card.DoRightClick = function()
+                    local menu = DermaMenu()
+                    menu:AddOption("Delete Tag", function()
+                        net.Start("rptools_remove_tag")
+                        net.WriteString(id)
+                        net.SendToServer()
+                        
+                        if self.ActiveTagID == id then
+                            self.SelectionMode = "NONE"
+                            self.ActiveTagID = nil
+                            self:RefreshUI()
+                        end
+                    end):SetIcon("icon16/delete.png")
+                    menu:Open()
+                end
+
             end
-            
-            self:SetTall(yOffset)
+        end
 
-            
-        end)
+        for _, ply in ipairs(player.GetAll()) do
+            if string.find(string.lower(ply:Nick()), filterP, 1, true) then
+                local card = self.ListPlayers:Add("DButton")
+                card:Dock(TOP)
+                card:SetTall(45)
+                card:DockMargin(0, 0, 10, 5)
+                card:SetText("")
+                
+                card.Paint = function(s, w, h)
+                    local isHovered = s:IsHovered()
+                    local isActive = (self.SelectionMode == "PLAYER" and self.ActivePlayer == ply)
+                    
+                    local hasActiveTag = false
+                    if self.SelectionMode == "TAG" and self.ActiveTagID then
+                        local cache = playersTags[ply:SteamID64()] or {}
+                        hasActiveTag = table.HasValue(cache, self.ActiveTagID)
+                    end
 
-        net.Start("rptools_register_list")
-        net.SendToServer()
+                    local bgColor = RPTools.Config.Colors.Panel()
+                    if isActive then bgColor = RPTools.Config.Colors.Background() 
+                    elseif isHovered then bgColor = RPTools.Config.Colors.Hover() end
 
-    end)
+                    draw.RoundedBox(4, 0, 0, w, h, bgColor)
+
+                    local stripeColor = RPTools.Config.Colors.TextMuted(50)
+                    local textOffsetX = 20
+
+                    if self.SelectionMode == "TAG" and self.ActiveTagID then
+                        local tagData = registerList[self.ActiveTagID]
+                        if tagData then
+                            local colAlpha = hasActiveTag and 255 or 50
+                            stripeColor = ColorAlpha(tagData.colour, colAlpha)
+                        end
+                    end
+                    
+                    draw.RoundedBoxEx(4, 0, 0, 8, h, stripeColor, true, false, true, false)
+
+                    local txtCol = RPTools.Config.Colors.Text()
+                    if self.SelectionMode == "TAG" and not hasActiveTag then txtCol = RPTools.Config.Colors.TextMuted() end
+
+                    draw.SimpleText(ply:Nick(), "DermaDefaultBold", textOffsetX, h/2, txtCol, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+
+                    if self.SelectionMode == "TAG" and hasActiveTag then
+                        surface.SetDrawColor(255, 255, 255, 255)
+                        surface.SetMaterial(Material("icon16/tick.png"))
+                        surface.DrawTexturedRect(w - 25, h/2 - 8, 16, 16)
+                    end
+                end
+
+                card.DoClick = function()
+                    if self.SelectionMode == "TAG" and self.ActiveTagID then
+                        local cache = playersTags[ply:SteamID64()] or {}
+                        if table.HasValue(cache, self.ActiveTagID) then net.Start("rptools_untag_player") else net.Start("rptools_tag_player") end
+                        net.WriteString(self.ActiveTagID)
+                        net.WriteEntity(ply)
+                        net.SendToServer()
+                    elseif self.SelectionMode == "PLAYER" and self.ActivePlayer == ply then
+                        self.SelectionMode = "NONE"
+                        self.ActivePlayer = nil
+                        self:RefreshUI()
+                    else
+                        self.SelectionMode = "PLAYER"
+                        self.ActivePlayer = ply
+                        self.ActiveTagID = nil
+                        self:RefreshUI()
+                    end
+                end
+            end
+        end
+    end
+
+
+    FRAME.SearchTags.OnValueChange = function() FRAME:RefreshUI() end
+    FRAME.SearchPlayers.OnValueChange = function() FRAME:RefreshUI() end
+
+    FRAME:RefreshUI()
+
+end
+
+concommand.Add("rptools_menu", function(ply)
+    if ply:IsAdmin() then OpenCrossReferenceMenu() end
 end)
 
-hook.Add("SpawnMenuOpen", "RPTools_SyncAdminMenu", function()
-    if LocalPlayer():IsAdmin() then
-        net.Start("rptools_register_list")
-        net.SendToServer()
+hook.Add("OnPlayerChat", "RPTools_ChatCommand", function(ply, text)
+    if ply == LocalPlayer() and string.lower(text) == "!rptools" then
+        if ply:IsAdmin() then
+            OpenCrossReferenceMenu()
+        end
+        return true
     end
+end)
+
+hook.Add("RPTools_OnTagsUpdated", "RPTools_RefreshDashTags", function()
+    if IsValid(RPTools.AdminDashboard) then RPTools.AdminDashboard:RefreshUI() end
+end)
+
+hook.Add("RPTools_OnPlayerTagsUpdated", "RPTools_RefreshDashPlayers", function()
+    if IsValid(RPTools.AdminDashboard) then RPTools.AdminDashboard:RefreshUI() end
 end)
