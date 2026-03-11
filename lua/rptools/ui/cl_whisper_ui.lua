@@ -100,3 +100,29 @@ hook.Add("PreDrawHalos", "RPTools_WhisperHalo", function()
     if not RPTools.UI.WhisperEntity or not RPTools.UI.WhisperEntity:IsValid() then return end
     halo.Add({RPTools.UI.WhisperEntity}, Color(180, 140, 255), 8, 8, 2)
 end)
+
+
+-- Admin Toolgun ui
+
+hook.Add("PreDrawHalos", "RPTools_WhisperToolGunHalo", function()
+    
+    if not LocalPlayer():IsValid() or not LocalPlayer():IsAdmin() then return end
+    
+    local toolgun = LocalPlayer():GetActiveWeapon()
+    if not IsValid(toolgun) or (toolgun:GetClass() ~= "gmod_tool") then return end
+    if toolgun:GetMode() ~= "rptools_whisper" then return end
+
+    local entities = ents.FindInSphere(LocalPlayer():GetPos(), 2000)
+
+    local whisperEnts = {}
+
+    for _, ent in pairs(entities) do
+        if ent:GetNW2Bool("rptools_has_whispers", false) then
+            table.insert(whisperEnts, ent)
+        end
+    end
+
+    halo.Add(whisperEnts, Color(180, 140, 255), 8, 8, 2, true, true)
+end)
+
+
