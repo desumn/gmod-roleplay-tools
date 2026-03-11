@@ -74,23 +74,34 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         end
         panel:AddPanel(btnAdd)
 
+        local tagsSearchBar = vgui.Create("DTextEntry", panel)
+        tagsSearchBar:SetPlaceholderText("Search for a tag...")
+        tagsSearchBar:SetUpdateOnType(true)
+        panel:AddPanel(tagsSearchBar)
+
         local tagsList = vgui.Create("DListView", panel)
         tagsList:SetTall(150)
         tagsList:SetMultiSelect(false)
         tagsList:AddColumn("Tags (Right-click to remove)")
         panel:AddPanel(tagsList)
 
-        function RPTools.Tags.RefreshList(list, dataTable)
+        local function refreshList(list, dataTable, filter)
             list:Clear()
+            filter = filter and string.lower(filter) or ""
             for id, data in pairs(dataTable) do
-                local line = list:AddLine(data.name, " ")
-                line.tagID = id
-
-            line.Columns[2].Paint = function(self, w, h)
-                draw.RoundedBox(4, 5, 2, w - 10, h - 4, data.colour)
+                if string.find(string.lower(data.name), filter, 1, true) then
+                    local line = list:AddLine(data.name, " ")
+                    line.tagID = id
+                    line.Columns[2].Paint = function(self, w, h)
+                    draw.RoundedBox(4, 5, 2, w - 10, h - 4, data.colour)
+                end
             end
 
             end
+        end
+
+        tagsSearchBar.OnValueChange = function(self, filter)
+            refreshList(tagsList, RPTools.UI.registerList, filter)
         end
 
        tagsList.OnRowRightClick = function(self, lineID, line)
@@ -105,16 +116,8 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
 
         hook.Add("RPTools_OnTagsUpdated", tagsList, function(self, register)
             if not IsValid(self) then return end
-            self:Clear()
-            for tagID, tagData in pairs(register) do
-                local line = self:AddLine(tagData.name, " ")
-                line.tagID = tagID
-                line.Columns[2].Paint = function(s, w, h)
-                    draw.RoundedBox(4, 5, 2, w - 10, h - 4, tagData.colour)
-                end
-            end
+            refreshList(self, register, tagsSearchBar:GetValue())
         end)
-
 
         local spacer = vgui.Create("DPanel", panel)
         spacer:SetTall(15)
