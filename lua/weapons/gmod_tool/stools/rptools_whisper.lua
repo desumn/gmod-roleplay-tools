@@ -150,7 +150,7 @@ if CLIENT then
 
         local btn = vgui.Create("DButton", addPanel)
         btn:Dock(BOTTOM)
-        btn:SetText("AJOUTER LE WHISPER")
+        btn:SetText("ADD WHISPER")
         btn.DoClick = function()
             local _, tagID = combo:GetSelected() 
     
