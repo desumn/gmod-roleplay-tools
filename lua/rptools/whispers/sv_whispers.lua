@@ -139,7 +139,7 @@ end)
 
 
 net.Receive("rptools_add_whisper", function(len, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     
     local ent = net.ReadEntity()
     local tagId = net.ReadString()
@@ -168,7 +168,7 @@ net.Receive("rptools_add_whisper", function(len, ply)
 end)
 
 net.Receive("rptools_remove_whisper", function(len, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     
     local ent = net.ReadEntity()
     local id = net.ReadString()

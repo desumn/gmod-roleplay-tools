@@ -34,7 +34,7 @@ if SERVER then
         local ply = self:GetOwner()
 
         if not IsValid(ent) or ent:IsPlayer() or ent:IsWorld() then return false end
-        if not ply:IsAdmin() then return false end
+        if not RPTools.CanAdmin(ply) then return false end
 
         if not ent.RPTools then ent.RPTools = {} end
 
@@ -52,7 +52,7 @@ if SERVER then
         local ply = self:GetOwner()
 
         if not IsValid(ent) or ent:IsPlayer() or ent:IsWorld() then return false end
-        if not ply:IsAdmin() then return false end
+        if not RPTools.CanAdmin(ply) then return false end
 
         if self:GetStage() == 0 then
             if not ent.RPTools or not ent.RPTools.whispers or ent.RPTools.whispers == {} then return false end
@@ -79,7 +79,7 @@ if SERVER then
     function TOOL:Reload(trace)
         local ply = self:GetOwner()
 
-        if not ply:IsAdmin() then return false end
+        if not RPTools.CanAdmin(ply) then return false end
 
         if self:GetStage() == 1 then
             ply.RPTools.SelectedCopyWhispers = {}

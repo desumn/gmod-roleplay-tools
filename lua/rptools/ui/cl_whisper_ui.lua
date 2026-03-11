@@ -106,7 +106,7 @@ end)
 
 hook.Add("PreDrawHalos", "RPTools_WhisperToolGunHalo", function()
     
-    if not LocalPlayer():IsValid() or not LocalPlayer():IsAdmin() then return end
+    if not LocalPlayer():IsValid() or not RPTools.CanAdmin(LocalPlayer()) then return end
     
     local toolgun = LocalPlayer():GetActiveWeapon()
     if not IsValid(toolgun) or (toolgun:GetClass() ~= "gmod_tool") then return end
@@ -128,7 +128,7 @@ end)
 
 hook.Add("PostDrawTranslucentRenderables", "RPTools_WhisperRangePreview", function()
     local ply = LocalPlayer()
-    if not ply:IsValid() or not ply:IsAdmin() then return end
+    if not ply:IsValid() or not RPTools.CanAdmin(ply) then return end
     local weapon = ply:GetActiveWeapon()
 
     if not IsValid(weapon) or weapon:GetClass() ~= "gmod_tool" then return end

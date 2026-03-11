@@ -94,7 +94,7 @@ hook.Add("RPTools_TagRegisterUpdated", "RPTools_SendRegisterToAdmin", function()
 
     local admin_table = {}
     for _, player in ipairs(player.GetAll()) do
-        if player:IsValid() and player:IsAdmin() then 
+        if player:IsValid() and RPTools.CanAdmin(player) then 
             table.insert(admin_table, player)
         end
     end
@@ -107,19 +107,19 @@ hook.Add("RPTools_TagRegisterUpdated", "RPTools_SendRegisterToAdmin", function()
 end)
 
 net.Receive("rptools_register_list", function (_, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     net.Start("rptools_register_list")
     net.WriteTable(RPTools.Tags.getAllTags())
     net.Send(ply)
 end)
 
 net.Receive("rptools_add_tag", function (_, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     RPTools.Tags.newTag(net.ReadString(), net.ReadColor())
 end)
 
 net.Receive("rptools_remove_tag", function (_, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     RPTools.Tags.removeTag(net.ReadString())
 end)
 
@@ -222,7 +222,7 @@ hook.Add("RPTools_PlayerTagsUpdated", "RPTools_SendPlayerTagsToAdmin", function(
 
     local admin_table = {}
     for _, player in ipairs(player.GetAll()) do
-        if player:IsValid() and player:IsAdmin() then 
+        if player:IsValid() and RPTools.CanAdmin(player) then 
             table.insert(admin_table, player)
         end
     end
@@ -233,34 +233,34 @@ hook.Add("RPTools_PlayerTagsUpdated", "RPTools_SendPlayerTagsToAdmin", function(
 end)
 
 net.Receive("rptools_player_tags", function (_, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     local target = net.ReadPlayer()
     RPTools.Tags.sendPlayerTags(ply, target)
 end)
 
 net.Receive("rptools_tag_player", function (_, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     local tag = net.ReadString()
     local target = net.ReadPlayer()
     RPTools.Tags.tagPlayer(target, tag)
 end)
 
 net.Receive("rptools_untag_player", function (_, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     local tag = net.ReadString()
     local target = net.ReadPlayer()
     RPTools.Tags.untagPlayer(target, tag)
 end)
 
 net.Receive("rptools_nuke_player_tags", function(len, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     RPTools.Tags.clearAllPlayerTags()
 
     ply:ChatPrint("[RPTools] Players tags nuked.")
 end)
 
 net.Receive("rptools_clear_player_tags", function(len, ply)
-    if not ply:IsAdmin() then return end
+    if not RPTools.CanAdmin(ply) then return end
     local target = net.ReadEntity()
     RPTools.Tags.clearPlayerTags(target)
 end)

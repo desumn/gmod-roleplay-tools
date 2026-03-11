@@ -340,12 +340,12 @@ local function OpenCrossReferenceMenu()
 end
 
 concommand.Add("rptools_menu", function(ply)
-    if ply:IsAdmin() then OpenCrossReferenceMenu() end
+    if RPTools.CanAdmin(ply) then OpenCrossReferenceMenu() end
 end)
 
 hook.Add("OnPlayerChat", "RPTools_ChatCommand", function(ply, text)
     if ply == LocalPlayer() and string.lower(text) == "!rptools" then
-        if ply:IsAdmin() then
+        if RPTools.CanAdmin(ply) then
             OpenCrossReferenceMenu()
         end
         return true

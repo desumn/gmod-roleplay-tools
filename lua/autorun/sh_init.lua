@@ -1,7 +1,15 @@
 
 RPTools = RPTools or {}
 
-PIXEL = PIXEL or {}
+if sam then
+    sam.permissions.add("rptools_admin", "RPTools", "admin")
+end
+
+function RPTools.CanAdmin(ply)
+    if not IsValid(ply) then return false end
+    if sam then return ply:HasPermission("rptools_admin") end
+    return ply:IsAdmin()
+end
 
 local function loadAddon()
 
