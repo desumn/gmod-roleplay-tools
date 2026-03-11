@@ -112,14 +112,37 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         lblTitlePlayers:SetDark(true)
         panel:AddPanel(lblTitlePlayers)
 
-        local plyCombo = vgui.Create("DComboBox", panel)
-        plyCombo:SetValue("Select a player...")
-        for _, ply in ipairs(player.GetAll()) do
-            plyCombo:AddChoice(ply:Nick(), ply)
-        end
-        panel:AddPanel(plyCombo)
+        local searchBar = vgui.Create("DTextEntry", panel)
+        searchBar:SetPlaceholderText("Search for a player...")
+        searchBar:SetUpdateOnType(true)
+        panel:AddPanel(searchBar)
 
-        plyCombo.OnSelect = function(self, index, value, selectedPlayer)
+        local plyList = vgui.Create("DListView", panel)
+        plyList:SetTall(150)
+        plyList:SetMultiSelect(false)
+        plyList:AddColumn("Connected players")
+        panel:AddPanel(plyList)
+
+        local function RefreshPlayerList(filter)
+            plyList:Clear()
+            filter = filter and string.lower(filter) or ""
+            for _, ply in ipairs(player.GetAll()) do
+                if string.find(string.lower(ply:Nick()), filter, 1, true) then
+                    local line = plyList:AddLine(ply:Nick())
+                    line.playerEnt = ply
+                end
+            end
+        end
+
+        RefreshPlayerList()
+
+        searchBar.OnValueChange = function(self, value)
+            RefreshPlayerList(value)
+        end
+
+        plyList.OnRowSelected = function(self, rowIndex, row)
+            local selectedPlayer = row.playerEnt
+            
             if IsValid(selectedPlayer) then
                 net.Start("rptools_player_tags")
                 net.WriteEntity(selectedPlayer)
