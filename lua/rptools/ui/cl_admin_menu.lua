@@ -20,6 +20,12 @@ hook.Add( "AddToolMenuCategories", "RPTools_Category", function()
 	spawnmenu.AddToolCategory( "Utilities", "RPTools", "#RPTools" )
 end )
 
+surface.CreateFont("RPTools_MenuTitle", {
+    font = "Roboto",
+    size = 20,
+    weight = 800,
+})
+
 hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
     
     spawnmenu.AddToolMenuOption("Utilities", "RPTools", "RPTools_Tag_Management", "#Tags Management", "", "", function(panel)
@@ -35,21 +41,27 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         end
 
         local lblTitle = vgui.Create("DLabel", panel)
-        lblTitle:SetText("--- Tag Register ---")
+        lblTitle:SetText("Tag Management")
+        lblTitle:SetFont("RPTools_MenuTitle")
         lblTitle:SetDark(true)
+        lblTitle:SizeToContents()
+        lblTitle:DockMargin(0, 0, 0, 5)
         panel:AddPanel(lblTitle)
 
-        local txtName = vgui.Create("DTextEntry", panel) -- Utilise panel
+        local txtName = vgui.Create("DTextEntry", panel)
         txtName:SetPlaceholderText("Tag name...")
-        panel:AddPanel(txtName) -- Indispensable pour l'affichage
+        panel:AddPanel(txtName)
         
         local mixer = vgui.Create("DColorMixer", panel)
-        mixer:SetPalette(true)
+        mixer:SetTall(110)
+        mixer:SetPalette(false)
         mixer:SetAlphaBar(false)
+        mixer:SetWangs(true)
         panel:AddPanel(mixer)
 
         local btnAdd = vgui.Create("DButton", panel)
-        btnAdd:SetText("Créer le Tag")
+        btnAdd:SetText("Create Tag")
+        btnAdd:SetIcon("icon16/tag_blue_add.png")
         btnAdd.DoClick = function()
             local name = txtName:GetValue()
             if name == "" then return end
@@ -58,6 +70,7 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
             net.WriteString(name)
             net.WriteColor(mixer:GetColor())
             net.SendToServer()
+            txtName:SetValue("")
         end
         panel:AddPanel(btnAdd)
 
@@ -102,14 +115,21 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
             end
         end)
 
+
         local spacer = vgui.Create("DPanel", panel)
-        spacer:SetPaintBackground(false)
-        spacer:SetTall(20)
+        spacer:SetTall(15)
+        spacer.Paint = function(self, w, h)
+            draw.RoundedBox(0, 10, h/2, w-20, 1, Color(0, 0, 0, 50)) 
+        end
         panel:AddPanel(spacer)
 
+
         local lblTitlePlayers = vgui.Create("DLabel", panel)
-        lblTitlePlayers:SetText("--- Player Tags ---")
+        lblTitlePlayers:SetText("Player Tags Management")
+        lblTitlePlayers:SetFont("RPTools_MenuTitle")
         lblTitlePlayers:SetDark(true)
+        lblTitlePlayers:SizeToContents()
+        lblTitlePlayers:DockMargin(0, 0, 0, 5)
         panel:AddPanel(lblTitlePlayers)
 
         local searchBar = vgui.Create("DTextEntry", panel)
@@ -150,6 +170,26 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
             end
         end
 
+        plyList.OnRowRightClick = function(self, rowIndex, row)
+            local selectedPlayer = row.playerEnt
+            if not IsValid(selectedPlayer) then return end
+
+            local menu = DermaMenu()
+            menu:AddOption("Clear tags", function()
+                Derma_Query(
+                    "Are you sure you want to clear " .. selectedPlayer:Nick() .. "'s tags ?",
+                    "Clear player tags",
+                    "Yes", function()
+                        net.Start("rptools_clear_player_tags")
+                        net.WriteEntity(selectedPlayer)
+                        net.SendToServer()
+                    end,
+                    "Nah", function() end
+                )
+            end):SetIcon("icon16/tag_blue_delete.png")
+            menu:Open()
+        end
+
         local btnClearAll = vgui.Create("DButton", panel)
         btnClearAll:SetText("CLEAR ALL PLAYER TAGS")
         btnClearAll:SetTextColor(Color(255, 50, 50))
@@ -173,7 +213,15 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
         hook.Add("RPTools_OnPlayerTagsUpdated", checkboxContainer, function(self, targetPly, plyOwnedIDs)
             if not IsValid(self) then return end
             self:Clear()
-            local yOffset = 0
+
+            local lblTarget = vgui.Create("DLabel", self)
+            lblTarget:SetPos(10, 5)
+            lblTarget:SetText(targetPly:Nick() .. "'s tags: ")
+            lblTarget:SetFont("DermaDefaultBold")
+            lblTarget:SetDark(true)
+            lblTarget:SizeToContents()
+            
+            local yOffset = 25
             for id, data in pairs(RPTools.UI.registerList) do     
                 local chk = vgui.Create("DCheckBoxLabel", self)
                 chk:SetPos(10, yOffset)
@@ -204,6 +252,8 @@ hook.Add("PopulateToolMenu", "RPTools_AdminMenu", function()
             end
             
             self:SetTall(yOffset)
+
+            
         end)
 
         net.Start("rptools_register_list")

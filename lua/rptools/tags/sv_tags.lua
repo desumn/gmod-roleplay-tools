@@ -182,6 +182,13 @@ function RPTools.Tags.sendPlayerTags(ply, target)
     net.Send(ply)
 end
 
+function RPTools.Tags.clearPlayerTags(ply)
+    if not IsValid(ply) then return end
+    local steamid = ply:SteamID64()
+    sql.QueryTyped([[DELETE FROM rptools_player_tags WHERE SteamID64 = ?]], steamid)
+    RPTools.Tags.loadPlayerTagsFromDB(ply)
+end
+
 function RPTools.Tags.clearAllPlayerTags()
     sql.Query([[DELETE FROM rptools_player_tags;]])
 
@@ -249,5 +256,11 @@ net.Receive("rptools_nuke_player_tags", function(len, ply)
     if not ply:IsAdmin() then return end
     RPTools.Tags.clearAllPlayerTags()
 
-    ply:ChatPrint("[RPTools] L'inventaire de tags de TOUS les joueurs a été réinitialisé.")
+    ply:ChatPrint("[RPTools] Players tags nuked.")
+end)
+
+net.Receive("rptools_clear_player_tags", function(len, ply)
+    if not ply:IsAdmin() then return end
+    local target = net.ReadEntity()
+    RPTools.Tags.clearPlayerTags(target)
 end)
