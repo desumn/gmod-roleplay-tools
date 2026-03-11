@@ -186,4 +186,5 @@ end)
 duplicator.RegisterEntityModifier("rptools_whispers", function(_, ent, data)
     ent.RPTools = ent.RPTools or {}
     ent.RPTools.whispers = data
+    if not table.IsEmpty(data) then ent:SetNW2Bool("rptools_has_whispers", true) end
 end)
