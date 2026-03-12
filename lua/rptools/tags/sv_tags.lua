@@ -145,7 +145,6 @@ end
 
 function RPTools.Tags.tagPlayer(ply, tagId)
 
-
     if not ply:IsValid() then return end
     if not RPTools.Tags.tagExists(tagId) then return end
 
@@ -236,6 +235,11 @@ hook.Add("RPTools_PlayerTagsUpdated", "RPTools_SendPlayerTagsToAdmin", function(
     if #admin_table > 0 then
         RPTools.Tags.sendPlayerTags(admin_table, target)
     end
+
+    net.Start("rptools_invalidate_whispers_cache")
+    net.WriteUInt(0, 16)
+    net.Send(target)
+
 end)
 
 net.Receive("rptools_player_tags", function (_, ply)

@@ -20,7 +20,6 @@ RPTools.UI.Context = {
     c3D = 2;
 }
 
-
 function RPTools.UI.wordWrap(text, font, maxWidth)
     surface.SetFont(font)
     local exploded = string.Explode(" ", text)
@@ -55,7 +54,6 @@ local function DrawObservationWhisper2D(ent, whisper, tagData, yOffset)
     
     if not pos2D.visible then return yOffset end
 
-
     local diamondSize = 6
     local poly = {
         { x = pos2D.x, y = pos2D.y - diamondSize },
@@ -65,7 +63,7 @@ local function DrawObservationWhisper2D(ent, whisper, tagData, yOffset)
     }
     
     draw.NoTexture()
-    surface.SetDrawColor(tagData.color)
+    surface.SetDrawColor(tagData.colour)
     surface.DrawPoly(poly)
 
     local ply = LocalPlayer()
@@ -95,9 +93,9 @@ local function DrawObservationWhisper2D(ent, whisper, tagData, yOffset)
     
     draw.RoundedBox(4, drawX, drawY, panelWidth, panelHeight, Color(20, 20, 20, 220))
     
-    draw.RoundedBoxEx(4, drawX, drawY, 4, panelHeight, tagData.color, true, false, true, false)
+    draw.RoundedBoxEx(4, drawX, drawY, 4, panelHeight, tagData.colour, true, false, true, false)
     
-    draw.SimpleText("[" .. tagData.name .. "]", headerFont, drawX + padding + 5, drawY + padding, tagData.color, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+    draw.SimpleText("[" .. tagData.name .. "]", headerFont, drawX + padding + 5, drawY + padding, tagData.colour, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
     
     local textStartY = drawY + padding + headerHeight + 5
     for i, line in ipairs(lines) do

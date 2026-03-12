@@ -28,15 +28,15 @@ util.AddNetworkString("rptools_request_whispers")
 util.AddNetworkString("rptools_invalidate_whispers_cache")
 
 AddCSLuaFile("cl_init.lua")
-AddCSLuaFile("RPTools/UI/cl_whisper_ui.lua")
-AddCSLuaFile("RPTools/ui/cl_admin_menu.lua")
-AddCSLuaFile("RPTools/ui/cl_whisper_editor.lua")
+AddCSLuaFile("rptools/ui/cl_whisper_ui.lua")
+AddCSLuaFile("rptools/ui/cl_admin_menu.lua")
+AddCSLuaFile("rptools/ui/cl_whisper_editor.lua")
 AddCSLuaFile("sh_commands.lua")
-AddCSLuaFile("RPTools/whispers/cl_whispers_cache.lua")
+AddCSLuaFile("rptools/whispers/cl_whispers_cache.lua")
 
-include("RPTools/Utilities/sv_utils.lua")
-include("RPTools/Tags/sv_tags.lua")
-include("RPTools/Whispers/sv_whispers.lua")
+include("rptools/utilities/sv_utils.lua")
+include("rptools/uags/sv_tags.lua")
+include("rptools/whispers/sv_whispers.lua")
 
 sql.Query([[CREATE TABLE IF NOT EXISTS rptools_tags(
     id TEXT PRIMARY KEY,

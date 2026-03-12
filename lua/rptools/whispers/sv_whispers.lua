@@ -31,6 +31,10 @@ function RPTools.Whispers.newWhisper(ent, whisper_id, text, required_tagId, dist
 
     ent:SetNW2Bool("rptools_has_whispers", true)
 
+    net.Start("rptools_invalidate_whispers_cache")
+    net.WriteUInt(ent:EntIndex(), 16)
+    net.Broadcast()
+
     duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
 end
 
@@ -55,6 +59,11 @@ function RPTools.Whispers.removeWhisper(ent, id)
 
     if table.IsEmpty(ent.RPTools.whispers) then ent:SetNW2Bool("rptools_has_whispers", false) end
 
+    net.Start("rptools_invalidate_whispers_cache")
+    net.WriteUInt(ent:EntIndex(), 16)
+    net.Broadcast()
+
+
     duplicator.StoreEntityModifier(ent, "rptools_whispers", ent.RPTools.whispers)
 end
 
@@ -66,7 +75,7 @@ function RPTools.Whispers.listAuthorizedWhispers(ply, ent)
 
     local whispers = {}
     for _, whisper in pairs(ent.RPTools.whispers) do
-        if RPTools.Tags.playerTagged(ply, whisper.required_tagId) then
+        if RPTools.Tags.playerTagged(ply, whisper.required_tag) then
             table.insert(whispers, whisper)
         end
     end
@@ -94,7 +103,6 @@ net.Receive("rptools_add_whisper", function(len, ply)
     if not IsValid(ent) then return end
 
     local whisperId = tempWhisperId
-    -- Si l'ID est vide ou n'existe pas dans la table, c'est une création
     if whisperId == "" or not (ent.RPTools and ent.RPTools.whispers and ent.RPTools.whispers[whisperId]) then
         whisperId = RPTools.Whispers.generateWhisperID()
     end
@@ -134,7 +142,6 @@ end)
 
 net.Receive("rptools_request_whispers", function(_, ply)
     local entids = net.ReadTable(true)
-
     local valid_whispers = {}
     local whisper_counts = {}
 
