@@ -40,7 +40,4 @@ RPTools.Config.Colors = {
 -- Which prefix is used to log?
 RPTools.Config.LogPrefix = "[RPTools] "
 
--- How often (in seconds) do the server if a player can receive a whisper?
-RPTools.Config.WhisperTickRate = 0.5
-
-
+RPTools.Config.BatchSendDelay = 0.2

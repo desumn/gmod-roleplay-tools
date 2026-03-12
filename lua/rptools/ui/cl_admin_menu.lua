@@ -2,7 +2,7 @@
 RPTools.UI = RPTools.UI or {}
 RPTools.Tags = RPTools.Tags or {}
 
-RPTools.UI.registerList = {}
+RPTools.UI.registerList = RPTools.UI.registerList or {}
 local playersTags = {}
 
 net.Receive("rptools_register_list", function (_, ply)

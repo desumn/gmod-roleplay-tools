@@ -103,18 +103,10 @@ end
 
 hook.Add("RPTools_TagRegisterUpdated", "RPTools_SendRegisterToAdmin", function()
 
-    local admin_table = {}
-    for _, player in ipairs(player.GetAll()) do
-        if player:IsValid() and RPTools.CanAdmin(player) then 
-            table.insert(admin_table, player)
-        end
-    end
+    net.Start("rptools_register_list")
+    net.WriteTable(RPTools.Tags.getAllTags())
+    net.Broadcast()
 
-    if #admin_table > 0 then
-        net.Start("rptools_register_list")
-        net.WriteTable(RPTools.Tags.getAllTags())
-        net.Send(admin_table)
-    end
 end)
 
 net.Receive("rptools_register_list", function (_, ply)
@@ -219,6 +211,10 @@ hook.Add("PlayerInitialSpawn", "RPTools_CreateTagTable", function (ply)
 
     local steamid = ply:SteamID64()
     print("[RPTools] Player " .. ply:Nick() .. "(" .. steamid .. ")" .. " tags initialized.")
+
+    net.Start("rptools_register_list")
+    net.WriteTable(RPTools.Tags.getAllTags())
+    net.Send(ply)
 
 end)
 
