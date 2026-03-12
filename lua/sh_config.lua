@@ -1,6 +1,16 @@
 RPTools = RPTools or {}
 RPTools.Config = RPTools.Config or {}
 
+RPTools.Tags = RPTools.Tags or {}
+
+RPTools.Tags.Type = {
+    default = 1;
+}
+
+RPTools.Tags.typeName = {
+    [RPTools.Tags.Type.default] = "Default";
+}
+
 -- How far does an entity need to be to send its whispers?
 RPTools.Config.WhisperDistance = 300
 

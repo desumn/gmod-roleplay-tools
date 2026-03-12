@@ -14,6 +14,7 @@ local tagTemplate = {
     id = "_";
     name = "No Name";
     colour = Color(180, 140, 255);
+    tag = RPTools.Tags.Type.default;
 }
 
 local tagRegister = {}
@@ -43,7 +44,7 @@ function RPTools.Tags.loadRegisterFromDB()
 
 end
 
-function RPTools.Tags.newTag(tagName, colour)
+function RPTools.Tags.newTag(tagName, colour, type)
 
     if not isstring(tagName) then return end
     if not colour or not IsColor(colour) then return end
@@ -54,6 +55,7 @@ function RPTools.Tags.newTag(tagName, colour)
         id = RPTools.Tags.generateTagID();
         name = tagName;
         colour = colour;
+        type = type;
     }
 
     table.Merge(tag, incompleteTag)
@@ -123,7 +125,7 @@ end)
 
 net.Receive("rptools_add_tag", function (_, ply)
     if not RPTools.CanAdmin(ply) then return end
-    RPTools.Tags.newTag(net.ReadString(), net.ReadColor())
+    RPTools.Tags.newTag(net.ReadString(), net.ReadColor(), net.ReadUInt(8))
 end)
 
 net.Receive("rptools_remove_tag", function (_, ply)

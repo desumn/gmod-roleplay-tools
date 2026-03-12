@@ -96,7 +96,7 @@ local function OpenCrossReferenceMenu()
     end
     btnNewTag.DoClick = function()
         local popup = vgui.Create("DFrame")
-        popup:SetSize(350, 260)
+        popup:SetSize(350, 300)
         popup:Center()
         popup:SetTitle("")
         popup:MakePopup()
@@ -127,6 +127,15 @@ local function OpenCrossReferenceMenu()
         entryName:DockMargin(0, 0, 0, 10)
         entryName:SetPlaceholderText("Tag Name...")
 
+        local comboType = vgui.Create("DComboBox", formContainer)
+        comboType:Dock(TOP)
+        comboType:SetTall(30)
+        comboType:DockMargin(0, 0, 0, 10)
+
+        for typeId, typeName in pairs(RPTools.Tags.typeName) do
+            comboType:AddChoice(typeName, typeId)
+        end
+
         local colorMixer = vgui.Create("DColorMixer", formContainer)
         colorMixer:Dock(FILL)
         colorMixer:DockMargin(0, 0, 0, 15)
@@ -147,9 +156,12 @@ local function OpenCrossReferenceMenu()
             local name = entryName:GetValue()
             if string.Trim(name) == "" then return end
 
+            local _, typeId = comboType:GetSelected()
+
             net.Start("rptools_add_tag")
             net.WriteString(name)
             net.WriteColor(colorMixer:GetColor())
+            net.WriteUInt(typeId, 8)
             net.SendToServer()
             
             popup:Close()
