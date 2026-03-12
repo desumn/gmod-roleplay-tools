@@ -25,6 +25,15 @@ if CLIENT then
 
     RPTools.UI.SelectedEntity = nil
     RPTools.UI.SelectedWhispers = {}
+
+    surface.CreateFont("RPTools_ToolScreenText", {
+        font = "Roboto", -- Ou "Arial" si tu veux rester standard
+        size = 40,
+        weight = 800,
+        antialias = true,
+        shadow = true
+    })
+    
 end
 
 if SERVER then
