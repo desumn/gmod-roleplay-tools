@@ -32,6 +32,7 @@ AddCSLuaFile("RPTools/UI/cl_whisper_ui.lua")
 AddCSLuaFile("RPTools/ui/cl_admin_menu.lua")
 AddCSLuaFile("RPTools/ui/cl_whisper_editor.lua")
 AddCSLuaFile("sh_commands.lua")
+AddCSLuaFile("RPTools/whispers/cl_whispers_cache.lua")
 
 include("RPTools/Utilities/sv_utils.lua")
 include("RPTools/Tags/sv_tags.lua")

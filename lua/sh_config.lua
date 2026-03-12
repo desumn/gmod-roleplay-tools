@@ -4,11 +4,11 @@ RPTools.Config = RPTools.Config or {}
 RPTools.Tags = RPTools.Tags or {}
 
 RPTools.Tags.Type = {
-    default = 1;
+    observation = 1;
 }
 
 RPTools.Tags.typeName = {
-    [RPTools.Tags.Type.default] = "Default";
+    [RPTools.Tags.Type.observation] = "observation";
 }
 
 -- How far does an entity need to be to send its whispers?

@@ -73,12 +73,64 @@ function RPTools.Whispers.listAuthorizedWhispers(ply, ent)
     return whispers
 end
 
-table.insert(whispers, whisper)
 duplicator.RegisterEntityModifier("rptools_whispers", function(_, ent, data)
     ent.RPTools = ent.RPTools or {}
     ent.RPTools.whispers = data
     if not table.IsEmpty(data) then ent:SetNW2Bool("rptools_has_whispers", true) end
 end)
+
+
+net.Receive("rptools_add_whisper", function(len, ply)
+    if not RPTools.CanAdmin(ply) then return end
+    
+    local ent = net.ReadEntity()
+    local tagId = net.ReadString()
+    local text = net.ReadString()
+    local distance = net.ReadUInt(16)
+    local duration = net.ReadUInt(8)
+    local soundUrl = net.ReadString()
+    local tempWhisperId = net.ReadString()
+
+    if not IsValid(ent) then return end
+
+    local whisperId = tempWhisperId
+    -- Si l'ID est vide ou n'existe pas dans la table, c'est une création
+    if whisperId == "" or not (ent.RPTools and ent.RPTools.whispers and ent.RPTools.whispers[whisperId]) then
+        whisperId = RPTools.Whispers.generateWhisperID()
+    end
+
+    RPTools.Whispers.newWhisper(ent, whisperId, text, tagId, distance, duration, soundUrl)
+
+    net.Start("rptools_open_editor")
+    net.WriteEntity(ent)
+    net.WriteTable(ent.RPTools.whispers or {})
+    net.WriteTable(RPTools.Tags.getAllTags())
+    net.WriteString(whisperId)
+    net.Send(ply)
+end)
+
+net.Receive("rptools_remove_whisper", function(len, ply)
+    if not RPTools.CanAdmin(ply) then return end
+    
+    local ent = net.ReadEntity()
+    local id = net.ReadString()
+    
+    RPTools.Whispers.removeWhisper(ent, id)
+    
+    net.Start("rptools_open_editor")
+    net.WriteEntity(ent)
+    net.WriteTable(ent.RPTools.whispers or {})
+    net.WriteTable(RPTools.Tags.getAllTags())
+    net.WriteString(id)
+    net.Send(ply)
+end)
+
+duplicator.RegisterEntityModifier("rptools_whispers", function(_, ent, data)
+    ent.RPTools = ent.RPTools or {}
+    ent.RPTools.whispers = data
+    if not table.IsEmpty(data) then ent:SetNW2Bool("rptools_has_whispers", true) end
+end)
+
 
 net.Receive("rptools_request_whispers", function(_, ply)
     local entids = net.ReadTable(true)
