@@ -24,6 +24,9 @@ util.AddNetworkString("rptools_nuke_player_tags")
 
 util.AddNetworkString("rptools_clear_player_tags")
 
+util.AddNetworkString("rptools_request_whispers")
+util.AddNetworkString("rptools_invalidate_whispers_cache")
+
 AddCSLuaFile("cl_init.lua")
 AddCSLuaFile("RPTools/UI/cl_whisper_ui.lua")
 AddCSLuaFile("RPTools/ui/cl_admin_menu.lua")
