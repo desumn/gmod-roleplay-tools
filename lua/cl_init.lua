@@ -1,11 +1,7 @@
 
-print("[Roleplay Tools] Starting client")
 
-include("rptools/ui/cl_whisper_ui.lua")
-include("rptools/ui/cl_admin_menu.lua")
-include("rptools/ui/cl_whisper_editor.lua")
-include("rptools/whispers/cl_whispers_cache.lua")
+RPTools.Logs.log(RPTools.Logs.level.info, "Init", "Starting client")
 
-net.Receive("rptools_register_list", function (len, ply)
-    RPTools.UI.registerList = net.ReadTable()
-end)
+RPTools.Logs.log(RPTools.Logs.level.warning, "Init", "No features found, that might be harmful, on the client.")
+
+

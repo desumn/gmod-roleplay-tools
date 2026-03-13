@@ -1,57 +1,7 @@
 
-print("[Roleplay Tools] Starting server")
+RPTools.Logs.log(RPTools.Logs.level.info, "Init", "Starting server")
 
-util.AddNetworkString("show_tag_register")
-util.AddNetworkString("show_whispers")
-util.AddNetworkString("rptools_register_list")
+RPTools.Logs.log(RPTools.Logs.level.warning, "Init", "No features found, that might be harmful.")
 
-util.AddNetworkString("rptools_add_tag")
-util.AddNetworkString("rptools_remove_tag")
-
-util.AddNetworkString("rptools_player_tags")
-util.AddNetworkString("rptools_tag_player")
-util.AddNetworkString("rptools_untag_player")
-
-util.AddNetworkString("rptools_select_entity")
-
-util.AddNetworkString("rptools_list_whispers")
-util.AddNetworkString("rptools_add_whisper")
-util.AddNetworkString("rptools_remove_whisper")
-
-util.AddNetworkString("rptools_open_editor")
-
-util.AddNetworkString("rptools_nuke_player_tags")
-
-util.AddNetworkString("rptools_clear_player_tags")
-
-util.AddNetworkString("rptools_request_whispers")
-util.AddNetworkString("rptools_invalidate_whispers_cache")
-
-AddCSLuaFile("cl_init.lua")
-AddCSLuaFile("rptools/ui/cl_whisper_ui.lua")
-AddCSLuaFile("rptools/ui/cl_admin_menu.lua")
-AddCSLuaFile("rptools/ui/cl_whisper_editor.lua")
-AddCSLuaFile("sh_commands.lua")
-AddCSLuaFile("rptools/whispers/cl_whispers_cache.lua")
-
-include("rptools/utilities/sv_utils.lua")
-include("rptools/uags/sv_tags.lua")
-include("rptools/whispers/sv_whispers.lua")
-
-sql.Query([[CREATE TABLE IF NOT EXISTS rptools_tags(
-    id TEXT PRIMARY KEY,
-    data TEXT
-);]])
-
-sql.Query([[PRAGMA foreign_keys = ON;]])
-
-
-sql.Query([[CREATE TABLE IF NOT EXISTS rptools_player_tags(
-    SteamID64 TEXT,
-    tagId TEXT,
-    PRIMARY KEY (steamid64, tagId),
-    FOREIGN KEY (tagId) REFERENCES rptools_tags(id) ON DELETE CASCADE
-);]])
-
-RPTools.Tags.loadRegisterFromDB()
-
+include("sv_node_register.lua")
+RPTools.Logs.log(RPTools.Logs.level.info, "Init", "Node Register included")
