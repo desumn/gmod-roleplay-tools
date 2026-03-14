@@ -71,7 +71,7 @@ function RPTools.Actions.EmptyActionSet()
     return {}
 end
 
-function RPTools.Actions.AddAction(set, action)
+function RPTools.Actions.AddToSet(set, action)
     table.insert(set, action)
 end
 

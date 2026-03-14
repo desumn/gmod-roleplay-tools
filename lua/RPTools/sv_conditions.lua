@@ -95,6 +95,11 @@ function RPTools.Condition.EmptyConditionSet()
     return {}
 end
 
+function RPTools.Condition.AddToSet(set, condition)
+    table.insert(set, condition)
+end
+
+
 function RPTools.Condition.CreateConditionSet(conditions)
     local conditionSetValid, conditionErrorMessage = RPTools.Condition.ValidateConditionSet(conditions)
 

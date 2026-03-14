@@ -1,0 +1,25 @@
+{
+	"title": "Roleplay Tools",
+	"type": "tool",
+	"tags": [
+		"roleplay",
+		"admin"
+	],
+	"ignore": [
+		"*.psd",
+		"*.vcproj",
+		"*.svn*",
+		"*.git*",
+		"*.gitignore",
+        "*.vscode",
+		"*.smd",
+		"*.vcd",
+		"*.vdf",
+		"*.xcf",
+		"*.tga",
+		"*.db",
+		"*.txt",
+		"*.md",
+		".DS_Store"
+	]
+}
