@@ -14,3 +14,21 @@ function RPTools.Utilities.MakeError(result, message)
         return true, ""
     end
 end
+
+function RPTools.Utilities.AllValues(table, cond)
+    for _, value in pairs(table)
+        if not cond(value) then return false end
+    end
+    return true
+end
+
+function RPTools.Utilities.AllKeys(table, cond)
+    for key, _ in pairs(table)
+        if not cond(key) then return false end
+    end
+    return true
+end
+
+function RPTools.Utilities.IsSet(table, cond)
+    return istable(table) and RPTools.Utilities.AllValues(table, function (val) return isbool(val) and val end )
+end
