@@ -4,11 +4,11 @@ RPTools.Actions = RPTools.Actions or {}
 
 
 local actionFunctions = {
-    chat_message = function(player, node, params)
-        RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "chat_message action not implemented")
+    chat_message = function(ply, _, params)
+        ply:ChatPrint(params.message)
     end,
-    flag = function(player_, node, params)
-        RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "flag action not implemented")
+    flag = function(ply, _, params)
+        RPTools.Blackboard.Write(ply, params.key, params.value)
     end
 }
 

@@ -6,7 +6,6 @@ local logModuleName = "NodeRegister"
 
 local nodeRegister = {}
 
-
 function RPTools.NodeRegister.RegisterNode(node)
     local isvalid, error_message = RPTools.Node.ValidateNode(node)
     if not isvalid then
@@ -42,7 +41,7 @@ function RPTools.NodeRegister.GetNodeById(id)
 end
 
 function RPTools.NodeRegister.GetAllNodes()
-    return nodeRegister
+    return table.ClearKeys(nodeRegister)
 end
 
 function RPTools.NodeRegister.EditNode(id, subNode)

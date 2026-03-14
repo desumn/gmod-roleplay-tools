@@ -3,11 +3,11 @@ RPTools = RPTools or {}
 RPTools.Sources = RPTools.Sources or {}
 
 local sourceFunctions = {
-    distance = function(player, node, params)
-        RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "distance source not implemented")
+    distance = function(ply, node, _)
+        return ply:GetPos():distance(RPTools.Node.GetPosition(node))
     end,
-    flag = function(player, node, params)
-        RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "flag source not implemented")
+    flag = function(ply, node, param)
+        return RPTools.Blackboard.Read(ply, param)
     end
 }
 
