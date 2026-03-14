@@ -7,7 +7,7 @@ function RPTools.Condition.ValidateCondition(condition)
     local finalResult = true
     local accumulatedErrorMessage = ""
 
-    local sourceValid, sourceErrorMessage = RPTools.Source.ValidateSource(condition.source)
+    local sourceValid, sourceErrorMessage = RPTools.Sources.ValidateSource(condition.source)
     finalResult = finalResult and sourceValid
     if not sourceValid then
         accumulatedErrorMessage = sourceErrorMessage .. ", " .. accumulatedErrorMessage
@@ -28,7 +28,7 @@ function RPTools.Condition.ValidateCondition(condition)
     end
 
     if sourceValid then
-        local paramValid, paramErrorMessage = RPTools.Source.ValidateParameter(condition.source, condition.sourceParameter)
+        local paramValid, paramErrorMessage = RPTools.Sources.ValidateParameter(condition.source, condition.sourceParameter)
         finalResult = finalResult and paramValid
         if not paramValid then
             accumulatedErrorMessage = paramErrorMessage .. ", " .. accumulatedErrorMessage
