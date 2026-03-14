@@ -7,56 +7,56 @@ local logModuleName = "NodeRegister"
 local nodeRegister = {}
 
 
-function RPTools.NodeRegister.registerNode(node)
-    local isvalid, error_message = RPTools.Node.validateNode(node)
+function RPTools.NodeRegister.RegisterNode(node)
+    local isvalid, error_message = RPTools.Node.ValidateNode(node)
     if not isvalid then
-        RPTools.Logs.log(RPTools.Logs.level.warning, logModuleName, "Tried to register an invalid node (" .. error_message .. ")")
+        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Tried to register an invalid node (" .. error_message .. ")")
         return
     end
 
     local id = RPTools.Node.getId(node) or RPTools.Node.generateId(node)
 
     nodeRegister[id] = node
-    RPTools.Logs.log(RPTools.Logs.level.info, logModuleName, "Added node with id:(" .. id .. ") to the node register.")
+    RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Added node with id:(" .. id .. ") to the node register.")
     -- Hook pour prévenir de l'ajout?
 end
 
-function RPTools.NodeRegister.unregisterNode(id)
+function RPTools.NodeRegister.UnregisterNode(id)
     if not nodeRegister[id] then
-        RPTools.Logs.log(RPTools.Logs.level.warning, logModuleName, "Trying to remove node: node (" .. table.ToString(node) .. ") not found")
+        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Trying to remove node: node (" .. table.ToString(node) .. ") not found")
         return
     end
     nodeRegister[id] = nil
-    RPTools.Logs.log(RPTools.Logs.level.info, logModuleName, "Removed node with id:(" .. id .. ") from the node register.")
+    RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Removed node with id:(" .. id .. ") from the node register.")
     -- Hook pour prévenir de la suppression?
 end
 
-function RPTools.NodeRegister.getNodeById(id)
+function RPTools.NodeRegister.GetNodeById(id)
     local node = nodeRegister[id]
     if not node then
-        RPTools.Logs.log(RPTools.Logs.level.warning, logModuleName, "Trying to get node: node (" .. table.ToString(node) .. ") not found")
+        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Trying to get node: node (" .. table.ToString(node) .. ") not found")
         return
     end
 
     return node
 end
 
-function RPTools.NodeRegister.getAllNodes()
+function RPTools.NodeRegister.GetAllNodes()
     return nodeRegister
 end
 
-function RPTools.NodeRegister.editNode(id, subNode)
-    local node = RPTools.NodeRegister.getNodeById(id)
+function RPTools.NodeRegister.EditNode(id, subNode)
+    local node = RPTools.NodeRegister.GetNodeById(id)
 
     if not node then return end
 
-    local error_message = RPTools.Node.edit(node, subNode)
+    local errorMessage = RPTools.Node.Edit(node, subNode)
 
-    if error_message then
-        RPTools.Logs.log(RPTools.Logs.level.warning, logModuleName, "Failed to edit node with id:(" .. id .. "): " .. error_message)
+    if errorMessage then
+        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Failed to edit node with id:(" .. id .. "): " .. errorMessage)
     end
 
     nodeRegister[id] = node
 
-    RPTools.Logs.log(RPTools.Logs.level.info, logModuleName, "Edited node with id:(" .. id .. ")")
+    RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Edited node with id:(" .. id .. ")")
 end

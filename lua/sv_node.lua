@@ -12,55 +12,55 @@ local function generateId()
     return "node_" .. counter
 end
 
-function RPTools.Node.generateId(node)
+function RPTools.Node.GenerateId(node)
     node.id = generateId()
     return node.id
 end
 
 local function validateId(id)
-    return RPTools.Utilities.make_error(isstring(id) and id ~= "", "Invalid id " .. tostring(id))
+    return RPTools.Utilities.MakeError(isstring(id) and id ~= "", "Invalid id " .. tostring(id))
 end
 
 local function validatePosition(vector)
-    return RPTools.Utilities.make_error(
+    return RPTools.Utilities.MakeError(
            isvector(vector) and
-           RPTools.Utilities.isnumber(vector.x) and
-           RPTools.Utilities.isnumber(vector.y) and
-           RPTools.Utilities.isnumber(vector.z), "Invalid vector: " .. tostring(vector))
+           RPTools.Utilities.IsNumber(vector.x) and
+           RPTools.Utilities.IsNumber(vector.y) and
+           RPTools.Utilities.IsNumber(vector.z), "Invalid vector: " .. tostring(vector))
 
 end
 
 local function validateRequiredTime(time)
-    return RPTools.Utilities.make_error(RPTools.Utilities.isnumber(time), "Invalid required time: " .. tostring(time))
+    return RPTools.Utilities.MakeError(RPTools.Utilities.IsNumber(time), "Invalid required time: " .. tostring(time))
 end
 
-RPTools.Node.trigger_policy = {
-    manual = 1,
-    one_shot = 2,
-    cooldown = 3,
-    continuous = 4,
+RPTools.Node.TRIGGER_POLICY = {
+    MANUAL = 1,
+    ONE_SHOT = 2,
+    COOLDOWN = 3,
+    CONTINOUS = 4,
 }
 
 local function validateTriggerPolicy(trigger_policy)
-    return RPTools.Utilities.make_error(
-        RPTools.Utilities.isnumber(trigger_policy) and trigger_policy >= 1 and trigger_policy <= 4, 
+    return RPTools.Utilities.MakeError(
+        RPTools.Utilities.IsNumber(trigger_policy) and trigger_policy >= 1 and trigger_policy <= 4, 
         "Invalid trigger politic: " .. tostring(trigger_policy))
 end
 
-RPTools.Node.scope = {
-    single_player = 1,
-    global = 2,
+RPTools.Node.SCOPE = {
+    SINGLE_PLAYER = 1,
+    GLOBAL = 2,
 }
 
 local function validateScope(scope)
-    return RPTools.Utilities.make_error(RPTools.Utilities.isnumber(scope) and scope >= 1 and scope <= 2, "Invalid scope: " .. tostring(scope))
+    return RPTools.Utilities.MakeError(RPTools.Utilities.IsNumber(scope) and scope >= 1 and scope <= 2, "Invalid scope: " .. tostring(scope))
 end
 
 local function validatePriority(priority)
-    return RPTools.Utilities.make_error(RPTools.Utilities.isnumber(priority), "Invalid priority: " .. tostring(priority))
+    return RPTools.Utilities.MakeError(RPTools.Utilities.IsNumber(priority), "Invalid priority: " .. tostring(priority))
 end
 
-local field_validations = {
+local fieldValidations = {
         id = validateId, 
         position = validatePosition, 
         conditions = RPTools.Condition.validateConditions,
@@ -70,24 +70,24 @@ local field_validations = {
         scope = validateScope,
         priority = validatePriority}
 
-function RPTools.Node.validateNode(node)
+function RPTools.Node.ValidateNode(node)
 
-    local final_result = true
-    local accumulated_error = ""
+    local finalResult = true
+    local accumulatedError = ""
 
-    for field, validate in pairs(field_validations) do
+    for field, validate in pairs(fieldValidations) do
         local result, str_error = validate(node[field])
-        final_result = final_result and result
+        finalResult = finalResult and result
         if not result then 
-            accumulated_error = str_error .. ", " .. accumulated_error
+            accumulatedError = str_error .. ", " .. accumulatedError
         end
     end
 
-    return final_result, accumulated_error
+    return finalResult, accumulatedError
 
 end
 
-function RPTools.Node.create(_position, _conditions, _required_time, _actions, _trigger_policy, _scope, _priority)
+function RPTools.Node.Create(_position, _conditions, _required_time, _actions, _trigger_policy, _scope, _priority)
     local node = {
         id = generateId(),
         position = _position or Vector(0, 0, 0),
@@ -98,51 +98,51 @@ function RPTools.Node.create(_position, _conditions, _required_time, _actions, _
         scope = _scope or RPTools.Node.scope.single_player,
         priority = _priority or 0 }
 
-    local isvalid, error_message = RPTools.Node.validateNode(node)
+    local isValid, errorMessage = RPTools.Node.ValidateNode(node)
 
-    if isvalid then
+    if isValid then
         return node, nil
     else
-        return nil, error_message
+        return nil, errorMessage
     end
 end
 
-function RPTools.Node.getId(node)
+function RPTools.Node.GetId(node)
     return node.id
 end
 
-function RPTools.Node.getPosition(node)
+function RPTools.Node.GetPosition(node)
     return node.position
 end
 
-function RPTools.Node.getConditions(node)
+function RPTools.Node.GetConditions(node)
     return node.conditions
 end
 
-function RPTools.Node.getRequiredTime(node)
+function RPTools.Node.GetRequiredTime(node)
     return node.required_time
 end
 
-function RPTools.Node.getActions(node)
+function RPTools.Node.GetActions(node)
     return node.actions
 end
 
-function RPTools.Node.getScope(node)
+function RPTools.Node.GetScope(node)
     return node.scope
 end
 
-function RPTools.Node.getPriority(node)
+function RPTools.Node.GetPriority(node)
     return node.priority
 end
 
-function RPTools.Node.edit(node, subNode)
+function RPTools.Node.Edit(node, subNode)
     local testNode = table.Copy(node)
 
     table.Merge(testNode, subNode)
 
-    local isvalid, error_message = RPTools.Node.validateNode(testNode)
-    if not isvalid then
-        return error_message
+    local isValid, errorMessage = RPTools.Node.ValidateNode(testNode)
+    if not isValid then
+        return errorMessage
     end
 
     table.Merge(node, subNode)

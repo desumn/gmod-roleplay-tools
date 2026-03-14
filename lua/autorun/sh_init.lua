@@ -5,7 +5,7 @@ local function loadAddon()
 
 
     include("sh_logs.lua")
-    RPTools.Logs.log(RPTools.Logs.level.info, "Init", "Starting server")
+    RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "Starting server")
     if SERVER then 
         include("sv_init.lua")
     end
