@@ -2,7 +2,7 @@
 RPTools = RPTools or {}
 RPTools.Condition = RPTools.Condition or {}
 
-function RPTools.Condition.ValidateCondition(condition)
+function RPTools.Condition.ValidateAction(condition)
 
     local accumulatedErrorMessage = ""
 
@@ -38,7 +38,7 @@ function RPTools.Condition.ValidateConditionSet(conditions)
     local accumulatedErrorMessage = ""
 
     for _, condition in ipairs(conditions) do
-        local conditionValid, conditionErrorMessage = RPTools.Condition.ValidateCondition(condition)
+        local conditionValid, conditionErrorMessage = RPTools.Condition.ValidateAction(condition)
         allConditionsValid = conditionValid and allConditionsValid
         if not conditionValid then
             accumulatedErrorMessage = conditionErrorMessage .. ", " .. accumulatedErrorMessage
@@ -59,7 +59,7 @@ function RPTools.Condition.Create(source, operator, value)
         value = value
     }
 
-    local conditionValid, conditionErrorMessage = RPTools.Condition.ValidateCondition(condition)
+    local conditionValid, conditionErrorMessage = RPTools.Condition.ValidateAction(condition)
 
     if not conditionValid then
         return nil, conditionErrorMessage
