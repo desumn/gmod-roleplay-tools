@@ -8,8 +8,9 @@ local nodeRegister = {}
 
 
 function RPTools.NodeRegister.registerNode(node)
-    if not RPTools.Node.CheckValidity(node) then
-        RPTools.Logs.log(RPTools.Logs.level.warning, logModuleName, "Tried to register an invalid node (" .. table.ToString(node) .. ")")
+    local isvalid, error_message = RPTools.Node.validateNode(node)
+    if not isvalid then
+        RPTools.Logs.log(RPTools.Logs.level.warning, logModuleName, "Tried to register an invalid node (" .. error_message .. ")")
         return
     end
 
@@ -46,22 +47,15 @@ end
 
 function RPTools.NodeRegister.editNode(id, subNode)
     local node = RPTools.NodeRegister.getNodeById(id)
-    local fieldName = fieldName or ""
 
     if not node then return end
 
-    local id = RPTools.Node.getId(node)
+    local error_message = RPTools.Node.edit(node, subNode)
 
-    local testNode = table.Copy(node)
-
-    table.Merge(testNode, subNode)
-
-    if not RPTools.Node.CheckValidity(testNode) then
-        RPTools.Logs.log(RPTools.Logs.level.warning, logModuleName, "Failed to edit node with id:(" .. id .. ") from " .. table.ToString(node) .. " to " .. table.ToString(testNode))
-        return
+    if error_message then
+        RPTools.Logs.log(RPTools.Logs.level.warning, logModuleName, "Failed to edit node with id:(" .. id .. "): " .. error_message)
     end
 
-    table.Merge(node, subNode)
     nodeRegister[id] = node
 
     RPTools.Logs.log(RPTools.Logs.level.info, logModuleName, "Edited node with id:(" .. id .. ")")
