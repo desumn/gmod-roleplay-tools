@@ -87,15 +87,15 @@ function RPTools.Actions.Create(actionType, params)
 end
 
 function RPTools.Actions.GetActionType(action)
-    return action.type
+    return action.actionType
 end
 
 function RPTools.Actions.GetSide(action)
-    return sides[action.type]
+    return sides[action.actionType]
 end
 
-function RPTools.Actions.GetParams(actions)
-    return table.Copy(actions.params)
+function RPTools.Actions.GetParams(action)
+    return table.Copy(action.params)
 end
 
 
