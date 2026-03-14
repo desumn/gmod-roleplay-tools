@@ -2,34 +2,40 @@
 RPTools = RPTools or {}
 RPTools.Condition = RPTools.Condition or {}
 
-function RPTools.Condition.ValidateAction(condition)
+function RPTools.Condition.ValidateCondition(condition)
 
+    local finalResult = true
     local accumulatedErrorMessage = ""
 
     local sourceValid, sourceErrorMessage = RPTools.Source.ValidateSource(condition.source)
-
+    finalResult = finalResult and sourceValid
     if not sourceValid then
         accumulatedErrorMessage = sourceErrorMessage .. ", " .. accumulatedErrorMessage
     end
 
     local operatorValid, operatorErrorMessage = RPTools.Operators.ValidateOperator(condition.operator)
-
+    finalResult = finalResult and operatorValid
     if not operatorValid then
         accumulatedErrorMessage = operatorErrorMessage .. ", " .. accumulatedErrorMessage
-        return false, accumulatedErrorMessage -- Can't validate the value without the operator
     end
 
-    local valueValid, valueErrorMessage = RPTools.Operators.ValidateValue(condition.operator, condition.value)
-
-    if not valueValid then
-        accumulatedErrorMessage = valueErrorMessage .. ", " .. accumulatedErrorMessage
+    if operatorValid then
+        local valueValid, valueErrorMessage = RPTools.Operators.ValidateValue(condition.operator, condition.value)
+        finalResult = finalResult and valueValid
+        if not valueValid then
+            accumulatedErrorMessage = valueErrorMessage .. ", " .. accumulatedErrorMessage
+        end
     end
 
-    if not valueValid or not sourceValid then
-        return false, accumulatedErrorMessage
+    if sourceValid then
+        local paramValid, paramErrorMessage = RPTools.Source.ValidateParameter(condition.source, condition.sourceParameter)
+        finalResult = finalResult and paramValid
+        if not paramValid then
+            accumulatedErrorMessage = paramErrorMessage .. ", " .. accumulatedErrorMessage
+        end
     end
 
-    return true, nil
+    return finalResult, accumulatedErrorMessage
 end
 
 function RPTools.Condition.ValidateConditionSet(conditions)
@@ -38,7 +44,7 @@ function RPTools.Condition.ValidateConditionSet(conditions)
     local accumulatedErrorMessage = ""
 
     for _, condition in ipairs(conditions) do
-        local conditionValid, conditionErrorMessage = RPTools.Condition.ValidateAction(condition)
+        local conditionValid, conditionErrorMessage = RPTools.Condition.ValidateCondition(condition)
         allConditionsValid = conditionValid and allConditionsValid
         if not conditionValid then
             accumulatedErrorMessage = conditionErrorMessage .. ", " .. accumulatedErrorMessage
@@ -52,14 +58,15 @@ function RPTools.Condition.ValidateConditionSet(conditions)
     end
 end
 
-function RPTools.Condition.Create(source, operator, value)
+function RPTools.Condition.Create(source, sourceParameter, operator, value)
     local condition = {
         source = source,
+        sourceParameter = sourceParameter,
         operator = operator,
         value = value
     }
 
-    local conditionValid, conditionErrorMessage = RPTools.Condition.ValidateAction(condition)
+    local conditionValid, conditionErrorMessage = RPTools.Condition.ValidateCondition(condition)
 
     if not conditionValid then
         return nil, conditionErrorMessage
@@ -68,9 +75,12 @@ function RPTools.Condition.Create(source, operator, value)
     end
 end
 
-
 function RPTools.Condition.GetSource(condition)
     return condition.source
+end
+
+function RPTools.Condition.GetSourceParameter(condition)
+    return condition.sourceParameter
 end
 
 function RPTools.Condition.GetOperator(condition)

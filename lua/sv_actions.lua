@@ -4,10 +4,10 @@ RPTools.Actions = RPTools.Actions or {}
 
 
 local actionFunctions = {
-    chat_message = function(_)
+    chat_message = function(player, node, params)
         RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "chat_message action not implemented")
     end,
-    flag = function(_)
+    flag = function(player_, node, params)
         RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "flag action not implemented")
     end
 }
