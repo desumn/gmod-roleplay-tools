@@ -13,7 +13,7 @@ function RPTools.NodeRegister.RegisterNode(node)
         return
     end
 
-    local id = RPTools.Node.getId(node) or RPTools.Node.generateId(node)
+    local id = RPTools.Node.GetId(node) or RPTools.Node.GenerateId(node)
 
     nodeRegister[id] = node
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Added node with id:(" .. id .. ") to the node register.")

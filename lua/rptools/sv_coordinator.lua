@@ -1,5 +1,5 @@
 
-RPTools = {}
+RPTools = RPTools or {}
 
 RPTools.Coordinator = RPTools.Coordinator or {}
 
@@ -15,7 +15,7 @@ local function mainLoop()
                 local conditions = RPTools.Node.GetConditions(node)
                 
                 local allConditionsTrue = true
-                for _, condition in ipairs(conditions) do
+                for _, condition in pairs(conditions) do
                     local source = RPTools.Condition.GetSource(condition)
                     local sourceParam = RPTools.Condition.GetSourceParameter(condition)
                     local operator = RPTools.Condition.GetOperator(condition)

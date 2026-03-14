@@ -7,6 +7,7 @@ local function loadAddon()
 
     AddCSLuaFile("rptools/sh_logs.lua")
     AddCSLuaFile("rptools/sh_utilities.lua")
+    AddCSLuaFile("rptools/sh_commands.lua")
 
     include("rptools/sh_logs.lua")
     include("rptools/sh_utilities.lua")
@@ -20,8 +21,8 @@ local function loadAddon()
         include("rptools/sv_blackboard.lua")
         include("rptools/sv_node_register.lua")
         include("rptools/sv_coordinator.lua")
-        include("rptools/sh_commands.lua")
     end
+    include("rptools/sh_commands.lua")
 
 
 end

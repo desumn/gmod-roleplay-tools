@@ -5,7 +5,7 @@ local coordinatorStarted = false
 concommand.Add("rptools_test_node", function (ply, _, _, _)
     if not ply:IsAdmin() then return end
 
-    local cond = RPTools.Condition.Create("distance", "le", 500)
+    local cond = RPTools.Condition.Create("distance", nil, "le", 500)
 
     local conditions = RPTools.Condition.EmptyConditionSet()
     RPTools.Condition.AddToSet(conditions, cond)
@@ -28,7 +28,6 @@ concommand.Add("rptools_list_node", function (ply, _, _, _)
     if not ply:IsAdmin() then return end
     PrintTable(RPTools.NodeRegister.GetAllNodes())
 end)
-
 
 concommand.Add("rptools_toggle", function (ply, _, _, _)
     if not ply:IsAdmin() then return end

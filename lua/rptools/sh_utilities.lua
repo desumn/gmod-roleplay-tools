@@ -8,7 +8,7 @@ function RPTools.Utilities.IsNumber(n)
 end
 
 function RPTools.Utilities.MakeError(result, message)
-    if not result then 
+    if not result then
         return false, message
     else
         return true, ""
@@ -16,14 +16,14 @@ function RPTools.Utilities.MakeError(result, message)
 end
 
 function RPTools.Utilities.AllValues(table, cond)
-    for _, value in pairs(table)
+    for _, value in pairs(table) do
         if not cond(value) then return false end
     end
     return true
 end
 
 function RPTools.Utilities.AllKeys(table, cond)
-    for key, _ in pairs(table)
+    for key, _ in pairs(table) do
         if not cond(key) then return false end
     end
     return true
