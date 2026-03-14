@@ -63,7 +63,7 @@ end
 local fieldValidations = {
         id = validateId, 
         position = validatePosition, 
-        conditions = RPTools.Condition.validateConditions,
+        conditions = RPTools.Condition.validateConditionSet,
         required_time = validateRequiredTime, 
         actions = RPTools.Actions.validateActions,
         trigger_policy = validateTriggerPolicy,
@@ -91,7 +91,7 @@ function RPTools.Node.Create(_position, _conditions, _required_time, _actions, _
     local node = {
         id = generateId(),
         position = _position or Vector(0, 0, 0),
-        conditions = _conditions or RPTools.Condition.emptyConditionSet(),
+        conditions = _conditions or RPTools.Condition.EmptyConditionSet(),
         required_time = _required_time or 0,
         actions = _actions or RPTools.Actions.emptyActionSet(),
         trigger_policy = _trigger_policy or RPTools.Node.trigger_policy.one_shot,
