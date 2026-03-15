@@ -113,7 +113,7 @@ concommand.Add("rptools_remove", function (ply, _, args, _)
     RPTools.NodeRegister.UnregisterNode(args[1])
 end)
 
-concommand.Add("rptools_pause", function (ply, _, args, _)
+concommand.Add("rptools_pause_node", function (ply, _, args, _)
     if not ply:IsAdmin() then return end
     if not args[1] then return end
     local node = RPTools.NodeRegister.GetNodeById(args[1])
@@ -122,7 +122,7 @@ concommand.Add("rptools_pause", function (ply, _, args, _)
 end)
 
 
-concommand.Add("rptools_unpause", function (ply, _, args, _)
+concommand.Add("rptools_unpause_node", function (ply, _, args, _)
     if not ply:IsAdmin() then return end
     if not args[1] then return end
     local node = RPTools.NodeRegister.GetNodeById(args[1])
