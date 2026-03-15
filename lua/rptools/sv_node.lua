@@ -64,9 +64,9 @@ local fieldValidations = {
         id = validateId, 
         position = validatePosition, 
         conditions = RPTools.Condition.validateConditionSet,
-        required_time = validateRequiredTime, 
+        requiredTime = validateRequiredTime, 
         actions = RPTools.Actions.validateActions,
-        trigger_policy = validateTriggerPolicy,
+        triggerPolicy = validateTriggerPolicy,
         scope = validateScope,
         priority = validatePriority}
 
@@ -87,16 +87,17 @@ function RPTools.Node.ValidateNode(node)
 
 end
 
-function RPTools.Node.Create(_position, _conditions, _required_time, _actions, _trigger_policy, _scope, _priority)
+function RPTools.Node.Create(_position, _conditions, _required_time, _actions, _trigger_policy, _scope, _priority, _cooldownDuration)
     local node = {
         id = generateId(),
         position = _position or Vector(0, 0, 0),
         conditions = _conditions or RPTools.Condition.EmptyConditionSet(),
-        required_time = _required_time or 0,
+        requiredTime = _required_time or 0,
         actions = _actions or RPTools.Actions.emptyActionSet(),
-        trigger_policy = _trigger_policy or RPTools.Node.trigger_policy.one_shot,
+        triggerPolicy = _trigger_policy or RPTools.Node.trigger_policy.one_shot,
         scope = _scope or RPTools.Node.scope.single_player,
-        priority = _priority or 0 }
+        priority = _priority or 0,
+        cooldownDuration = _cooldownDuration or 0 }
 
     local isValid, errorMessage = RPTools.Node.ValidateNode(node)
 
@@ -120,7 +121,7 @@ function RPTools.Node.GetConditions(node)
 end
 
 function RPTools.Node.GetRequiredTime(node)
-    return node.required_time
+    return node.requiredTime
 end
 
 function RPTools.Node.GetActions(node)
@@ -133,6 +134,14 @@ end
 
 function RPTools.Node.GetPriority(node)
     return node.priority
+end
+
+function RPTools.Node.GetTriggerPolicy(node)
+    return node.triggerPolicy
+end
+
+function RPTools.Node.GetCooldownDuration(node)
+    return node.cooldownDuration
 end
 
 function RPTools.Node.Edit(node, subNode)
