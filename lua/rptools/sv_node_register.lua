@@ -37,7 +37,7 @@ function RPTools.NodeRegister.GetNodeById(id)
         return
     end
 
-    return node
+    return table.Copy(node)
 end
 
 function RPTools.NodeRegister.GetAllNodes()
@@ -58,4 +58,8 @@ function RPTools.NodeRegister.EditNode(id, subNode)
     nodeRegister[id] = node
 
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Edited node with id:(" .. id .. ")")
+end
+
+function RPTools.NodeRegister.ClearAll()
+    nodeRegister = {}
 end

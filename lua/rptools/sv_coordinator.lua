@@ -84,6 +84,15 @@ local function isActive(ply, nodeId)
 end
 
 
+function RPTools.Coordinator.GetNodeState(nodeid)
+    return nodePlayerState[nodeid] or {}
+end
+
+function RPTools.Coordinator.ClearAllState()
+    nodePlayerState = {}
+end
+
+
 local function mainLoop()
     local nodes = RPTools.NodeRegister.GetAllNodes()
     for _, ply in ipairs(player.GetAll()) do

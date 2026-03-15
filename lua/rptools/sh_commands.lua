@@ -75,7 +75,42 @@ end)
 
 concommand.Add("rptools_list_node", function (ply, _, _, _)
     if not ply:IsAdmin() then return end
-    PrintTable(RPTools.NodeRegister.GetAllNodes())
+    local nodes = RPTools.NodeRegister.GetAllNodes()
+    local ids = {}
+    for _, node in ipairs(nodes) do
+        table.insert(ids, RPTools.Node.GetId(node))
+    end
+    PrintTable(ids)
+end)
+
+
+concommand.Add("rptools_inspect", function (ply, _, args, _)
+    if not ply:IsAdmin() then return end
+    if not args[1] then return end
+    local node = RPTools.NodeRegister.GetNodeById(args[1])
+    if not node then return end
+    table.Merge(node, RPTools.Coordinator.GetNodeState(args[1]) or {})
+    PrintTable(node)
+end)
+
+concommand.Add("rptools_dump_blackbaord", function (ply, _, args, _)
+    if not ply:IsAdmin() then return end
+    PrintTable(RPTools.Blackboard.GetAll())
+end)
+
+concommand.Add("rptools_reset", function (ply, _, args, _)
+    if not ply:IsAdmin() then return end
+    RPTools.NodeRegister.ClearAll()
+    RPTools.Blackboard.ClearAll()
+    RPTools.Coordinator.ClearAllState()
+end)
+
+concommand.Add("rptools_inspect", function (ply, _, args, _)
+    if not ply:IsAdmin() then return end
+    if not args[1] then return end
+    local node = RPTools.NodeRegister.GetNodeById(args[1])
+    if not node then return end
+    RPTools.NodeRegister.UnregisterNode(args[1])
 end)
 
 concommand.Add("rptools_toggle", function (ply, _, _, _)

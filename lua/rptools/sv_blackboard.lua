@@ -82,6 +82,10 @@ function RPTools.Blackboard.ClearForPlayer(ply)
     blackboard[steamid] = {}
 end
 
+function RPTools.Blackboard.GetAll()
+    return table.Copy(blackboard)
+end
+
 function RPTools.Blackboard.ClearAll()
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Cleared all blackboard")
     blackboard = {}
