@@ -5,6 +5,22 @@ RPTools.Coordinator = RPTools.Coordinator or {}
 
 local logModuleName = "Coordinator"
 
+RPTools.Coordinator.NODE_STATE = {
+    RUNNING = 1,
+    ERROR = 2,
+    PAUSED = 3,
+}
+
+local nodeState = {}
+
+function RPTools.Coordinator.GetNodeRunningState(nodeId)
+    return nodeState and nodeState[nodeId]
+end
+
+function RPTools.Coordinator.SetNodeRunningState(nodeId, state)
+    nodeState[nodeId] = state
+end
+
 local nodePlayerState = {}
 
 local function setAsActivated(ply, nodeId)
@@ -95,10 +111,19 @@ end
 
 local function mainLoop()
     local nodes = RPTools.NodeRegister.GetAllNodes()
+
+    for _, node in ipairs(nodes) do
+        nodeState[RPTools.Node.GetId(node)] = RPTools.Coordinator.NODE_STATE.RUNNING
+    end
+
     for _, ply in ipairs(player.GetAll()) do
         for _, node in ipairs(nodes) do
             local nodeId = RPTools.Node.GetId(node)
-            
+
+            if not nodeState[nodeId] == RPTools.Coordinator.NODE_STATE.RUNNING then 
+                continue
+            end
+
             local policy = RPTools.Node.GetTriggerPolicy(node)
             
             if policy == RPTools.Node.TRIGGER_POLICY.ONE_SHOT then
@@ -163,7 +188,7 @@ local function mainLoop()
             
             if not nodeSuccess then
                 RPTools.Logs.log(RPTools.Logs.LEVEL.ERROR, logModuleName, "Node error: " .. nodeErrorMessage)
-                
+                nodeState[nodeId] = RPTools.Coordinator.NODE_STATE.ERROR
             end
         end
     end
