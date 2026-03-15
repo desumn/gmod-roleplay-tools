@@ -105,7 +105,7 @@ concommand.Add("rptools_reset", function (ply, _, args, _)
     RPTools.Coordinator.ClearAllState()
 end)
 
-concommand.Add("rptools_inspect", function (ply, _, args, _)
+concommand.Add("rptools_remove", function (ply, _, args, _)
     if not ply:IsAdmin() then return end
     if not args[1] then return end
     local node = RPTools.NodeRegister.GetNodeById(args[1])
