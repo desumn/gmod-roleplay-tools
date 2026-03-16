@@ -32,3 +32,15 @@ end
 function RPTools.Utilities.IsSet(table, cond)
     return istable(table) and RPTools.Utilities.AllValues(table, function (val) return isbool(val) and val end )
 end
+
+function RPTools.Utilities.FindPlayerByName(name)
+    local players = {}
+
+    for _, ply in ipairs(player.GetAll()) do
+        if string.find(string.lower(ply:Nick()), name) then
+            table.insert(players, ply)
+        end
+    end
+
+    return players
+end

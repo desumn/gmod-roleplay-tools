@@ -67,6 +67,31 @@ local function getTimestamp(ply, nodeId)
     return nodePlayerState[nodeId] and nodePlayerState[nodeId][ply:SteamID64()] and nodePlayerState[nodeId][steamid].timestamp
 end
 
+local function setTimer(ply, nodeId, time)
+    if not ply:IsValid() then
+        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Node " .. tostring(nodeId) .. " was activated by non-existent player " .. ply:Nick())
+        return
+    end
+    
+    local steamid = ply:SteamID64()
+    nodePlayerState[nodeId] = nodePlayerState[nodeId] or {}
+    nodePlayerState[nodeId][steamid] = nodePlayerState[nodeId][steamid] or {}
+    nodePlayerState[nodeId][ply:SteamID64()].timer = time 
+end
+
+local function getTimer(ply, nodeId)
+    if not ply:IsValid() then 
+        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Node " .. tostring(nodeId) .. " checked for activation by non-existent player " .. ply:Nick())
+        return
+    end
+    
+    local steamid = ply:SteamID64()
+    return nodePlayerState[nodeId] and nodePlayerState[nodeId][ply:SteamID64()] and nodePlayerState[nodeId][steamid].timer
+end
+
+
+
+
 local function activate(ply, nodeId)
     if not ply:IsValid() then 
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Node " .. tostring(nodeId) .. " was activated by non-existent player " .. ply:Nick())
@@ -113,14 +138,14 @@ local function mainLoop()
     local nodes = RPTools.NodeRegister.GetAllNodes()
 
     for _, node in ipairs(nodes) do
-        nodeState[RPTools.Node.GetId(node)] = RPTools.Coordinator.NODE_STATE.RUNNING
+        nodeState[RPTools.Node.GetId(node)] = nodeState[RPTools.Node.GetId(node)] or RPTools.Coordinator.NODE_STATE.RUNNING
     end
 
     for _, ply in ipairs(player.GetAll()) do
         for _, node in ipairs(nodes) do
             local nodeId = RPTools.Node.GetId(node)
 
-            if not nodeState[nodeId] == RPTools.Coordinator.NODE_STATE.RUNNING then 
+            if nodeState[nodeId] ~= RPTools.Coordinator.NODE_STATE.RUNNING then
                 continue
             end
 
@@ -162,22 +187,26 @@ local function mainLoop()
                 end
                 
                 if allConditionsTrue then
-                    RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "node " .. nodeId .. " activated for player " .. ply:Nick())
-                    
+                    local timeRequired = RPTools.Node.GetRequiredTime(node)
+
                     if not hasActivated(ply, nodeId) then setAsActivated(ply, nodeId) end
                     recordTimestamp(ply, nodeId)
+                    setTimer(ply, nodeId, (getTimer(ply, nodeId) or 0) + 0.1)
                     
 
-                    if policy ~= RPTools.Node.TRIGGER_POLICY.CONTINOUS or not isActive(ply, nodeId) then
+                    if (policy ~= RPTools.Node.TRIGGER_POLICY.CONTINOUS or not isActive(ply, nodeId))
+                          and getTimer(ply, nodeId) >= timeRequired then
+                        RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "node " .. nodeId .. " activated for player " .. ply:Nick())
                         local actions = RPTools.Node.GetActions(node)
                         for _, action in ipairs(actions) do
                             local params = RPTools.Actions.GetParams(action)
                             RPTools.Actions.GetFunction(RPTools.Actions.GetActionType(action))(ply, node, params)
-                            activate(ply, nodeId)
                             -- Pas encore de distinction Client/Serveur
                         end
+                        activate(ply, nodeId)
                     end
                 else
+                    setTimer(ply, nodeId, 0)
                     RPTools.Logs.log(RPTools.Logs.LEVEL.DEBUG, logModuleName, "node " .. nodeId .. " was not activated for player " .. ply:Nick())
                     if isActive(ply, nodeId) then
                         deactivate(ply, nodeId)

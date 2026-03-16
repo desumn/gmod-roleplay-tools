@@ -92,6 +92,33 @@ concommand.Add("rptools_inspect", function (ply, _, args, _)
     PrintTable(node)
 end)
 
+
+concommand.Add("rptools_flag", function (ply, _, args, _)
+    if not ply:IsAdmin() then return end
+    local playerName = args[1]
+    if not playerName then return end
+    local flag = args[2]
+    if not flag then return end
+
+    for _, ply_ in ipairs(RPTools.Utilities.FindPlayerByName(playerName)) do
+        print("Added flag " .. flag .. " to " .. ply_:Nick())
+        RPTools.Blackboard.Write(ply_, flag, true)
+    end
+end)
+
+concommand.Add("rptools_unflag", function (ply, _, args, _)
+    if not ply:IsAdmin() then return end
+    local playerName = args[1]
+    if not playerName then return end
+    local flag = args[2]
+    if not flag then return end
+
+    for _, ply_ in ipairs(RPTools.Utilities.FindPlayerByName(playerName)) do
+        print("Removed flag " .. flag .. " from " .. ply_:Nick())
+        RPTools.Blackboard.Write(ply_, flag, nil)
+    end
+end)
+
 concommand.Add("rptools_dump_blackbaord", function (ply, _, args, _)
     if not ply:IsAdmin() then return end
     PrintTable(RPTools.Blackboard.GetAll())

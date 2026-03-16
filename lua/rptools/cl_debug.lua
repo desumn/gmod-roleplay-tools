@@ -46,6 +46,7 @@ end)
 
 concommand.Add("rptools_toggle_draw_debug", function ()
     drawDebug = not drawDebug
+    nodes = {}
 end)
 
 hook.Add("PostDrawOpaqueRenderables", "rptools_drawDebug", function ()
