@@ -19,7 +19,7 @@ local msgTypeNames = {
 
 function RPTools.Network.ValidateMessageType(msgType)
     return RPTools.Utilities.MakeError(RPTools.Utilities.IsNumber(msgType) and
-                                       RPTools.Network.MSG_TYPE[msgType] ~= nil, "Invalid message type" .. tostring(msgType))
+                                       msgType >= 1 and msgType <= 4, "Invalid message type" .. tostring(msgType))
 end
 
 function RPTools.Network.WriteMessageType(msgType)

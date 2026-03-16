@@ -15,13 +15,12 @@ concommand.Add("rptools_test_node", function (ply, _, _, _)
     local actions = RPTools.Actions.EmptyActionSet()
     RPTools.Actions.AddToSet(actions, action)
 
-    local pos = ply:GetPos()
+    local pos = ply:GetPos() + Vector(0, 0, 50)
 
     local node = RPTools.Node.Create(pos, conditions, 0, actions, RPTools.Node.TRIGGER_POLICY.ONE_SHOT, RPTools.Node.SCOPE.SINGLE_PLAYER, 0)
 
     RPTools.NodeRegister.RegisterNode(node)
     debugoverlay.Sphere(pos, 10, 5, Color(255, 0, 0), true)
-
 end)
 
 
@@ -40,7 +39,7 @@ concommand.Add("rptools_test_emitter_node", function (ply, _, _, _)
     RPTools.Actions.AddToSet(actions, action)
     RPTools.Actions.AddToSet(actions, actionFlag)
 
-    local pos = ply:GetPos()
+    local pos = ply:GetPos() Vector(0, 0, 50)
 
     local node = RPTools.Node.Create(pos, conditions, 0, actions, RPTools.Node.TRIGGER_POLICY.ONE_SHOT, RPTools.Node.SCOPE.SINGLE_PLAYER, 0)
 
@@ -64,7 +63,7 @@ concommand.Add("rptools_test_reader_node", function (ply, _, _, _)
     local actions = RPTools.Actions.EmptyActionSet()
     RPTools.Actions.AddToSet(actions, action)
 
-    local pos = ply:GetPos()
+    local pos = ply:GetPos() + Vector(0, 0, 50)
 
     local node = RPTools.Node.Create(pos, conditions, 0, actions, RPTools.Node.TRIGGER_POLICY.ONE_SHOT, RPTools.Node.SCOPE.SINGLE_PLAYER, 0)
 

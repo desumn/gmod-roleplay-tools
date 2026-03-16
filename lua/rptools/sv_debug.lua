@@ -19,12 +19,11 @@ function RPTools.Debug.WriteDebugNode(node)
         table.insert(distances, RPTools.Condition.GetValue(condition))
     end
     
-
     local state = RPTools.Coordinator.GetNodeRunningState(id)
     
     net.WriteString(id)
     net.WriteVector(position)
-    net.WriteUInt(math.max(table.unpack(distances)), 16)
+    net.WriteUInt((table.IsEmpty(distances) and 0) or math.max(unpack(distances)), 16)
     net.WriteUInt(state, 3)
 end
 
