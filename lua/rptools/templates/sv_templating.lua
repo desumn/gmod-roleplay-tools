@@ -37,6 +37,15 @@ function RPTools.Templating.GetTemplateByName(templateName)
     return templateRegister[templateName]
 end
 
+function RPTools.Templating.GetAllTemplateNames()
+    local names = {}
+    for name, _ in pairs(templateRegister) do 
+        table.insert(names, name)
+    end
+    return names
+end
+
+
 local function validateValue(paramType, value)
     return RPTools.Utilities.MakeError((paramType == "number" and RPTools.Utilities.IsNumber(value))
                                     or (paramType == "boolean" and isbool(value))
@@ -190,14 +199,14 @@ local function applyParameters(template, arguments)
     end
 end
 
-function RPTools.Templating.Execute(template, arguments)
+function RPTools.Templating.Execute(template, arguments, context)
     local validatedArguments, argumentsErrorMessage = applyParameters(template, arguments)
     
     if not validatedArguments then
         return nil, argumentsErrorMessage
     end
 
-    return template.transformer(validatedArguments)
+    return template.transformer(validatedArguments, context)
 
 end
 

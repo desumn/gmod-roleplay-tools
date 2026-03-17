@@ -8,13 +8,14 @@ local function loadAddon()
     AddCSLuaFile("rptools/core/sh_logs.lua")
     AddCSLuaFile("rptools/core/sh_utilities.lua")
     AddCSLuaFile("rptools/commands/sh_commands.lua")
+    AddCSLuaFile("rptools/commands/sh_templating.lua")
     AddCSLuaFile("rptools/network/sh_network.lua")
     AddCSLuaFile("rptools/network/cl_network.lua")
-    AddCSLuaFile("rptools/network/cl_debug.lua")
+    AddCSLuaFile("rptools/debug/cl_debug.lua")
 
     include("rptools/core/sh_logs.lua")
     include("rptools/core/sh_utilities.lua")
-    include("rptools/core/sh_network.lua")
+    include("rptools/network/sh_network.lua")
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "Starting shared")
     if SERVER then
         include("rptools/network/sv_network.lua")
@@ -36,9 +37,8 @@ local function loadAddon()
         include("rptools/debug/cl_debug.lua")
     end
 
-
-
     include("rptools/commands/sh_commands.lua")
+    include("rptools/commands/sh_templating.lua")
 
 
 end
