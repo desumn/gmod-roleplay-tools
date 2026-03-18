@@ -3,10 +3,18 @@ RPTools = RPTools or {}
 RPTools.Debug = RPTools.Debug or {}
 
 
+surface.CreateFont("RPTools_DebugText", {
+    font = "Roboto",
+    size = 70,
+    weight = 800,
+    antialias = true,
+    extended = true
+})
+
+
 local nodes = {}
 
 local drawDebug = false
-
 
 NODE_STATE = {
     RUNNING = 1,
@@ -55,24 +63,31 @@ concommand.Add("rptools_toggle_debug", function ()
     end
 end)
 
-hook.Add("PostDrawOpaqueRenderables", "rptools_drawDebug", function ()
+hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function ()
     if not drawDebug then return end
-
+    
     for _, node in ipairs(nodes) do
         local position = node.position
         local distance = node.distance
-
+        
         render.DrawWireframeSphere(position, 20, 15, 15, stateColor[node.state], true)
-
+        
         if distance ~= 0 then
             render.DrawWireframeSphere(position, distance, 15, 15, ColorAlpha(stateColor[node.state], 60), true)
         end
-
-        local textPos = position + Vector(0, 0, 30)
-        local textAngle = (EyePos() - textPos):Angle()
-        cam.Start3D2D(textPos, Angle(0, textAngle.y - 90, 90), 0.2)
-        draw.SimpleText(node.id, "Default", 0, 0, color_white, TEXT_ALIGN_CENTER)
-        draw.SimpleText(stateText[node.state], "Default", 0, -10, stateColor[node.state], TEXT_ALIGN_CENTER)
+        
+        local textPos = position + Vector(0, 0, 5)
+        
+        local ang = LocalPlayer():EyeAngles() 
+        
+        ang:RotateAroundAxis(ang:Forward(), 90)
+        ang:RotateAroundAxis(ang:Right(), 90)
+        
+        cam.Start3D2D(textPos, ang, 0.1)
+        
+        draw.SimpleText(node.id, "RPTools_DebugText", 0, 0, color_white, TEXT_ALIGN_CENTER)
+        draw.SimpleText(stateText[node.state], "RPTools_DebugText", 0, 70, stateColor[node.state], TEXT_ALIGN_CENTER) -- Y ajusté
+        
         cam.End3D2D()
     end
 end)
