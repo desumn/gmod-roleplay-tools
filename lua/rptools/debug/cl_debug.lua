@@ -44,9 +44,15 @@ RPTools.Network.RegisterServerHandler(RPTools.Network.MSG_TYPE.DEBUG_SYNC, funct
     drawDebug = true
 end)
 
-concommand.Add("rptools_toggle_draw_debug", function ()
-    drawDebug = not drawDebug
-    nodes = {}
+concommand.Add("rptools_toggle_debug", function ()
+    if not LocalPlayer():IsAdmin() then return end
+    RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.DEBUG_SYNC, function () end)
+    if drawDebug then
+        drawDebug = false
+        nodes = {}
+    else
+        drawDebug = true
+    end
 end)
 
 hook.Add("PostDrawOpaqueRenderables", "rptools_drawDebug", function ()

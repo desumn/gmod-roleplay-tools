@@ -11,7 +11,7 @@ end
 
 local function requireTemplate(args, pos)
     local templateName = args[pos]
-    if not templateName then
+    if templateName == nil or templateName == "" then
         print("Please provide a template name, see rptools_template_list")
     end
 
@@ -52,7 +52,7 @@ concommand.Add("rptools_template_execute", function (ply, _, args, _)
     requireAdmin(ply)
 
     local template = requireTemplate(args, 1)
-    if not template then return end
+    if template == nil or template == "" then return end
 
     local parameters = RPTools.Templating.GetParameters(template)
     local arguments = {}
@@ -62,7 +62,6 @@ concommand.Add("rptools_template_execute", function (ply, _, args, _)
         local name, value = readParameter(arg)
         arguments[name] = value
     end
-
 
     local context = { position = ply:GetPos() + Vector(0, 0, 20) }
     local result_nodes, errorMessage = RPTools.Templating.Execute(template, arguments, context)

@@ -50,13 +50,12 @@ local function disableDebug()
     timer.Remove("rptools_debugMode")
 end
 
-concommand.Add("rptools_debug_toggle", function (ply)
+RPTools.Network.RegisterClientHandler(RPTools.Network.MSG_TYPE.DEBUG_SYNC, function(ply)
     if not ply:IsAdmin() then return end
-    if not debugMode then
-        enableDebug()
-    else 
+    if debugMode then
         disableDebug()
+    else
+        enableDebug()
     end
+
 end)
-
-
