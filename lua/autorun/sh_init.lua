@@ -12,6 +12,8 @@ local function loadAddon()
     AddCSLuaFile("rptools/network/sh_network.lua")
     AddCSLuaFile("rptools/network/cl_network.lua")
     AddCSLuaFile("rptools/debug/cl_debug.lua")
+    AddCSLuaFile("rptools/ui/cl_template_menu.lua")
+    AddCSLuaFile("rptools/templates/cl_templating.lua")
 
     include("rptools/core/sh_logs.lua")
     include("rptools/core/sh_utilities.lua")
@@ -35,6 +37,8 @@ local function loadAddon()
     if CLIENT then
         include("rptools/network/cl_network.lua")
         include("rptools/debug/cl_debug.lua")
+        include("rptools/templates/cl_templating.lua")
+        include("rptools/ui/cl_template_menu.lua")
     end
 
     include("rptools/commands/sh_commands.lua")

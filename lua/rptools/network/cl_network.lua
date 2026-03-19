@@ -32,7 +32,7 @@ net.Receive("RPTools_ServerToClient", function ()
         serverHandlers[msgType]()
     end)
     
-    if not handlerSuccess then 
+    if not handlerSuccess then
         RPTools.Logs.log(RPTools.Logs.LEVEL.ERROR, logModuleName, "Client receiving from server handler " .. msgName .. " failed " .. handlerErrorMessage ) 
     end
 end)

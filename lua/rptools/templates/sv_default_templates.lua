@@ -7,19 +7,21 @@ RPTools.Templating.RegisterTemplate({
         {
             name = "message",
             description = "message to send",
-            type = "string"
+            type = "string",
+            required = true
         },
         {
             name = "distance",
             description = "activation distance",
             type = "number",
+            required = true,
             default = 200
         },
         {
             name = "flag",
             description = "required flag for activating",
             type = "string",
-            default = ""
+            required = false
         }
     },
     transformer = function (args, context)
@@ -29,7 +31,7 @@ RPTools.Templating.RegisterTemplate({
         local conditions = RPTools.Condition.EmptyConditionSet()
         RPTools.Condition.AddToSet(conditions, distance_cond)
 
-        if args.flag ~= "" then
+        if args.flag ~= nil then
             local flag_cond = RPTools.Condition.Create("flag", args.flag, "eq", true)
             RPTools.Condition.AddToSet(conditions, flag_cond)
         end
@@ -42,5 +44,5 @@ RPTools.Templating.RegisterTemplate({
         local node = RPTools.Node.Create(context.position, conditions, 0, actions, RPTools.Node.TRIGGER_POLICY.ONE_SHOT, RPTools.Node.SCOPE.SINGLE_PLAYER, 0)
         
         return {node}
-    end  
+    end
 })
