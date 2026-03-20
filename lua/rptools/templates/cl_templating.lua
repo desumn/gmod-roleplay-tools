@@ -3,6 +3,11 @@ RPTools.Templating = RPTools.Templating or {}
 
 RPTools.Templating.ClientCache = {}
 
+function RPTools.Templating.GetTemplateFromClientCache(templateName)
+    return RPTools.Templating.ClientCache[templateName]
+end
+
+
 local function readParameter()
         local param = {}
         param.name = net.ReadString()
@@ -31,7 +36,6 @@ local function readParameter()
         return param
 end
 
-
 function RPTools.Templating.ReadTemplateInfo()
     local template = {}
     template.name = net.ReadString()
@@ -52,9 +56,11 @@ RPTools.Network.RegisterServerHandler(RPTools.Network.MSG_TYPE.TEMPLATE_SYNC, fu
     local templateCount = net.ReadUInt(8)
     RPTools.Templating.ClientCache = {}
     for i=1, templateCount do
-        RPTools.Templating.ClientCache[i] = RPTools.Templating.ReadTemplateInfo()
+        local template = RPTools.Templating.ReadTemplateInfo()
+        RPTools.Templating.ClientCache[template.name] = template
     end
 end)
+
 
 concommand.Add("rptools_show_cache", function()
     PrintTable(RPTools.Templating.ClientCache)

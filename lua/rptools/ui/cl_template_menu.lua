@@ -72,45 +72,170 @@ local function makeSubmitButton(frame)
     return button
 end
 
+
+local displayWidget = {
+    ["boolean"] = {
+        ["default"] = function (parent, default, name)
+            local checkbox = vgui.Create("DCheckBoxLabel", parent)
+            checkbox:SetText("")
+            checkbox:SetValue(default or false)
+            checkbox:Dock(TOP)
+
+            checkbox.OnChange = function(self, value)
+                hook.Run("rptools_template_ui_value_change", name, value)
+            end
+
+            return checkbox
+            
+        end
+    },
+    ["number"] = {
+        ["default"] = function (parent, default, name)
+            local numberEntry = vgui.Create("DNumberWang", parent)
+            numberEntry:SetValue(default or 0)
+            numberEntry:SetTall(30)
+            numberEntry:SetMinMax(0, 65635)
+            numberEntry:Dock(TOP)
+
+            numberEntry.OnValueChanged = function (self, value)
+                hook.Run("rptools_template_ui_value_change", name, value)
+            end
+
+            return numberEntry
+        end
+    },
+    ["string"] = {
+        ["default"] = function (parent, default, name)
+            local textEntry = vgui.Create("DTextEntry", parent)
+            textEntry:SetText(default or "")
+            textEntry:SetTall(30)
+            textEntry:SetUpdateOnType(true)
+            textEntry:Dock(TOP)
+
+            textEntry.OnValueChange = function (self, value)
+                hook.Run("rptools_template_ui_value_change", name, value)
+            end
+
+            return textEntry
+        end,
+        ["short"] = function (parent, default, name)
+            local textEntry = vgui.Create("DTextEntry", parent)
+            textEntry:SetText(default or "")
+            textEntry:SetTall(30)
+            textEntry:SetUpdateOnType(true)
+            textEntry:Dock(TOP)
+
+            textEntry.OnValueChange = function (self, value)
+                hook.Run("rptools_template_ui_value_change", name, value)
+            end
+
+            return textEntry
+        end,
+        ["long"] = function (parent, default, name)
+            local textEntry = vgui.Create("DTextEntry", parent)
+            textEntry:SetText(default or "")
+            textEntry:SetMultiline(true)
+            textEntry:SetTall(80)
+            textEntry:SetUpdateOnType(true)
+            textEntry:Dock(TOP)
+
+            textEntry.OnValueChange = function (self, value)
+                hook.Run("rptools_template_ui_value_change", name, value)
+            end
+
+            return textEntry
+        end
+    }
+}
+
+
 local function makeParameters(parameters, frame)
     local parametersPanel = vgui.Create("DScrollPanel", frame)
 
     parametersPanel:DockMargin(10, 0, 10, 0)
     parametersPanel:Dock(FILL)
+
+    local valueContainers = {}
+
+    for _, parameter in ipairs(parameters) do
+        local parameterPanel = vgui.Create("DPanel", parametersPanel)
+        parameterPanel.Paint = function () end
+        parameterPanel:DockMargin(0, 5, 0, 5)
+        parameterPanel:Dock(TOP)
+
+        local label = vgui.Create("DLabel", parameterPanel)
+        label:SetTall(15)
+        label:SetText(string.NiceName(parameter.name) .. (parameter.required and " *" or ""))
+        label:Dock(TOP)
+
+        local entry = displayWidget[parameter.type][parameter.display or "default"](parameterPanel, parameter.default, parameter.name)
+
+        parameterPanel:InvalidateLayout(true)
+        parameterPanel:SizeToChildren(false, true)
+
+        valueContainers[parameter.name] = entry
+    end
+
+    return valueContainers
+
 end
 
+local function nonEmptyOrNil(value)
+    if isstring(value) and value == "" then 
+        return nil
+    else
+        return value
+    end
+end
 
-local function openPanel(name, description, parameters)
-    local frame = makeFrame(name)
-    makeTitle(name, frame)
-    makeDescription(description, frame)
+local function openPanel(template, creationPos)
+    local frame = makeFrame(template.name)
+    makeTitle(string.NiceName(template.name), frame)
+    makeDescription(template.description, frame)
     makeSeparator(frame)
-    makeSubmitButton(frame)
-    makeParameters(parameters, frame)
+    local submitButton = makeSubmitButton(frame)
+    makeParameters(template.parameters, frame)
+
+    local arguments = {}
+    local finalArguments = {}
+    
+    hook.Add("rptools_template_ui_value_change", frame, function (_, name, newValue)
+        print(newValue)
+        arguments[name] = nonEmptyOrNil(newValue)
+        local newFinalArguments = RPTools.Templating.ApplyParameters(template, arguments)
+        submitButton:SetEnabled(finalArguments ~= nil)
+        if newFinalArguments == nil then
+            finalArguments = {}
+            submitButton:SetEnabled(false)
+        else
+            finalArguments = newFinalArguments
+            submitButton:SetEnabled(true)
+        end
+    end)
+
+    submitButton.DoClick = function (self)
+
+        RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function ()
+            net.WriteString(template.name)
+            net.WriteTable(finalArguments)
+            net.WriteVector(creationPos)
+        end)
+
+    end
+
 end
 
 concommand.Add("rptools_menu", function (ply, cmd, args, argStr)
-    openPanel("Messager",
-    "Node that send a chat message once to a nearby player eventually checking for player flags",
-    {
-        {
-            name = "message",
-            description = "message to send",
-            type = "string",
-            required = true
-        },
-        {
-            name = "distance",
-            description = "activation distance",
-            type = "number",
-            required = true,
-            default = 200
-        },
-        {
-            name = "flag",
-            description = "required flag for activating",
-            type = "string",
-            required = false
-        }
-    })
+    local templateName = args[1]
+    if templateName == nil or templateName == "" then
+        print("Please provide a template name, see rptools_template_list")
+    end
+
+    local template = RPTools.Templating.GetTemplateFromClientCache(templateName)
+    if not template then
+        print("Couldn't find template " .. templateName)
+        return
+    end
+
+    openPanel(template, LocalPlayer():GetEyeTrace().HitPos)
 end)

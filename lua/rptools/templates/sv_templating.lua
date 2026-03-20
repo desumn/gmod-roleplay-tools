@@ -45,123 +45,6 @@ function RPTools.Templating.GetAllTemplateNames()
     return names
 end
 
-local displayType = {
-    ["string"] = {
-        ["short"] = true,
-        ["long"] = true
-    }
-}
-
-
-local function validateDisplay(paramType, display)
-    return RPTools.Utilities.MakeError(displayType[paramType][display] == true, "display type invalid " .. tostring(display) .. " for " .. tostring(paramType))
-end
-
-local function validateValue(paramType, value)
-    return RPTools.Utilities.MakeError((paramType == "number" and RPTools.Utilities.IsNumber(value))
-    or (paramType == "boolean" and isbool(value))
-    or (paramType == "string" and isstring(value)),
-    "type error, expecting for value of type " .. paramType .. " got " .. tostring(value))
-end
-
-local function validateParameterType(paramType)
-    return RPTools.Utilities.MakeError(isstring(paramType) and 
-    (paramType == "boolean" or paramType == "number" or paramType == "string"), 
-    "parameter type must be boolean, number or string")
-end
-
-local function validateParameter(parameter)
-    if not parameter or not istable(parameter) then
-        return nil, "parameter is not a table"
-    end
-    
-    local isValid = true
-    local errorMessage = ""
-    
-    
-    local name = parameter.name
-    if not isstring(name) or name == "" then 
-        errorMessage = errorMessage .. ", name is not a string or is empty"
-        isValid = false
-    end
-    
-    local description = parameter.description
-    if not isstring(description) or description == "" then
-        errorMessage = errorMessage .. ", description is not a string or is empty"
-        isValid = false
-    end
-    
-    local required = parameter.required
-    if not isbool(required) then
-        errorMessage = errorMessage .. ", requirement not defined or is not bool"
-        isValid = false
-    end
-    
-    local paramTypeValid, paramTypeError = validateParameterType(parameter.type)
-    
-    if not paramTypeValid then
-        errorMessage = errorMessage .. ", " .. paramTypeError
-        isValid = false
-    end
-    
-    local defaultValue = parameter.default
-    local display = parameter.display
-    local defaultValid, defaultError = true, ""
-    local displayValid, displayError = true, ""
-
-
-    if defaultValue == nil then
-        defaultValid, defaultError = true, ""
-    elseif paramTypeValid then
-        defaultValid, defaultError = validateValue(parameter.type, defaultValue)
-    else
-        defaultValid = false
-    end
-
-    if display == nil then 
-        displayValid, displayError = true, ""
-    elseif paramTypeValid then
-        displayValid, displayError = validateDisplay(parameter.type, display)
-    else
-        displayValid = false
-    end
-    
-    
-    if not defaultValid then
-        errorMessage = errorMessage .. ", " .. defaultError
-        isValid = false
-    end
-
-    if not displayValid then
-        errorMessage = errorMessage .. ", " .. displayError
-        isValid = false
-    end
-    
-    if isValid then
-        return true, nil
-    else
-        return false, errorMessage
-    end
-end
-
-local function validateParameters(parameters)
-    local allValid = true
-    local errorMessage = ""
-    for _, parameter in ipairs(parameters) do
-        local validParameter, parameterErrorMessage = validateParameter(parameter)
-        if not validParameter then
-            allValid = false
-            errorMessage = errorMessage .. ", " .. parameterErrorMessage
-        end
-    end
-    
-    if allValid then
-        return true, nil
-    else 
-        return false, errorMessage
-    end
-end
-
 function RPTools.Templating.ValidateTemplate(template)
     local errorMessage = ""
     
@@ -180,7 +63,7 @@ function RPTools.Templating.ValidateTemplate(template)
     
     local parameters = template.parameters
     
-    local parametersValid, parametersErrorMessage = validateParameters(parameters)
+    local parametersValid, parametersErrorMessage = RPTools.Templating.ValidateParameters(parameters)
     
     if not parametersValid then
         errorMessage = errorMessage .. ", " .. parametersErrorMessage
@@ -198,48 +81,16 @@ function RPTools.Templating.ValidateTemplate(template)
         return true, nil
     end
 end
-    
-    
-    local function applyParameters(template, arguments)
-        
-        local unprovidedParameters = ""
-        local wronglyTypedArguments = ""
-        
-        local finalArguments = {}
-        
-        for _, parameter in ipairs(template.parameters) do
-            if arguments[parameter.name] == nil then
-                if parameter.default == nil and parameter.required then
-                    unprovidedParameters = unprovidedParameters .. ", " .. parameter.name
-                else
-                    finalArguments[parameter.name] = parameter.default
-                end
-            else
-                local valueValid, valueError = validateValue(parameter.type, arguments[parameter.name])
-                if valueValid then
-                    finalArguments[parameter.name] = arguments[parameter.name]
-                else
-                    wronglyTypedArguments = wronglyTypedArguments .. ", " .. valueError
-                end
-            end
-        end
-        
-        if wronglyTypedArguments == "" and unprovidedParameters == "" then
-            return finalArguments, nil
-        else
-            return nil, "unprovided: " .. unprovidedParameters .. "and wrongly typed: " .. wronglyTypedArguments
-        end
-    end
-    
+
+
     function RPTools.Templating.Execute(template, arguments, context)
-        local validatedArguments, argumentsErrorMessage = applyParameters(template, arguments)
+        local validatedArguments, argumentsErrorMessage = RPTools.Templating.ApplyParameters(template, arguments)
         
         if not validatedArguments then
             return nil, argumentsErrorMessage
         end
         
         return template.transformer(validatedArguments, context)
-        
     end
     
     function RPTools.Templating.GetName(template)
@@ -258,18 +109,17 @@ end
         return template.description
     end
     
-    
     local function writeParameter(parameter)
         net.WriteString(parameter.name)
         net.WriteString(parameter.description)
         net.WriteString(parameter.type)
-
+        
         local hasDisplay = parameter.display ~= nil
         net.WriteBool(hasDisplay)
         if hasDisplay then
             net.WriteString(parameter.display)
         end
-
+        
         net.WriteBool(parameter.required)
         
         local hasDefault = parameter.default ~= nil
@@ -297,14 +147,35 @@ end
         end 
     end
 
-concommand.Add("rptools_sync_templates", function(ply)
-    if not ply:IsAdmin() then return end
-    RPTools.Network.SendToAdmins(RPTools.Network.MSG_TYPE.TEMPLATE_SYNC, function()
-        local seqRegister = table.ClearKeys(templateRegister)
-        net.WriteUInt(#seqRegister, 8)
+    RPTools.Network.RegisterClientHandler(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function (ply)
+        if not ply:IsAdmin() then return end
 
-        for _, template in ipairs(seqRegister) do
-            RPTools.Templating.WriteTemplateInfo(template)
+        local name = net.ReadString()
+        local arguments = net.ReadTable()
+        local pos = net.ReadVector()
+
+        local context = { position = pos }
+    
+        local nodes, errorMessage = RPTools.Templating.Execute(RPTools.Templating.GetTemplateByName(name), arguments, context)
+
+        if nodes == nil or nodes == {} then
+            RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Error executing the template:" .. errorMessage)
+            return
+        end
+
+        for _, node in ipairs(nodes) do
+            RPTools.NodeRegister.RegisterNode(node)
         end
     end)
-end)
+    
+    concommand.Add("rptools_sync_templates", function(ply)
+        if not ply:IsAdmin() then return end
+        RPTools.Network.SendToAdmins(RPTools.Network.MSG_TYPE.TEMPLATE_SYNC, function()
+            local seqRegister = table.ClearKeys(templateRegister)
+            net.WriteUInt(#seqRegister, 8)
+            
+            for _, template in ipairs(seqRegister) do
+                RPTools.Templating.WriteTemplateInfo(template)
+            end
+        end)
+    end)
