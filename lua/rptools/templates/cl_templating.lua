@@ -7,17 +7,24 @@ local function readParameter()
         local param = {}
         param.name = net.ReadString()
         param.description = net.ReadString()
-        param.type = net.ReadString()
+        param.type = string.Trim(net.ReadString(), " ")
+
+        local hasDisplay = net.ReadBool()
+
+        if hasDisplay then
+            param.display = net.ReadString()
+        end
+
         param.required = net.ReadBool()
 
         local hasDefault = net.ReadBool()
         param.default = nil
         if hasDefault then
-            if type == "bool" then
+            if param.type == "bool" then
                 param.default = net.ReadBool()
-            elseif type == "number" then
+            elseif param.type == "number" then
                 param.default = net.ReadUInt(16)
-            elseif type == "string" then
+            elseif param.type == "string" then
                 param.default = net.ReadString
             end
         end

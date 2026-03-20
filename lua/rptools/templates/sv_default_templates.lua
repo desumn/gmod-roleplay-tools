@@ -8,6 +8,7 @@ RPTools.Templating.RegisterTemplate({
             name = "message",
             description = "message to send",
             type = "string",
+            display = "long",
             required = true
         },
         {
@@ -21,6 +22,7 @@ RPTools.Templating.RegisterTemplate({
             name = "flag",
             description = "required flag for activating",
             type = "string",
+            display = "short",
             required = false
         }
     },

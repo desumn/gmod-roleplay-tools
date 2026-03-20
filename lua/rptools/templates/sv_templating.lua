@@ -45,6 +45,17 @@ function RPTools.Templating.GetAllTemplateNames()
     return names
 end
 
+local displayType = {
+    ["string"] = {
+        ["short"] = true,
+        ["long"] = true
+    }
+}
+
+
+local function validateDisplay(paramType, display)
+    return RPTools.Utilities.MakeError(displayType[paramType][display] == true, "display type invalid " .. tostring(display) .. " for " .. tostring(paramType))
+end
 
 local function validateValue(paramType, value)
     return RPTools.Utilities.MakeError((paramType == "number" and RPTools.Utilities.IsNumber(value))
@@ -52,7 +63,6 @@ local function validateValue(paramType, value)
     or (paramType == "string" and isstring(value)),
     "type error, expecting for value of type " .. paramType .. " got " .. tostring(value))
 end
-
 
 local function validateParameterType(paramType)
     return RPTools.Utilities.MakeError(isstring(paramType) and 
@@ -95,8 +105,11 @@ local function validateParameter(parameter)
     end
     
     local defaultValue = parameter.default
+    local display = parameter.display
     local defaultValid, defaultError = true, ""
-    
+    local displayValid, displayError = true, ""
+
+
     if defaultValue == nil then
         defaultValid, defaultError = true, ""
     elseif paramTypeValid then
@@ -104,13 +117,25 @@ local function validateParameter(parameter)
     else
         defaultValid = false
     end
+
+    if display == nil then 
+        displayValid, displayError = true, ""
+    elseif paramTypeValid then
+        displayValid, displayError = validateDisplay(parameter.type, display)
+    else
+        displayValid = false
+    end
     
     
     if not defaultValid then
         errorMessage = errorMessage .. ", " .. defaultError
         isValid = false
     end
-    
+
+    if not displayValid then
+        errorMessage = errorMessage .. ", " .. displayError
+        isValid = false
+    end
     
     if isValid then
         return true, nil
@@ -238,6 +263,13 @@ end
         net.WriteString(parameter.name)
         net.WriteString(parameter.description)
         net.WriteString(parameter.type)
+
+        local hasDisplay = parameter.display ~= nil
+        net.WriteBool(hasDisplay)
+        if hasDisplay then
+            net.WriteString(parameter.display)
+        end
+
         net.WriteBool(parameter.required)
         
         local hasDefault = parameter.default ~= nil
