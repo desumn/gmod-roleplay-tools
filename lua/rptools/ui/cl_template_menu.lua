@@ -1,15 +1,16 @@
+RPTools = RPTools or {}
+RPTools.UI = RPTools.UI or {}
 
+RPTools.UI.CurrentTemplate = ""
 
-local function makeFrame(name)
-    local frame = vgui.Create("DFrame")
-    frame:SetSize(ScrW() * 0.18, ScrH() * 0.7)
-    frame:CenterVertical()
-    frame:AlignRight(ScrW() * 0.005)
-    frame:SetDraggable(true)
-    frame:ShowCloseButton(true)
-    frame:SetTitle("Create Node From Template -- " .. name)
-    frame:MakePopup()
-    return frame
+RPTools.UI.CurrentParams = {}
+
+local function nonEmptyOrNil(value)
+    if value == nil or (isstring(value) and value == "") then
+        return nil
+    else
+        return value
+    end
 end
 
 local function makeTitle(name, frame)
@@ -29,12 +30,11 @@ local function makeDescription(description, frame)
     local descLabel = vgui.Create("DLabel", frame)
     descLabel:SetFont("DermaDefault")
     descLabel:SetText(description)
-    descLabel:SetTextColor(Color(180, 180, 180))
+    descLabel:SetTextColor(Color(190, 195, 200))
     
     descLabel:SetWrap(true)
-    descLabel:SetAutoStretchVertical(true)
+    descLabel:SetTall(60)
     
-    descLabel:SizeToContents()
     descLabel:SetContentAlignment(5)
     descLabel:DockMargin(10, 0, 10, 10)
     descLabel:Dock(TOP)
@@ -47,7 +47,7 @@ local function makeSeparator(frame)
     separator:SetTall(2)
     
     separator.Paint = function(self, w, h)
-        surface.SetDrawColor(Color(100, 100, 100))
+        surface.SetDrawColor(Color(80, 85, 95))
         surface.DrawRect(0, 0, w, h)
     end
     
@@ -58,21 +58,6 @@ local function makeSeparator(frame)
     return separator
 end
 
-local function makeSubmitButton(frame)
-    local button = vgui.Create("DButton", frame)
-    
-    button:SetTall(35)
-    
-    button:SetText("Create Node")
-    
-    
-    button:SetEnabled(false)
-    button:DockMargin(10, 5, 10, 10)
-    button:Dock(BOTTOM)
-    return button
-end
-
-
 local displayWidget = {
     ["boolean"] = {
         ["default"] = function (parent, default, name)
@@ -80,11 +65,11 @@ local displayWidget = {
             checkbox:SetText("")
             checkbox:SetValue(default or false)
             checkbox:Dock(TOP)
-
+            
             checkbox.OnChange = function(self, value)
                 hook.Run("rptools_template_ui_value_change", name, value)
             end
-
+            
             return checkbox
             
         end
@@ -96,11 +81,11 @@ local displayWidget = {
             numberEntry:SetTall(30)
             numberEntry:SetMinMax(0, 65635)
             numberEntry:Dock(TOP)
-
+            
             numberEntry.OnValueChanged = function (self, value)
                 hook.Run("rptools_template_ui_value_change", name, value)
             end
-
+            
             return numberEntry
         end
     },
@@ -111,11 +96,12 @@ local displayWidget = {
             textEntry:SetTall(30)
             textEntry:SetUpdateOnType(true)
             textEntry:Dock(TOP)
-
+            textEntry:SetPlaceholderText("Please enter a " .. name)
+            
             textEntry.OnValueChange = function (self, value)
                 hook.Run("rptools_template_ui_value_change", name, value)
             end
-
+            
             return textEntry
         end,
         ["short"] = function (parent, default, name)
@@ -124,11 +110,12 @@ local displayWidget = {
             textEntry:SetTall(30)
             textEntry:SetUpdateOnType(true)
             textEntry:Dock(TOP)
-
+            textEntry:SetPlaceholderText("Please enter a " .. name)
+            
             textEntry.OnValueChange = function (self, value)
                 hook.Run("rptools_template_ui_value_change", name, value)
             end
-
+            
             return textEntry
         end,
         ["long"] = function (parent, default, name)
@@ -138,104 +125,84 @@ local displayWidget = {
             textEntry:SetTall(80)
             textEntry:SetUpdateOnType(true)
             textEntry:Dock(TOP)
-
+            textEntry:SetPlaceholderText("Please enter a " .. name)
+            
             textEntry.OnValueChange = function (self, value)
                 hook.Run("rptools_template_ui_value_change", name, value)
             end
-
+            
             return textEntry
         end
     }
 }
 
-
 local function makeParameters(parameters, frame)
-    local parametersPanel = vgui.Create("DScrollPanel", frame)
-
-    parametersPanel:DockMargin(10, 0, 10, 0)
-    parametersPanel:Dock(FILL)
-
     local valueContainers = {}
-
+    
     for _, parameter in ipairs(parameters) do
-        local parameterPanel = vgui.Create("DPanel", parametersPanel)
+        local parameterPanel = vgui.Create("DPanel", frame)
         parameterPanel.Paint = function () end
-        parameterPanel:DockMargin(0, 5, 0, 5)
+        parameterPanel:DockMargin(5, 8, 5, 8)
         parameterPanel:Dock(TOP)
-
+        
         local label = vgui.Create("DLabel", parameterPanel)
         label:SetTall(15)
-        label:SetText(string.NiceName(parameter.name) .. (parameter.required and " *" or ""))
+        label:SetText(string.NiceName(parameter.name) .. (parameter.required and " (Required)" or " (Optional)"))
+        if parameter.required then
+            label:SetTextColor(Color(230, 180, 80))
+        else
+            label:SetTextColor(Color(150, 155, 160))
+        end
         label:Dock(TOP)
-
+    
         local entry = displayWidget[parameter.type][parameter.display or "default"](parameterPanel, parameter.default, parameter.name)
-
+        
         parameterPanel:InvalidateLayout(true)
-        parameterPanel:SizeToChildren(false, true)
-
+        local height = label:GetTall() + entry:GetTall() + 12
+        parameterPanel:SetTall(height)
+        
         valueContainers[parameter.name] = entry
     end
-
+    
     return valueContainers
-
+    
 end
 
-local function nonEmptyOrNil(value)
-    if isstring(value) and value == "" then 
-        return nil
-    else
-        return value
-    end
-end
-
-local function openPanel(template, creationPos)
-    local frame = makeFrame(template.name)
+function RPTools.UI.OpenTemplateMenu(frame, template)
+    frame:Clear()
     makeTitle(string.NiceName(template.name), frame)
     makeDescription(template.description, frame)
     makeSeparator(frame)
-    local submitButton = makeSubmitButton(frame)
     makeParameters(template.parameters, frame)
-
+    
     local arguments = {}
-    local finalArguments = {}
+    
+    local stateIndicator = vgui.Create("DLabel", frame)
+    stateIndicator:SetFont("DermaDefault")
+    stateIndicator:SetText("Template not valid - please fill the required parameters.")
+    stateIndicator:SetTextColor(Color(220, 160, 170))
+    
+    stateIndicator:SetWrap(true)
+    stateIndicator:SetTall(60)
+    
+    stateIndicator:SetContentAlignment(5)
+    stateIndicator:DockMargin(8, 0, 8, 10)
+    stateIndicator:Dock(TOP)
     
     hook.Add("rptools_template_ui_value_change", frame, function (_, name, newValue)
-        print(newValue)
         arguments[name] = nonEmptyOrNil(newValue)
         local newFinalArguments = RPTools.Templating.ApplyParameters(template, arguments)
-        submitButton:SetEnabled(finalArguments ~= nil)
-        if newFinalArguments == nil then
-            finalArguments = {}
-            submitButton:SetEnabled(false)
+        
+        if newFinalArguments then
+            RPTools.UI.CurrentParams = newFinalArguments
+            RPTools.UI.CurrentTemplate = template.name
+            stateIndicator:SetText("Template valid - you can now place a node in world. ")
+            stateIndicator:SetTextColor(Color(100, 200, 100))
         else
-            finalArguments = newFinalArguments
-            submitButton:SetEnabled(true)
+            RPTools.UI.CurrentParams = {}
+            RPTools.UI.CurrentTemplate = ""
+            stateIndicator:SetText("Template not valid - please fill the required parameters.")
+            stateIndicator:SetTextColor(Color(220, 160, 170))
         end
     end)
-
-    submitButton.DoClick = function (self)
-
-        RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function ()
-            net.WriteString(template.name)
-            net.WriteTable(finalArguments)
-            net.WriteVector(creationPos)
-        end)
-
-    end
-
 end
-
-concommand.Add("rptools_menu", function (ply, cmd, args, argStr)
-    local templateName = args[1]
-    if templateName == nil or templateName == "" then
-        print("Please provide a template name, see rptools_template_list")
-    end
-
-    local template = RPTools.Templating.GetTemplateFromClientCache(templateName)
-    if not template then
-        print("Couldn't find template " .. templateName)
-        return
-    end
-
-    openPanel(template, LocalPlayer():GetEyeTrace().HitPos)
-end)

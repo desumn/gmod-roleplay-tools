@@ -2,7 +2,7 @@ RPTools = RPTools or {}
 
 RPTools.Templating.RegisterTemplate({
     name = "messager",
-    description = "Node that send a chat message once to a neraby player eventually checking for player flags",
+    description = "Node that send a chat message once to a nearby player eventually checking for player flags",
     parameters = {
         {
             name = "message",

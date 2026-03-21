@@ -59,6 +59,7 @@ RPTools.Network.RegisterServerHandler(RPTools.Network.MSG_TYPE.TEMPLATE_SYNC, fu
         local template = RPTools.Templating.ReadTemplateInfo()
         RPTools.Templating.ClientCache[template.name] = template
     end
+    hook.Run("RPTools_TemplateSync", RPTools.Templating.ClientCache)
 end)
 
 
