@@ -110,13 +110,18 @@ if CLIENT then
         for i, node in ipairs(nodes) do
             local pos = y + 30 + (i - 1) * 25
             
+            local color = Color(120, 120, 120)
+            if i == selectedIndex then
+                color = color_white
+            end
+
             draw.RoundedBox(4, x + 10, pos, 280, 22, Color(50, 53, 60, 150))
             
             if i == selectedIndex then 
                 draw.SimpleText("►", "DermaDefault", x + 15, pos + 11, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
             end
             
-            draw.SimpleText(node.id, "DermaDefault", x + 30, pos + 11, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+            draw.SimpleText(node.id, "DermaDefault", x + 30, pos + 11, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
             draw.SimpleText(RPTools.Debug.stateText[node.state], "DermaDefault", x + 280, pos + 11, RPTools.Debug.stateColor[node.state], TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
         end
         
@@ -153,13 +158,12 @@ function TOOL:RightClick(_)
         if visibleNodeCache.length == 0 then return false end
 
         local node = visibleNodeCache.data[selectedIndex].node
-        PrintTable(node)
 
         RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.DELETE_NODE, function ()
             net.WriteString(node.id)
         end)
 
-        notification.AddLegacy("Node" .. node.id .. "removed", NOTIFY_UNDO, 3)
+        notification.AddLegacy("Node " .. node.id .. " removed", NOTIFY_UNDO, 3)
 
         return true
     end
