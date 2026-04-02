@@ -1,6 +1,20 @@
 TOOL.Category = "RPTools"
 TOOL.Name = "Node Spawner"
 
+TOOL.Information = {
+    { name = "left" },
+    { name = "right" },
+    { name = "reload" },
+}
+
+if CLIENT then
+    language.Add("tool.rptools_spawner.name", "Node Spawner")
+    language.Add("tool.rptools_spawner.desc", "Place and manage RPTools nodes")
+    language.Add("tool.rptools_spawner.left", "Place a node")
+    language.Add("tool.rptools_spawner.right", "Delete selected node")
+    language.Add("tool.rptools_spawner.reload", "Cycle node selection")
+end
+
 local selectedIndex = 1
 local visibleNodeCache = {
     lastCalculation = 0,
@@ -114,7 +128,7 @@ if CLIENT then
             if i == selectedIndex then
                 color = color_white
             end
-
+            
             draw.RoundedBox(4, x + 10, pos, 280, 22, Color(50, 53, 60, 150))
             
             if i == selectedIndex then 
@@ -154,17 +168,17 @@ end
 
 function TOOL:RightClick(_)
     if CLIENT then
-
+        
         if visibleNodeCache.length == 0 then return false end
-
+        
         local node = visibleNodeCache.data[selectedIndex].node
-
+        
         RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.DELETE_NODE, function ()
             net.WriteString(node.id)
         end)
-
+        
         notification.AddLegacy("Node " .. node.id .. " removed", NOTIFY_UNDO, 3)
-
+        
         return true
     end
     return true
