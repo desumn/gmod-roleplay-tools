@@ -8,7 +8,8 @@ RPTools.Network.MSG_TYPE = {
     TEMPLATE_SYNC = 3,
     CLIENT_RESULT = 4,
     FULL_SYNC = 5,
-    CREATE_FROM_TEMPLATE = 6
+    CREATE_FROM_TEMPLATE = 6,
+    DELETE_NODE = 7
 }
 
 local msgTypeNames = {
@@ -17,12 +18,13 @@ local msgTypeNames = {
     [RPTools.Network.MSG_TYPE.TEMPLATE_SYNC] = "template sync",
     [RPTools.Network.MSG_TYPE.CLIENT_RESULT] = "client sync",
     [RPTools.Network.MSG_TYPE.FULL_SYNC] = "full sync",
-    [RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE] = "create from template"
+    [RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE] = "create from template",
+    [RPTools.Network.MSG_TYPE.DELETE_NODE] = "delete node"
 }
 
 function RPTools.Network.ValidateMessageType(msgType)
     return RPTools.Utilities.MakeError(RPTools.Utilities.IsNumber(msgType) and
-                                       msgType >= 1 and msgType <= 6, "Invalid message type" .. tostring(msgType))
+                                       msgType >= 1 and msgType <= 7, "Invalid message type" .. tostring(msgType))
 end
 
 function RPTools.Network.WriteMessageType(msgType)

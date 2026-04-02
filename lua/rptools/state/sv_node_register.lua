@@ -12,9 +12,9 @@ function RPTools.NodeRegister.RegisterNode(node)
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Tried to register an invalid node (" .. error_message .. ")")
         return
     end
-
+    
     local id = RPTools.Node.GetId(node) or RPTools.Node.GenerateId(node)
-
+    
     nodeRegister[id] = node
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Added node with id:(" .. id .. ") to the node register.")
     -- Hook pour prévenir de l'ajout?
@@ -36,7 +36,7 @@ function RPTools.NodeRegister.GetNodeById(id)
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Trying to get node: node (" .. table.ToString(node) .. ") not found")
         return
     end
-
+    
     return table.Copy(node)
 end
 
@@ -46,20 +46,29 @@ end
 
 function RPTools.NodeRegister.EditNode(id, subNode)
     local node = RPTools.NodeRegister.GetNodeById(id)
-
+    
     if not node then return end
-
+    
     local errorMessage = RPTools.Node.Edit(node, subNode)
-
+    
     if errorMessage then
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Failed to edit node with id:(" .. id .. "): " .. errorMessage)
     end
-
+    
     nodeRegister[id] = node
-
+    
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Edited node with id:(" .. id .. ")")
 end
 
 function RPTools.NodeRegister.ClearAll()
     nodeRegister = {}
 end
+
+
+RPTools.Network.RegisterClientHandler(RPTools.Network.MSG_TYPE.DELETE_NODE, function (ply)
+    if not ply:IsAdmin() then return end
+    
+    local id = net.ReadString()
+
+    RPTools.NodeRegister.UnregisterNode(id)
+end)

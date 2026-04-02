@@ -32,3 +32,4 @@ end
 function RPTools.Utilities.IsSet(table, cond)
     return istable(table) and RPTools.Utilities.AllValues(table, function (val) return isbool(val) and val end )
 end
+

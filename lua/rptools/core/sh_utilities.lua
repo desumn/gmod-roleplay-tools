@@ -44,3 +44,14 @@ function RPTools.Utilities.FindPlayerByName(name)
 
     return players
 end
+
+function RPTools.Utilities.Map(table, f)
+    local returnTable = {}
+
+    for k, v in pairs(table) do
+        returnTable[k] = f(k, v)
+    end
+
+    return returnTable
+
+end
