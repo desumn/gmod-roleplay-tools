@@ -136,7 +136,7 @@ if CLIENT then
             end
             
             draw.SimpleText(node.id, "DermaDefault", x + 30, pos + 11, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-            draw.SimpleText(RPTools.Debug.stateText[node.state], "DermaDefault", x + 280, pos + 11, RPTools.Debug.stateColor[node.state], TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
+            draw.SimpleText(RPTools.Coordinator.stateText[node.state], "DermaDefault", x + 280, pos + 11, RPTools.Coordinator.stateColor[node.state], TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
         end
         
         return

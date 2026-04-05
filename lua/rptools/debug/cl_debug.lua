@@ -21,18 +21,6 @@ RPTools.Debug.NODE_STATE = {
     PAUSED = 3,
 }
 
-RPTools.Debug.stateColor = {
-    [RPTools.Debug.NODE_STATE.RUNNING] = Color(0, 140, 0),
-    [RPTools.Debug.NODE_STATE.ERROR] = Color(160, 60, 60),
-    [RPTools.Debug.NODE_STATE.PAUSED] = Color(150, 100, 100)
-}
-
-RPTools.Debug.stateText = {
-    [RPTools.Debug.NODE_STATE.RUNNING] = "Running",
-    [RPTools.Debug.NODE_STATE.ERROR] = "Error",
-    [RPTools.Debug.NODE_STATE.PAUSED] = "Paused"
-}
-
 function RPTools.Debug.ReadDebugNode()
     local id = net.ReadString()
     local position = net.ReadVector()
@@ -74,10 +62,10 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function ()
         local position = node.position
         local distance = node.distance
         
-        render.DrawWireframeSphere(position, 20, 15, 15, RPTools.Debug.stateColor[node.state], true)
+        render.DrawWireframeSphere(position, 20, 15, 15, RPTools.Coordinator.stateColor[node.state], true)
         
         if distance ~= 0 then
-            render.DrawWireframeSphere(position, distance, 15, 15, ColorAlpha(RPTools.Debug.stateColor[node.state], 60), true)
+            render.DrawWireframeSphere(position, distance, 15, 15, ColorAlpha(RPTools.Coordinator.stateColor[node.state], 60), true)
         end
         
         local textPos = position + Vector(0, 0, 5)
@@ -90,7 +78,7 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function ()
         cam.Start3D2D(textPos, ang, 0.1)
         
         draw.SimpleText(node.id, "RPTools_DebugText", 0, 0, color_white, TEXT_ALIGN_CENTER)
-        draw.SimpleText(RPTools.Debug.stateText[node.state], "RPTools_DebugText", 0, 70, RPTools.Debug.stateColor[node.state], TEXT_ALIGN_CENTER) -- Y ajusté
+        draw.SimpleText(RPTools.Debug.stateText[node.state], "RPTools_DebugText", 0, 70, RPTools.Coordinator.stateColor[node.state], TEXT_ALIGN_CENTER) -- Y ajusté
         
         cam.End3D2D()
     end
