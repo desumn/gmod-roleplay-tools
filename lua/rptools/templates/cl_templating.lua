@@ -30,7 +30,7 @@ local function readParameter()
             elseif param.type == "number" then
                 param.default = net.ReadUInt(16)
             elseif param.type == "string" then
-                param.default = net.ReadString
+                param.default = net.ReadString()
             end
         end
         return param

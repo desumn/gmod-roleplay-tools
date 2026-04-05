@@ -5,7 +5,9 @@ local displayType = {
     ["string"] = {
         ["short"] = true,
         ["long"] = true
-    }
+    },
+    ["number"] = {},
+    ["boolean"] = {},
 }
 
 local function validateDisplay(paramType, display)

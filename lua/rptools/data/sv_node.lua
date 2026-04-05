@@ -63,9 +63,9 @@ end
 local fieldValidations = {
         id = validateId, 
         position = validatePosition, 
-        conditions = RPTools.Condition.validateConditionSet,
-        requiredTime = validateRequiredTime, 
-        actions = RPTools.Actions.validateActions,
+        conditions = RPTools.Condition.ValidateConditionSet,
+        requiredTime = validateRequiredTime,
+        actions = RPTools.Actions.ValidateActionsSet,
         triggerPolicy = validateTriggerPolicy,
         scope = validateScope,
         priority = validatePriority}
@@ -76,7 +76,7 @@ function RPTools.Node.ValidateNode(node)
     local accumulatedError = ""
 
     for field, validate in pairs(fieldValidations) do
-        local result, str_error = validate(node[field])
+        local result, str_error = validate(node[field])(node)
         finalResult = finalResult and result
         if not result then 
             accumulatedError = str_error .. ", " .. accumulatedError
@@ -93,9 +93,9 @@ function RPTools.Node.Create(_position, _conditions, _required_time, _actions, _
         position = _position or Vector(0, 0, 0),
         conditions = _conditions or RPTools.Condition.EmptyConditionSet(),
         requiredTime = _required_time or 0,
-        actions = _actions or RPTools.Actions.emptyActionSet(),
-        triggerPolicy = _trigger_policy or RPTools.Node.trigger_policy.one_shot,
-        scope = _scope or RPTools.Node.scope.single_player,
+        actions = _actions or RPTools.Actions.EmptyActionSet(),
+        triggerPolicy = _trigger_policy or RPTools.Node.trigger_policy.ONE_SHOT,
+        scope = _scope or RPTools.Node.scope.SINGLE_PLAYER,
         priority = _priority or 0,
         cooldownDuration = _cooldownDuration or 0 }
 
