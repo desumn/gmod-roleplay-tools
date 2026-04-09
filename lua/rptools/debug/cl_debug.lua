@@ -76,9 +76,9 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function ()
         ang:RotateAroundAxis(ang:Right(), 90)
         
         cam.Start3D2D(textPos, ang, 0.1)
-        
+
         draw.SimpleText(node.id, "RPTools_DebugText", 0, 0, color_white, TEXT_ALIGN_CENTER)
-        draw.SimpleText(RPTools.Debug.stateText[node.state], "RPTools_DebugText", 0, 70, RPTools.Coordinator.stateColor[node.state], TEXT_ALIGN_CENTER) -- Y ajusté
+        draw.SimpleText(RPTools.Coordinator.stateText[node.state], "RPTools_DebugText", 0, 70, RPTools.Coordinator.stateColor[node.state], TEXT_ALIGN_CENTER) -- Y ajusté
         
         cam.End3D2D()
     end

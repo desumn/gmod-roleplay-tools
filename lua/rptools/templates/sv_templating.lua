@@ -158,7 +158,7 @@ end
     
         local nodes, errorMessage = RPTools.Templating.Execute(RPTools.Templating.GetTemplateByName(name), arguments, context)
 
-        if nodes == nil or nodes == {} then
+        if nodes == nil or table.IsEmpty(nodes) then
             RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Error executing the template:" .. errorMessage)
             return
         end

@@ -24,7 +24,7 @@ function RPTools.Debug.WriteDebugNode(node)
     net.WriteString(id)
     net.WriteVector(position)
     net.WriteUInt((table.IsEmpty(distances) and 0) or math.max(unpack(distances)), 16)
-    net.WriteUInt(state, 3)
+    net.WriteUInt(state or 1, 3)
 end
 
 local function sendAllNodes()

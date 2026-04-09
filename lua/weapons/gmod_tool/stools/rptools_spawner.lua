@@ -154,7 +154,7 @@ function TOOL:LeftClick(tr)
         end
         local name = RPTools.UI.CurrentTemplate
         local params = RPTools.UI.CurrentParams
-        
+
         RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function ()
             net.WriteString(name)
             net.WriteTable(params)

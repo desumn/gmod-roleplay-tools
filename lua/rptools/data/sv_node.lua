@@ -76,7 +76,7 @@ function RPTools.Node.ValidateNode(node)
     local accumulatedError = ""
 
     for field, validate in pairs(fieldValidations) do
-        local result, str_error = validate(node[field])(node)
+        local result, str_error = validate(node[field])
         finalResult = finalResult and result
         if not result then 
             accumulatedError = str_error .. ", " .. accumulatedError
