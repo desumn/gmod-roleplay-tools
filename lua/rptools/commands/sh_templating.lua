@@ -1,14 +1,5 @@
 RPTools = RPTools or {}
 
-local function requireAdmin(ply)
-    if not ply:IsAdmin() then
-        print("Permission denied")
-        return
-    else
-        return true
-    end
-end
-
 local function requireTemplate(args, pos)
     local templateName = args[pos]
     if templateName == nil or templateName == "" then
@@ -34,14 +25,14 @@ end
 
 
 concommand.Add("rptools_template_list", function (ply, _, args, _)
-    if not requireAdmin(ply) then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     local templateList = RPTools.Templating.GetAllTemplateNames()
 
     PrintTable(templateList)
 end)
 
 concommand.Add("rptools_template_info", function (ply, _, args, _)
-    if not requireAdmin(ply) then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     local template = requireTemplate(args, 1)
     if not template then return end
 
@@ -49,7 +40,7 @@ concommand.Add("rptools_template_info", function (ply, _, args, _)
 end)
 
 concommand.Add("rptools_template_execute", function (ply, _, args, _)
-    requireAdmin(ply)
+    if not RPTools.Commands.requireAdmin(ply) then return end
 
     local template = requireTemplate(args, 1)
     if template == nil or template == "" then return end

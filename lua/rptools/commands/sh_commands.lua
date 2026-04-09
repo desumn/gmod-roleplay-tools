@@ -1,9 +1,20 @@
 RPTools = RPTools or {}
+RPTools.Commands = RPTools.Commands or {}
+
+
+function RPTools.Commands.requireAdmin(ply)
+    if not ply:IsAdmin() then
+        print("Permission denied")
+        return
+    else
+        return true
+    end
+end
 
 local coordinatorStarted = false
 
 concommand.Add("rptools_list_node", function (ply, _, _, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     local nodes = RPTools.NodeRegister.GetAllNodes()
     local ids = {}
     for _, node in ipairs(nodes) do
@@ -14,7 +25,7 @@ end)
 
 
 concommand.Add("rptools_inspect", function (ply, _, args, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     if not args[1] then return end
     local node = RPTools.NodeRegister.GetNodeById(args[1])
     if not node then return end
@@ -24,7 +35,7 @@ end)
 
 
 concommand.Add("rptools_flag", function (ply, _, args, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     local playerName = args[1]
     if not playerName then return end
     local flag = args[2]
@@ -37,7 +48,7 @@ concommand.Add("rptools_flag", function (ply, _, args, _)
 end)
 
 concommand.Add("rptools_unflag", function (ply, _, args, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     local playerName = args[1]
     if not playerName then return end
     local flag = args[2]
@@ -50,19 +61,19 @@ concommand.Add("rptools_unflag", function (ply, _, args, _)
 end)
 
 concommand.Add("rptools_dump_blackboard", function (ply, _, args, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     PrintTable(RPTools.Blackboard.GetAll())
 end)
 
 concommand.Add("rptools_reset", function (ply, _, args, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     RPTools.NodeRegister.ClearAll()
     RPTools.Blackboard.ClearAll()
     RPTools.Coordinator.ClearAllState()
 end)
 
 concommand.Add("rptools_remove", function (ply, _, args, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     if not args[1] then return end
     local node = RPTools.NodeRegister.GetNodeById(args[1])
     if not node then return end
@@ -70,7 +81,7 @@ concommand.Add("rptools_remove", function (ply, _, args, _)
 end)
 
 concommand.Add("rptools_pause_node", function (ply, _, args, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     if not args[1] then return end
     local node = RPTools.NodeRegister.GetNodeById(args[1])
     if not node then return end
@@ -79,17 +90,15 @@ end)
 
 
 concommand.Add("rptools_unpause_node", function (ply, _, args, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     if not args[1] then return end
     local node = RPTools.NodeRegister.GetNodeById(args[1])
     if not node then return end
     RPTools.Coordinator.SetNodeRunningState(args[1], RPTools.Coordinator.NODE_STATE.RUNNING)
 end)
 
-
-
 concommand.Add("rptools_toggle", function (ply, _, _, _)
-    if not ply:IsAdmin() then return end
+    if not RPTools.Commands.requireAdmin(ply) then return end
     if coordinatorStarted then
         RPTools.Coordinator.Stop()
     else
