@@ -3,7 +3,7 @@ RPTools.Serialization = RPTools.Serialization or {}
 RPTools.Save = RPTools.Save or {}
 
 local function serializeNodes()
-    local nodes = RPTools.NodeRegister.GetAllNodes()
+    local nodes = table.Copy(RPTools.NodeRegister.GetAllNodes())
     for _, node in ipairs(nodes) do
         node.id = nil
     end
@@ -54,7 +54,7 @@ end
 function RPTools.Save.LoadAll(name)
     if not file.Exists("rptools/saves/" .. name .. ".json", "DATA") then return false end
     local json = file.Read("rptools/saves/" .. name .. ".json")
-
+    
     local save = util.JSONToTable(json)
     if not save then return false end
 

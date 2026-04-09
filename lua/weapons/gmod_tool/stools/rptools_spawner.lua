@@ -93,6 +93,12 @@ if CLIENT then
 
     panel:AddItem(templateList)
     panel:AddItem(configPanel)
+
+    templateList.OnRowSelected = function(self, index, row)
+    RPTools.UI.OpenTemplateMenu(configPanel, RPTools.Templating.GetTemplateFromClientCache(row.name))
+    configPanel:InvalidateLayout(true)
+    configPanel:SizeToChildren(false, true)
+    end
   end
 
   function TOOL:DrawHUD()

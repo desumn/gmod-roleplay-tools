@@ -83,6 +83,7 @@ function RPTools.Node.ValidateNode(node)
   local accumulatedError = ""
 
   for field, validate in pairs(fieldValidations) do
+    if field == "id" and node.id == nil then continue end
     local result, str_error = validate(node[field])
     finalResult = finalResult and result
     if not result then
