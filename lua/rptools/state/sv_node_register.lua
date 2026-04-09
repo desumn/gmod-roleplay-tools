@@ -22,7 +22,7 @@ end
 
 function RPTools.NodeRegister.UnregisterNode(id)
     if not nodeRegister[id] then
-        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Trying to remove node: node (" .. table.ToString(node) .. ") not found")
+        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Trying to remove node: node (" .. table.ToString(id) .. ") not found")
         return
     end
     nodeRegister[id] = nil
@@ -33,7 +33,7 @@ end
 function RPTools.NodeRegister.GetNodeById(id)
     local node = nodeRegister[id]
     if not node then
-        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Trying to get node: node (" .. table.ToString(node) .. ") not found")
+        RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Trying to get node: node (" .. id .. ") not found")
         return
     end
     

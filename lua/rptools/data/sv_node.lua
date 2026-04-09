@@ -94,8 +94,8 @@ function RPTools.Node.Create(_position, _conditions, _required_time, _actions, _
         conditions = _conditions or RPTools.Condition.EmptyConditionSet(),
         requiredTime = _required_time or 0,
         actions = _actions or RPTools.Actions.EmptyActionSet(),
-        triggerPolicy = _trigger_policy or RPTools.Node.trigger_policy.ONE_SHOT,
-        scope = _scope or RPTools.Node.scope.SINGLE_PLAYER,
+        triggerPolicy = _trigger_policy or RPTools.Node.TRIGGER_POLICY.ONE_SHOT,
+        scope = _scope or RPTools.Node.SCOPE.SINGLE_PLAYER,
         priority = _priority or 0,
         cooldownDuration = _cooldownDuration or 0 }
 
