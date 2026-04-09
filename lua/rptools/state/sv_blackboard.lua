@@ -152,5 +152,5 @@ end
 
 ---@param otherBlackboard table
 function RPTools.Blackboard.Merge(otherBlackboard)
-    table.Merge(blackboard, otherBlackboard)
+  table.Merge(blackboard, otherBlackboard)
 end
