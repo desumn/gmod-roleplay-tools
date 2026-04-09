@@ -12,6 +12,8 @@ local function generateId()
     return "node_" .. counter
 end
 
+---@param node RPToolsNode
+---@return string
 function RPTools.Node.GenerateId(node)
     node.id = generateId()
     return node.id
@@ -34,6 +36,7 @@ local function validateRequiredTime(time)
     return RPTools.Utilities.MakeError(RPTools.Utilities.IsNumber(time), "Invalid required time: " .. tostring(time))
 end
 
+---@enum RPToolsTriggerPolicy
 RPTools.Node.TRIGGER_POLICY = {
     MANUAL = 1,
     ONE_SHOT = 2,
@@ -47,6 +50,7 @@ local function validateTriggerPolicy(trigger_policy)
         "Invalid trigger politic: " .. tostring(trigger_policy))
 end
 
+---@enum RPToolsScope
 RPTools.Node.SCOPE = {
     SINGLE_PLAYER = 1,
     GLOBAL = 2,
@@ -87,6 +91,16 @@ function RPTools.Node.ValidateNode(node)
 
 end
 
+
+---@param _position Vector
+---@param _conditions RPToolsCondition[]
+---@param _required_time number
+---@param _actions RPToolsAction[]
+---@param _trigger_policy RPToolsTriggerPolicy
+---@param _scope RPToolsScope
+---@param _priority number
+---@param _cooldownDuration? number
+---@return RPToolsNode|nil, string|nil
 function RPTools.Node.Create(_position, _conditions, _required_time, _actions, _trigger_policy, _scope, _priority, _cooldownDuration)
     local node = {
         id = generateId(),
@@ -108,42 +122,65 @@ function RPTools.Node.Create(_position, _conditions, _required_time, _actions, _
     end
 end
 
+
+---@param node RPToolsNode
+---@return string
 function RPTools.Node.GetId(node)
     return node.id
 end
 
+---@param node RPToolsNode
+---@return Vector
 function RPTools.Node.GetPosition(node)
     return node.position
 end
 
+---@param node RPToolsNode
+---@return RPToolsCondition[]
 function RPTools.Node.GetConditions(node)
     return node.conditions
 end
 
+---@param node RPToolsNode
+---@return integer
 function RPTools.Node.GetRequiredTime(node)
     return node.requiredTime
 end
 
+
+---@param node RPToolsNode
+---@return RPToolsAction[]
 function RPTools.Node.GetActions(node)
     return node.actions
 end
 
+---@param node RPToolsNode
+---@return RPToolsScope
 function RPTools.Node.GetScope(node)
     return node.scope
 end
 
+---@param node RPToolsNode
+---@return integer
 function RPTools.Node.GetPriority(node)
     return node.priority
 end
 
+---@param node RPToolsNode
+---@return RPToolsTriggerPolicy
 function RPTools.Node.GetTriggerPolicy(node)
     return node.triggerPolicy
 end
 
+---@param node RPToolsNode
+---@return integer
 function RPTools.Node.GetCooldownDuration(node)
     return node.cooldownDuration
 end
 
+---@param node RPToolsNode
+---@param subNode table
+---@return string|nil
 function RPTools.Node.Edit(node, subNode)
     local testNode = table.Copy(node)
 

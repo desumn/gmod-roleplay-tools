@@ -2,7 +2,6 @@
 RPTools = RPTools or {}
 RPTools.Actions = RPTools.Actions or {}
 
-
 local actionFunctions = {
     chat_message = function(ply, _, params)
         ply:ChatPrint(params.message)
@@ -12,6 +11,8 @@ local actionFunctions = {
     end
 }
 
+---@param actionType string
+---@return function|nil, string|nil
 function RPTools.Actions.GetFunction(actionType)
     return actionFunctions[actionType]
 end
@@ -20,6 +21,7 @@ local function validateType(actionType)
     return RPTools.Utilities.MakeError(actionFunctions[actionType] ~= nil, "Invalid action type: " .. tostring(actionType))
 end
 
+---@enum side
 RPTools.Actions.SIDE = {
     SERVER = 1,
     CLIENT = 2,
@@ -50,6 +52,8 @@ local function validateParams(actionType, params)
                                         .. expectedTypes[actionType] ..  ")" .. ": " .. tostring(params))
 end
 
+---@param action RPToolsAction
+---@return boolean, string|nil
 function RPTools.Actions.ValidateAction(action)
     local typeValid, typeErrorMessage = validateType(action.actionType)
 
@@ -67,14 +71,20 @@ function RPTools.Actions.ValidateAction(action)
 
 end
 
+---@return RPToolsAction[]
 function RPTools.Actions.EmptyActionSet()
     return {}
 end
 
+---@param set RPToolsAction[]
+---@param action RPToolsAction
 function RPTools.Actions.AddToSet(set, action)
     table.insert(set, action)
 end
 
+---@param actionType string
+---@param params table
+---@return RPToolsAction|nil, string|nil
 function RPTools.Actions.Create(actionType, params)
     local action = { actionType = actionType, params = params}
     local actionValid, errorMessage = RPTools.Actions.ValidateAction(action)

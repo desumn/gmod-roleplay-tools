@@ -2,6 +2,7 @@ RPTools = RPTools or {}
 
 RPTools.Network = RPTools.Network or {}
 
+---@enum RPToolsMsgType
 RPTools.Network.MSG_TYPE = {
     DEBUG_SYNC = 1,
     NODE_SYNC = 2,

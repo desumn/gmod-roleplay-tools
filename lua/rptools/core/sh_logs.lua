@@ -16,6 +16,7 @@ local function addToBuffer(newLog)
     bufferIndex = (bufferIndex + 1) > bufSize:GetInt() and 1 or bufferIndex + 1
 end
 
+---@enum RPToolsLogLevel
 RPTools.Logs.LEVEL = {
     DEBUG = 1,
     INFO = 2,
@@ -25,6 +26,9 @@ RPTools.Logs.LEVEL = {
 
 local logLevel = CreateConVar("rptools_logs_level", RPTools.Logs.LEVEL.WARNING, nil, "Log level for the Roleplay Tools addon", 0, 3)
 
+---@param level RPToolsLogLevel
+---@param source string
+---@param message string
 function RPTools.Logs.log(level, source, message)
     if level < logLevel:GetInt() then return end
 
@@ -70,6 +74,8 @@ function Format.message(message)
     return message
 end
 
+---@param log RPToolsLog
+---@return string
 function RPTools.Logs.FormatLog(log)
 
     return "[RPTools | " .. Format.level(log.level) .. " | " .. Format.date(log.date) .. " | " .. Format.time(log.curtime) .. "] "

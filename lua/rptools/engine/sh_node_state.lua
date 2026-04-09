@@ -2,6 +2,7 @@ RPTools = RPTools or {}
 RPTools.Coordinator = RPTools.Coordinator or {}
 
 
+---@enum RPToolsNodeState
 RPTools.Coordinator.NODE_STATE = {
     RUNNING = 1,
     ERROR = 2,
