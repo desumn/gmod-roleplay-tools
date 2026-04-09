@@ -2,185 +2,204 @@ TOOL.Category = "RPTools"
 TOOL.Name = "Node Spawner"
 
 TOOL.Information = {
-    { name = "left" },
-    { name = "right" },
-    { name = "reload" },
+  { name = "left" },
+  { name = "right" },
+  { name = "reload" },
 }
 
 if CLIENT then
-    language.Add("tool.rptools_spawner.name", "Node Spawner")
-    language.Add("tool.rptools_spawner.desc", "Place and manage RPTools nodes")
-    language.Add("tool.rptools_spawner.left", "Place a node")
-    language.Add("tool.rptools_spawner.right", "Delete selected node")
-    language.Add("tool.rptools_spawner.reload", "Cycle node selection")
+  language.Add("tool.rptools_spawner.name", "Node Spawner")
+  language.Add("tool.rptools_spawner.desc", "Place and manage RPTools nodes")
+  language.Add("tool.rptools_spawner.left", "Place a node")
+  language.Add("tool.rptools_spawner.right", "Delete selected node")
+  language.Add("tool.rptools_spawner.reload", "Cycle node selection")
 end
 
 local selectedIndex = 1
 local visibleNodeCache = {
-    lastCalculation = 0,
-    length = 0,
-    data = {}
+  lastCalculation = 0,
+  length = 0,
+  data = {},
 }
 
-
 if CLIENT then
-    
-    local maxDistance = 750
-    local maxEyeDistance = 22
-    
-    local function detectNodes()
-        local nodes = RPTools.Debug.GetDebugNodes()
-        
-        local eyePos = EyePos()
-        local direction = EyeAngles():Forward()
-        local visibleNodes = {}
-        
-        for _, node in ipairs(nodes) do
-            local nodeEyeVector = node.position - eyePos
-            if nodeEyeVector:Dot(direction) <= 0 then continue end
-            if nodeEyeVector:LengthSqr() >= maxDistance * maxDistance then continue end
-            local perpendicularDistance = nodeEyeVector:Cross(direction):Length()
-            if perpendicularDistance > maxEyeDistance then continue end
-            
-            table.insert(visibleNodes, { node = node, perpendicularDistance = perpendicularDistance })
-        end
-        
-        table.sort(visibleNodes, function(a, b)
-            return a.perpendicularDistance < b.perpendicularDistance
-        end)
-        
-        visibleNodeCache.lastCalculation = CurTime()
-        visibleNodeCache.data = visibleNodes
-        
-        if visibleNodeCache.length ~= #visibleNodes then selectedIndex = 1 end
-        visibleNodeCache.length = #visibleNodes
-        
+  local maxDistance = 750
+  local maxEyeDistance = 22
+
+  local function detectNodes()
+    local nodes = RPTools.Debug.GetDebugNodes()
+
+    local eyePos = EyePos()
+    local direction = EyeAngles():Forward()
+    local visibleNodes = {}
+
+    for _, node in ipairs(nodes) do
+      local nodeEyeVector = node.position - eyePos
+      if nodeEyeVector:Dot(direction) <= 0 then
+        continue
+      end
+      if nodeEyeVector:LengthSqr() >= maxDistance * maxDistance then
+        continue
+      end
+      local perpendicularDistance = nodeEyeVector:Cross(direction):Length()
+      if perpendicularDistance > maxEyeDistance then
+        continue
+      end
+
+      table.insert(visibleNodes, { node = node, perpendicularDistance = perpendicularDistance })
     end
-    
-    
-    local function updateTemplates(templateList, templates)
-        templateList:Clear()
-        for _, template in pairs(templates) do
-            local line = templateList:AddLine(string.NiceName(template.name), template.description)
-            line.name = template.name
-        end
+
+    table.sort(visibleNodes, function(a, b)
+      return a.perpendicularDistance < b.perpendicularDistance
+    end)
+
+    visibleNodeCache.lastCalculation = CurTime()
+    visibleNodeCache.data = visibleNodes
+
+    if visibleNodeCache.length ~= #visibleNodes then
+      selectedIndex = 1
     end
-    
-    function TOOL.BuildCPanel(panel)
-        panel:Help("1. Select a template.\n2. Configure the template.\n3. Spawn a node from this template.")
-        
-        local templateList = vgui.Create("DListView")
-        templateList:SetTall(80)
-        templateList:SetMultiSelect(false)
-        templateList:AddColumn("Template Name")
-        
-        updateTemplates(templateList, RPTools.Templating.ClientCache)
-        
-        hook.Add("RPTools_TemplateSync", templateList, function (self, templates)
-            updateTemplates(self, templates)
-        end)
-        
-        local configPanel = vgui.Create("DPanel", panel)
-        
-        configPanel:SetSize(0, 0)
-        configPanel.Paint = function(self, w, h)
-            draw.RoundedBox(4, 0, 0, w, h, Color(45, 48, 55, 220))
-        end
-        
-        panel:AddItem(templateList)
-        panel:AddItem(configPanel)
-        
-        
+    visibleNodeCache.length = #visibleNodes
+  end
+
+  local function updateTemplates(templateList, templates)
+    templateList:Clear()
+    for _, template in pairs(templates) do
+      local line = templateList:AddLine(string.NiceName(template.name), template.description)
+      line.name = template.name
     end
-    
-    function TOOL:DrawHUD()
-        if visibleNodeCache.lastCalculation == 0 or CurTime() - visibleNodeCache.lastCalculation > 0.2 then
-            detectNodes()
-        end
-        
-        if visibleNodeCache.length == 0 then return end
-        
-        local nodes = RPTools.Utilities.Map(visibleNodeCache.data, function (_, data) return data.node end)
-        
-        local height = 30 + #nodes * 25 + 25 + 20
-        
-        local x = ScrW() - 320
-        local y = ScrH() * 0.35
-        
-        draw.RoundedBox(8, x, y, 300, height, Color(30, 30, 35, 200))
-        draw.SimpleText("Nearby nodes", "DermaDefaultBold", x + 150, y + 15, Color(255, 255, 255), TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-        
-        
-        for i, node in ipairs(nodes) do
-            local pos = y + 30 + (i - 1) * 25
-            
-            local color = Color(120, 120, 120)
-            if i == selectedIndex then
-                color = color_white
-            end
-            
-            draw.RoundedBox(4, x + 10, pos, 280, 22, Color(50, 53, 60, 150))
-            
-            if i == selectedIndex then 
-                draw.SimpleText("►", "DermaDefault", x + 15, pos + 11, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-            end
-            
-            draw.SimpleText(node.id, "DermaDefault", x + 30, pos + 11, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
-            draw.SimpleText(RPTools.Coordinator.stateText[node.state], "DermaDefault", x + 280, pos + 11, RPTools.Coordinator.stateColor[node.state], TEXT_ALIGN_RIGHT, TEXT_ALIGN_CENTER)
-        end
-        
-        return
+  end
+
+  function TOOL.BuildCPanel(panel)
+    panel:Help("1. Select a template.\n2. Configure the template.\n3. Spawn a node from this template.")
+
+    local templateList = vgui.Create("DListView")
+    templateList:SetTall(80)
+    templateList:SetMultiSelect(false)
+    templateList:AddColumn("Template Name")
+
+    updateTemplates(templateList, RPTools.Templating.ClientCache)
+
+    hook.Add("RPTools_TemplateSync", templateList, function(self, templates)
+      updateTemplates(self, templates)
+    end)
+
+    local configPanel = vgui.Create("DPanel", panel)
+
+    configPanel:SetSize(0, 0)
+    configPanel.Paint = function(self, w, h)
+      draw.RoundedBox(4, 0, 0, w, h, Color(45, 48, 55, 220))
     end
-    
-    
+
+    panel:AddItem(templateList)
+    panel:AddItem(configPanel)
+  end
+
+  function TOOL:DrawHUD()
+    if visibleNodeCache.lastCalculation == 0 or CurTime() - visibleNodeCache.lastCalculation > 0.2 then
+      detectNodes()
+    end
+
+    if visibleNodeCache.length == 0 then
+      return
+    end
+
+    local nodes = RPTools.Utilities.Map(visibleNodeCache.data, function(_, data)
+      return data.node
+    end)
+
+    local height = 30 + #nodes * 25 + 25 + 20
+
+    local x = ScrW() - 320
+    local y = ScrH() * 0.35
+
+    draw.RoundedBox(8, x, y, 300, height, Color(30, 30, 35, 200))
+    draw.SimpleText(
+      "Nearby nodes",
+      "DermaDefaultBold",
+      x + 150,
+      y + 15,
+      Color(255, 255, 255),
+      TEXT_ALIGN_CENTER,
+      TEXT_ALIGN_CENTER
+    )
+
+    for i, node in ipairs(nodes) do
+      local pos = y + 30 + (i - 1) * 25
+
+      local color = Color(120, 120, 120)
+      if i == selectedIndex then
+        color = color_white
+      end
+
+      draw.RoundedBox(4, x + 10, pos, 280, 22, Color(50, 53, 60, 150))
+
+      if i == selectedIndex then
+        draw.SimpleText("►", "DermaDefault", x + 15, pos + 11, color_white, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+      end
+
+      draw.SimpleText(node.id, "DermaDefault", x + 30, pos + 11, color, TEXT_ALIGN_LEFT, TEXT_ALIGN_CENTER)
+      draw.SimpleText(
+        RPTools.Coordinator.stateText[node.state],
+        "DermaDefault",
+        x + 280,
+        pos + 11,
+        RPTools.Coordinator.stateColor[node.state],
+        TEXT_ALIGN_RIGHT,
+        TEXT_ALIGN_CENTER
+      )
+    end
+
+    return
+  end
 end
 
 function TOOL:LeftClick(tr)
-    if CLIENT then
-        if RPTools.UI.CurrentTemplate == "" then
-            notification.AddLegacy("Please configure a template first", NOTIFY_ERROR, 3)
-            surface.PlaySound("buttons/button10.wav")
-            return false
-        end
-        local name = RPTools.UI.CurrentTemplate
-        local params = RPTools.UI.CurrentParams
-
-        RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function ()
-            net.WriteString(name)
-            net.WriteTable(params)
-            net.WriteVector(tr.HitPos)
-        end)
-        return true
+  if CLIENT then
+    if RPTools.UI.CurrentTemplate == "" then
+      notification.AddLegacy("Please configure a template first", NOTIFY_ERROR, 3)
+      surface.PlaySound("buttons/button10.wav")
+      return false
     end
+    local name = RPTools.UI.CurrentTemplate
+    local params = RPTools.UI.CurrentParams
+
+    RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function()
+      net.WriteString(name)
+      net.WriteTable(params)
+      net.WriteVector(tr.HitPos)
+    end)
     return true
+  end
+  return true
 end
 
-
 function TOOL:RightClick(_)
-    if CLIENT then
-        
-        if visibleNodeCache.length == 0 then return false end
-        
-        local node = visibleNodeCache.data[selectedIndex].node
-        
-        RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.DELETE_NODE, function ()
-            net.WriteString(node.id)
-        end)
-        
-        notification.AddLegacy("Node " .. node.id .. " removed", NOTIFY_UNDO, 3)
-        
-        return true
+  if CLIENT then
+    if visibleNodeCache.length == 0 then
+      return false
     end
+
+    local node = visibleNodeCache.data[selectedIndex].node
+
+    RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.DELETE_NODE, function()
+      net.WriteString(node.id)
+    end)
+
+    notification.AddLegacy("Node " .. node.id .. " removed", NOTIFY_UNDO, 3)
+
     return true
+  end
+  return true
 end
 
 function TOOL:Reload(_)
-    if CLIENT then
-        selectedIndex = selectedIndex + 1
-        if selectedIndex > visibleNodeCache.length then
-            selectedIndex = 1
-        end
-        return true
+  if CLIENT then
+    selectedIndex = selectedIndex + 1
+    if selectedIndex > visibleNodeCache.length then
+      selectedIndex = 1
     end
     return true
+  end
+  return true
 end
