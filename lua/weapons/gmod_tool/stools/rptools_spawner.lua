@@ -87,16 +87,6 @@ if CLIENT then
             draw.RoundedBox(4, 0, 0, w, h, Color(45, 48, 55, 220))
         end
         
-        templateList.OnRowSelected = function (self, index, row)
-            RPTools.UI.OpenTemplateMenu(configPanel, RPTools.Templating.GetTemplateFromClientCache(row.name))
-            configPanel:InvalidateLayout(true)
-            configPanel:SizeToChildren(false, true)
-            
-            for _, child in ipairs(configPanel:GetChildren()) do
-                print(child:GetClassName(), child:GetName(), child:GetTall())
-            end
-        end
-        
         panel:AddItem(templateList)
         panel:AddItem(configPanel)
         

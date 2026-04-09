@@ -79,6 +79,3 @@
         RPTools.Network.SendToClients(player.GetAll(), msgType, sender)
     end
 
-    hook.Add("PlayerInitialSpawn", "rptools_reconnect_sync" , function (ply)
-        return
-    end)

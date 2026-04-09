@@ -15,12 +15,6 @@ local nodes = {}
 
 local drawDebug = false
 
-RPTools.Debug.NODE_STATE = {
-    RUNNING = 1,
-    ERROR = 2,
-    PAUSED = 3,
-}
-
 function RPTools.Debug.ReadDebugNode()
     local id = net.ReadString()
     local position = net.ReadVector()
