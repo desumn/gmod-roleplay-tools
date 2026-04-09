@@ -6,6 +6,9 @@ RPTools.Blackboard = RPTools.Blackboard or {}
 
 local blackboard = {}
 
+---@param ply Player
+---@param key string
+---@return any
 function RPTools.Blackboard.Read(ply, key)
     if not ply or not ply:IsValid() then
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Tried to read in blackboard on invalid player: " .. tostring(ply) .. " with key: " .. tostring(key))
@@ -24,6 +27,9 @@ function RPTools.Blackboard.Read(ply, key)
     return blackboard[steamid][key]
 end
 
+---@param ply Player
+---@param key string
+---@param value any
 function RPTools.Blackboard.Write(ply, key, value)
     if not ply or not ply:IsValid() then
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Tried to write in blackboard on invalid player: " .. tostring(ply) .. " with key: " .. tostring(key))
@@ -44,6 +50,9 @@ function RPTools.Blackboard.Write(ply, key, value)
     blackboard[steamid][key] = value
 end
 
+---@param ply Player
+---@param key string
+---@param value? number
 function RPTools.Blackboard.Increment(ply, key, value)
     local incrementValue = value or 1
 
@@ -70,6 +79,7 @@ function RPTools.Blackboard.Increment(ply, key, value)
     blackboard[steamid][key] = oldValue + incrementValue
 end
 
+---@param ply Player
 function RPTools.Blackboard.ClearForPlayer(ply)
     if not ply or not ply:IsValid() then
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Tried to clear blackboard on invalid player: " .. tostring(ply))
@@ -82,20 +92,24 @@ function RPTools.Blackboard.ClearForPlayer(ply)
     blackboard[steamid] = {}
 end
 
+---@return table
 function RPTools.Blackboard.GetAll()
     return table.Copy(blackboard)
 end
 
+---@return string
 function RPTools.Blackboard.ClearAll()
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Cleared all blackboard")
     blackboard = {}
 end
 
-function RPTools.Blackboard.serialize()
+---@return string
+function RPTools.Blackboard.Serialize()
     return util.TableToJSON(blackboard)
 end
 
-function RPTools.Blackboard.deserialize(blackboard_json)
+---@param blackboard_json string
+function RPTools.Blackboard.Deserialize(blackboard_json)
     local newBlackboard = util.JSONToTable(blackboard_json)
     if not newBlackboard then 
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Failed to deserialize blackboard")

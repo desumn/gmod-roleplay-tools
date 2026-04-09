@@ -3,6 +3,8 @@ RPTools.Templating = RPTools.Templating or {}
 
 RPTools.Templating.ClientCache = {}
 
+---@param templateName string
+---@return RPToolsTemplate|nil
 function RPTools.Templating.GetTemplateFromClientCache(templateName)
     return RPTools.Templating.ClientCache[templateName]
 end
@@ -36,6 +38,7 @@ local function readParameter()
         return param
 end
 
+---@return RPToolsTemplate
 function RPTools.Templating.ReadTemplateInfo()
     local template = {}
     template.name = net.ReadString()

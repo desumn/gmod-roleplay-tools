@@ -21,7 +21,7 @@ local function validateType(actionType)
     return RPTools.Utilities.MakeError(actionFunctions[actionType] ~= nil, "Invalid action type: " .. tostring(actionType))
 end
 
----@enum side
+---@enum RPToolsActionSide
 RPTools.Actions.SIDE = {
     SERVER = 1,
     CLIENT = 2,
@@ -96,19 +96,27 @@ function RPTools.Actions.Create(actionType, params)
     end
 end
 
+---@param action RPToolsAction
+---@return string
 function RPTools.Actions.GetActionType(action)
     return action.actionType
 end
 
+---@param action RPToolsAction
+---@return RPToolsActionSide
 function RPTools.Actions.GetSide(action)
     return sides[action.actionType]
 end
 
+---@param action RPToolsAction
+---@return table
 function RPTools.Actions.GetParams(action)
     return table.Copy(action.params)
 end
 
 
+---@param actions RPToolsAction[]
+---@return boolean, string|nil
 function RPTools.Actions.ValidateActionsSet(actions)
 
     local allActionsValid = true

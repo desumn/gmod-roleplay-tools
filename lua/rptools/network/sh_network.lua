@@ -23,19 +23,26 @@ local msgTypeNames = {
     [RPTools.Network.MSG_TYPE.DELETE_NODE] = "delete node"
 }
 
+---@param msgType RPToolsMsgType
+---@return boolean, string
 function RPTools.Network.ValidateMessageType(msgType)
     return RPTools.Utilities.MakeError(RPTools.Utilities.IsNumber(msgType) and
                                        msgType >= 1 and msgType <= 7, "Invalid message type" .. tostring(msgType))
 end
 
+---@param msgType RPToolsMsgType
 function RPTools.Network.WriteMessageType(msgType)
     return net.WriteUInt(msgType, 4)
 end
 
+
+---@return RPToolsMsgType
 function RPTools.Network.ReadMessageType()
     return net.ReadUInt(4)
 end
 
+---@param msgType RPToolsMsgType
+---@return string
 function RPTools.Network.FormatMessageType(msgType)
     return msgTypeNames[msgType]
 end

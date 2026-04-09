@@ -14,6 +14,9 @@ local function validateDisplay(paramType, display)
     return RPTools.Utilities.MakeError(displayType[paramType][display] == true, "display type invalid " .. tostring(display) .. " for " .. tostring(paramType))
 end
 
+---@param paramType string
+---@param value any
+---@return boolean, string
 function RPTools.Templating.ValidateValue(paramType, value)
     return RPTools.Utilities.MakeError((paramType == "number" and RPTools.Utilities.IsNumber(value))
     or (paramType == "boolean" and isbool(value))
@@ -27,6 +30,8 @@ local function validateParameterType(paramType)
     "parameter type must be boolean, number or string")
 end
 
+---@param parameter RPToolsParameter
+---@return boolean, string|nil
 function RPTools.Templating.ValidateParameter(parameter)
     if not parameter or not istable(parameter) then
         return nil, "parameter is not a table"
@@ -101,6 +106,8 @@ function RPTools.Templating.ValidateParameter(parameter)
     end
 end
 
+---@param parameters RPToolsParameter[]
+---@return boolean, string|nil
 function RPTools.Templating.ValidateParameters(parameters)
     local allValid = true
     local errorMessage = ""
@@ -120,6 +127,9 @@ function RPTools.Templating.ValidateParameters(parameters)
 end
 
 
+---@param template RPToolsTemplate
+---@param arguments table
+---@return table|nil, string|nil
 function RPTools.Templating.ApplyParameters(template, arguments)
     
     local unprovidedParameters = ""

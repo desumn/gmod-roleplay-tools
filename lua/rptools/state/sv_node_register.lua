@@ -6,6 +6,7 @@ local logModuleName = "NodeRegister"
 
 local nodeRegister = {}
 
+---@param node RPToolsNode
 function RPTools.NodeRegister.RegisterNode(node)
     local isvalid, error_message = RPTools.Node.ValidateNode(node)
     if not isvalid then
@@ -20,6 +21,8 @@ function RPTools.NodeRegister.RegisterNode(node)
     -- Hook pour prévenir de l'ajout?
 end
 
+
+---@param id string
 function RPTools.NodeRegister.UnregisterNode(id)
     if not nodeRegister[id] then
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Trying to remove node: node (" .. table.ToString(id) .. ") not found")
@@ -30,6 +33,9 @@ function RPTools.NodeRegister.UnregisterNode(id)
     -- Hook pour prévenir de la suppression?
 end
 
+
+---@param id string
+---@return RPToolsNode|nil
 function RPTools.NodeRegister.GetNodeById(id)
     local node = nodeRegister[id]
     if not node then
@@ -40,10 +46,14 @@ function RPTools.NodeRegister.GetNodeById(id)
     return table.Copy(node)
 end
 
+
+---@return RPToolsNode[]
 function RPTools.NodeRegister.GetAllNodes()
     return table.ClearKeys(nodeRegister)
 end
 
+---@param id string
+---@param subNode table
 function RPTools.NodeRegister.EditNode(id, subNode)
     local node = RPTools.NodeRegister.GetNodeById(id)
     

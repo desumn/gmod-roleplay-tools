@@ -15,6 +15,9 @@ local operatorFunctions = {
     one_of = function(value, set) return set[value] == true end
 }
 
+
+---@param operator string
+---@return function|nil, string|nil
 function RPTools.Operators.GetFunction(operator)
     local operatorValid, operatorErrorMessage = RPTools.Operators.ValidateOperator(operator)
 
@@ -25,10 +28,15 @@ function RPTools.Operators.GetFunction(operator)
     end
 end
 
+---@param operator string
+---@return boolean, string
 function RPTools.Operators.ValidateOperator(operator)
     return RPTools.Utilities.MakeError(operator and operatorFunctions[operator] ~= nil, "Unknown operator: " .. tostring(operator))
 end
 
+---@param operator string
+---@param value any
+---@return boolean, string
 function RPTools.Operators.ValidateValue(operator, value)
     if table.HasValue({"le", "lt", "ge", "gt"}, operator) then 
         return RPTools.Utilities.MakeError(RPTools.Utilities.IsNumber(value), "Value expected of type number: " .. tostring(value))

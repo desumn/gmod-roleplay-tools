@@ -6,10 +6,14 @@ local logModuleName = "Coordinator"
 
 local nodeState = {}
 
+---@param nodeId string
+---@return RPToolsNodeState|nil
 function RPTools.Coordinator.GetNodeRunningState(nodeId)
     return nodeState and nodeState[nodeId]
 end
 
+---@param nodeId string
+---@param state RPToolsNodeState
 function RPTools.Coordinator.SetNodeRunningState(nodeId, state)
     nodeState[nodeId] = state
 end
@@ -29,6 +33,9 @@ local function getOrCreatePlayerState(steamId, nodeId)
     
 end
 
+
+---@param steamid string
+---@return table
 function RPTools.Coordinator.GetNodeState(steamid)
     return nodePlayerState[steamid] or {}
 end

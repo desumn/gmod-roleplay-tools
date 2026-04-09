@@ -7,6 +7,8 @@ local logModuleName = "Network.Client"
 
 local serverHandlers = {}
 
+---@param msgType RPToolsMsgType
+---@param handler fun()
 function RPTools.Network.RegisterServerHandler(msgType, handler)
     if not isfunction(handler) then return end
     local msgTypeValid, msgTypeErrorMessage = RPTools.Network.ValidateMessageType(msgType)
@@ -37,7 +39,8 @@ net.Receive("RPTools_ServerToClient", function ()
     end
 end)
 
-
+---@param msgType RPToolsMsgType
+---@param sender fun()
 function RPTools.Network.SendToServer(msgType, sender)
     if not isfunction(sender) then return end
     local msgTypeValid, msgTypeErrorMessage = RPTools.Network.ValidateMessageType(msgType)

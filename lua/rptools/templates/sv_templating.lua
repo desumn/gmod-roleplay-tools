@@ -5,6 +5,7 @@ local logModuleName = "Templating"
 
 local templateRegister = {}
 
+---@param template RPToolsTemplate
 function RPTools.Templating.RegisterTemplate(template)
     local isvalid, error_message = RPTools.Templating.ValidateTemplate(template)
     if not isvalid then
@@ -18,6 +19,7 @@ function RPTools.Templating.RegisterTemplate(template)
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Added template :" .. name .. " to the template register.")
 end
 
+---@param templateName string
 function RPTools.Templating.UnregisterTemplate(templateName)
     if not templateRegister[templateName] then
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Tried to unregister a non-existant template (" .. tostring(templateName) .. ")")
@@ -28,6 +30,8 @@ function RPTools.Templating.UnregisterTemplate(templateName)
     RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Removed template :" .. templateName .. " from the template register.")
 end
 
+---@param templateName string
+---@return RPToolsTemplate|nil
 function RPTools.Templating.GetTemplateByName(templateName)
     if not templateRegister[templateName] then
         RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Tried to get a non-existant template (" .. tostring(templateName) .. ")")
@@ -37,6 +41,8 @@ function RPTools.Templating.GetTemplateByName(templateName)
     return templateRegister[templateName]
 end
 
+
+---@return string[]
 function RPTools.Templating.GetAllTemplateNames()
     local names = {}
     for name, _ in pairs(templateRegister) do
@@ -45,6 +51,8 @@ function RPTools.Templating.GetAllTemplateNames()
     return names
 end
 
+---@param template RPToolsTemplate
+---@return boolean, string|nil
 function RPTools.Templating.ValidateTemplate(template)
     local errorMessage = ""
     
@@ -75,14 +83,18 @@ function RPTools.Templating.ValidateTemplate(template)
         isValid = false
     end
         
-    if not isValid then 
-        return false, errorMessage
-    else
-        return true, nil
-    end
+        if not isValid then 
+            return false, errorMessage
+        else
+            return true, nil
+        end
 end
-
-
+    
+    
+    ---@param template RPToolsTemplate
+    ---@param arguments table
+    ---@param context RPToolsContext
+    ---@return RPToolsNode[]|nil, string|nil
     function RPTools.Templating.Execute(template, arguments, context)
         local validatedArguments, argumentsErrorMessage = RPTools.Templating.ApplyParameters(template, arguments)
         
@@ -93,21 +105,32 @@ end
         return template.transformer(validatedArguments, context)
     end
     
+
+    ---@param template RPToolsTemplate
+    ---@return string
     function RPTools.Templating.GetName(template)
         return template.name
     end
     
+
+    ---@param template RPToolsTemplate
+    ---@return RPToolsParameter[]
     function RPTools.Templating.GetParameters(template)
         return table.Copy(template.parameters)
     end
     
+    ---@param template RPToolsTemplate
+    ---@return fun(args: table, context: RPToolsContext): RPToolsNode[]|nil
     function RPTools.Templating.GetTransformer(template)
         return template.transformer
     end
     
+    ---@param template RPToolsTemplate
+    ---@return string
     function RPTools.Templating.GetDescription(template)
         return template.description
     end
+    
     
     local function writeParameter(parameter)
         net.WriteString(parameter.name)
@@ -138,6 +161,8 @@ end
         end
     end
     
+
+    ---@param template RPToolsTemplate
     function RPTools.Templating.WriteTemplateInfo(template)
         net.WriteString(template.name)
         net.WriteString(template.description)
@@ -146,23 +171,23 @@ end
             writeParameter(parameter)
         end 
     end
-
+    
     RPTools.Network.RegisterClientHandler(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function (ply)
         if not ply:IsAdmin() then return end
-
+        
         local name = net.ReadString()
         local arguments = net.ReadTable()
         local pos = net.ReadVector()
-
+        
         local context = { position = pos }
-    
+        
         local nodes, errorMessage = RPTools.Templating.Execute(RPTools.Templating.GetTemplateByName(name), arguments, context)
-
+        
         if nodes == nil or table.IsEmpty(nodes) then
             RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Error executing the template:" .. errorMessage)
             return
         end
-
+        
         for _, node in ipairs(nodes) do
             RPTools.NodeRegister.RegisterNode(node)
         end

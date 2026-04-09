@@ -11,10 +11,14 @@ local sourceFunctions = {
     end
 }
 
+---@param source string
+---@return boolean, string
 function RPTools.Sources.ValidateSource(source)
     return RPTools.Utilities.MakeError(sourceFunctions[source] ~= nil, "Invalid source: " .. tostring(source))
 end
 
+---@param source string
+---@return fun(ply: Player, node: RPToolsNode, param: any): any
 function RPTools.Sources.GetFunction(source)
     return sourceFunctions[source]
 end
@@ -29,6 +33,11 @@ local expectedTypes = {
     flag = "key = string"
 }
 
+
+
+---@param source string
+---@param param any
+---@return boolean, string
 function RPTools.Sources.ValidateParameter(source, param)
     return RPTools.Utilities.MakeError(validators[source](param), "Invalid params for source " .. tostring(source) .. "(" 
                                         .. expectedTypes[source] ..  ")" .. ": " .. tostring(param))
