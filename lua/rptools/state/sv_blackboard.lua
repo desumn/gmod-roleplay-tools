@@ -150,18 +150,7 @@ function RPTools.Blackboard.ClearAll()
   blackboard = {}
 end
 
----@return string
-function RPTools.Blackboard.Serialize()
-  return util.TableToJSON(blackboard)
-end
-
----@param blackboard_json string
-function RPTools.Blackboard.Deserialize(blackboard_json)
-  local newBlackboard = util.JSONToTable(blackboard_json)
-  if not newBlackboard then
-    RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Failed to deserialize blackboard")
-    return
-  end
-
-  blackboard = newBlackboard
+---@param otherBlackboard table
+function RPTools.Blackboard.Merge(otherBlackboard)
+    table.Merge(blackboard, otherBlackboard)
 end

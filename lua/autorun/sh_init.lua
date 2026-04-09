@@ -14,6 +14,7 @@ local function loadAddon()
   AddCSLuaFile("rptools/ui/cl_template_menu.lua")
   AddCSLuaFile("rptools/templates/cl_templating.lua")
   AddCSLuaFile("rptools/engine/sh_node_state.lua")
+  AddCSLuaFile("rptools/commands/sh_saving.lua")
 
   include("rptools/core/sh_logs.lua")
   include("rptools/core/sh_utilities.lua")
@@ -34,6 +35,7 @@ local function loadAddon()
     include("rptools/templates/sh_template_validation.lua")
     include("rptools/templates/sv_templating.lua")
     include("rptools/templates/sv_default_templates.lua")
+    include("rptools/state/sv_serialization.lua")
   end
 
   if CLIENT then
@@ -47,6 +49,7 @@ local function loadAddon()
 
   include("rptools/commands/sh_commands.lua")
   include("rptools/commands/sh_templating.lua")
+  include("rptools/commands/sh_saving.lua")
 end
 
 loadAddon()
