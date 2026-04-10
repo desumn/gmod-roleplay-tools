@@ -22,7 +22,7 @@ local msgTypeNames = {
   [RPTools.Network.MSG_TYPE.FULL_SYNC] = "full sync",
   [RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE] = "create from template",
   [RPTools.Network.MSG_TYPE.DELETE_NODE] = "delete node",
-  [RPTools.Network.MSG_TYPE.DELETE_NODE] = "print",
+  [RPTools.Network.MSG_TYPE.PRINT] = "print",
 }
 
 ---@param msgType RPToolsMsgType
