@@ -56,7 +56,6 @@ local function loadAddon()
     include("rptools/commands/sh_saving.lua")
     include("rptools/commands/sh_attributes.lua")
   end
-
 end
 
 loadAddon()
