@@ -1,3 +1,8 @@
+RPTools = RPTools or {}
+RPTools.Commands = RPTools.Commands or {}
+
+local printToPlayer = RPTools.Commands.PrintToPlayer
+
 local attrTable = "attributes"
 
 concommand.Add("rptools_attr", function(ply, _, args, _)
@@ -8,14 +13,14 @@ concommand.Add("rptools_attr", function(ply, _, args, _)
   local name = args[1]
 
   if not name then
-    print("Please provide a player name")
+    printToPlayer(ply, "Please provide a player name")
     return
   end
 
   local target_players = RPTools.Utilities.FindPlayerByName(name)
 
   if table.IsEmpty(player) then
-    print("No player found for name " .. name)
+    printToPlayer(ply, "No player found for name " .. name)
   end
 
   local attribute = args[2]
@@ -24,11 +29,11 @@ concommand.Add("rptools_attr", function(ply, _, args, _)
     for _, target_player in ipairs(target_players) do
       local playerAttributes = RPTools.Blackboard.Read(target_player, attrTable)
       if not playerAttributes or table.IsEmpty(playerAttributes) then
-        print("Player " .. target_player:Nick() .. " has no attributes")
+        printToPlayer(ply, "Player " .. target_player:Nick() .. " has no attributes")
         continue
       end
       for attributeName, attributeValue in pairs(playerAttributes) do
-        print(target_player:Nick() .. " (" .. attributeName .. ")" .. ": " .. tostring(attributeValue))
+        printToPlayer(ply, target_player:Nick() .. " (" .. attributeName .. ")" .. ": " .. tostring(attributeValue))
       end
     end
     return
@@ -51,7 +56,7 @@ concommand.Add("rptools_attr", function(ply, _, args, _)
   else
     local attributeValue = tonumber(value)
     if not attributeValue then
-      print("Value must be a valid number")
+      printToPlayer(ply, "Value must be a valid number")
       return
     end
 
@@ -60,7 +65,7 @@ concommand.Add("rptools_attr", function(ply, _, args, _)
       local newAttributes = playerAttributes or {}
       newAttributes[attribute] = attributeValue
       RPTools.Blackboard.Write(target_player, attrTable, newAttributes)
-      print("Set attribute " .. attribute .. " for " .. target_player:Nick() .. " to " .. tostring(attributeValue))
+      printToPlayer(ply, "Set attribute " .. attribute .. " for " .. target_player:Nick() .. " to " .. tostring(attributeValue))
     end
   end
 end)

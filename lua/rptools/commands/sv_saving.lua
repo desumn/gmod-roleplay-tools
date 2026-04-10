@@ -1,6 +1,9 @@
 RPTools = RPTools or {}
 RPTools.Commands = RPTools.Commands or {}
 
+local printToPlayer = RPTools.Commands.PrintToPlayer
+
+
 concommand.Add("rptools_save", function(ply, _, args, _)
   if not RPTools.Commands.requireAdmin(ply) then
     return
@@ -9,12 +12,12 @@ concommand.Add("rptools_save", function(ply, _, args, _)
   local name = args[1]
 
   if not name then
-    print("Please provide a save name")
+    printToPlayer(ply, "Please provide a save name")
     return
   end
 
   RPTools.Save.SaveAll(name)
-  print("Successfully saved " .. name)
+  printToPlayer(ply, "Successfully saved " .. name)
 end)
 
 concommand.Add("rptools_load", function(ply, _, args, _)
@@ -25,15 +28,15 @@ concommand.Add("rptools_load", function(ply, _, args, _)
   local name = args[1]
 
   if not name then
-    print("Please provide a save name")
+    printToPlayer(ply, "Please provide a save name")
     return
   end
 
   local loadSuccess = RPTools.Save.LoadAll(name)
   if not loadSuccess then
-    print("Failed to load save " .. name .. " (do not include the .json extension in the name!)")
+    printToPlayer(ply, "Failed to load save " .. name .. " (do not include the .json extension in the name!)")
   else
-    print("Successfully loaded save " .. name)
+    printToPlayer(ply, "Successfully loaded save " .. name)
   end
 end)
 
@@ -45,7 +48,7 @@ concommand.Add("rptools_saves", function(ply, _, args, _)
   local saves = RPTools.Save.ListSaves()
   print("Saves: ")
   for _, savename in pairs(saves) do
-    print("  " .. savename)
+    printToPlayer(ply, "  " .. savename)
   end
 end)
 
@@ -57,15 +60,15 @@ concommand.Add("rptools_delete_save", function(ply, _, args, _)
   local name = args[1]
 
   if not name then
-    print("Please provide a save name")
+    printToPlayer(ply, "Please provide a save name")
     return
   end
 
   local deletionSuccess = RPTools.Save.Delete(name)
 
   if not deletionSuccess then
-    print("Failed to delete save " .. name .. ", does it exists?")
+    printToPlayer(ply, "Failed to delete save " .. name .. ", does it exists?")
   else
-    print("Successfully deleted save " .. name)
+    printToPlayer(ply, "Successfully deleted save " .. name)
   end
 end)
