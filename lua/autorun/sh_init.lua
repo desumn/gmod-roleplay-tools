@@ -18,6 +18,7 @@ local function loadAddon()
   include("rptools/core/sh_logs.lua")
   include("rptools/core/sh_utilities.lua")
   include("rptools/network/sh_network.lua")
+
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "Starting shared")
   if SERVER then
     include("rptools/network/sv_network.lua")
@@ -35,6 +36,8 @@ local function loadAddon()
     include("rptools/templates/sv_templating.lua")
     include("rptools/templates/sv_default_templates.lua")
     include("rptools/state/sv_serialization.lua")
+    include("rptools/commands/sh_commands.lua")
+    include("rptools/commands/sh_templating.lua")
     include("rptools/commands/sv_saving.lua")
     include("rptools/commands/sv_attributes.lua")
   end
@@ -46,10 +49,10 @@ local function loadAddon()
     include("rptools/templates/sh_template_validation.lua")
     include("rptools/templates/cl_templating.lua")
     include("rptools/ui/cl_template_menu.lua")
+    include("rptools/commands/sh_commands.lua")
+    include("rptools/commands/sh_templating.lua")
   end
 
-  include("rptools/commands/sh_commands.lua")
-  include("rptools/commands/sh_templating.lua")
 end
 
 loadAddon()

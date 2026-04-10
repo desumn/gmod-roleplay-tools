@@ -3,6 +3,7 @@ RPTools.Commands = RPTools.Commands or {}
 
 
 ---@param ply Player
+---@param string string
 function RPTools.Commands.PrintToPlayer(ply, string)
   RPTools.Network.SendToPlayer(ply, RPTools.Network.MSG_TYPE.PRINT, function ()
     net.WriteString(string)
@@ -20,7 +21,7 @@ local printToPlayer = RPTools.Commands.PrintToPlayer
 
 function RPTools.Commands.requireAdmin(ply)
   if not ply:IsAdmin() then
-    PrintToPlayer("Permission denied")
+    printToPlayer(ply, "Permission denied")
     return
   else
     return true
