@@ -3,23 +3,8 @@
 	"type": "tool",
 	"tags": [
 		"roleplay",
-		"admin"
+		"admin",
 	],
-	"ignore": [
-		"*.psd",
-		"*.vcproj",
-		"*.svn*",
-		"*.git*",
-		"*.gitignore",
-        "*.vscode",
-		"*.smd",
-		"*.vcd",
-		"*.vdf",
-		"*.xcf",
-		"*.tga",
-		"*.db",
-		"*.txt",
-		"*.md",
-		".DS_Store"
-	]
+        "ignore": [".git", ".gitignore", ".luarc.json", ".stylua.toml"],
+	"version": "0.1.0"
 }

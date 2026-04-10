@@ -1,5 +1,9 @@
 RPTools = RPTools or {}
 
+---@type string
+RPTools.VERSION = "0.1.0"
+
+
 AddCSLuaFile("autorun/sh_init.lua")
 
 local function loadAddon()
