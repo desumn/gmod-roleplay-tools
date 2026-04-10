@@ -33,7 +33,7 @@ concommand.Add("rptools_load", function(ply, _, args, _)
   if not loadSuccess then
     print("Failed to load save " .. name .. " (do not include the .json extension in the name!)")
   else
-    print("Successfully loaded save " .. name)  
+    print("Successfully loaded save " .. name)
   end
 end)
 
