@@ -14,6 +14,8 @@ local function loadAddon()
   AddCSLuaFile("rptools/ui/cl_template_menu.lua")
   AddCSLuaFile("rptools/templates/cl_templating.lua")
   AddCSLuaFile("rptools/engine/sh_node_state.lua")
+  AddCSLuaFile("rptools/commands/sh_saving.lua")
+  AddCSLuaFile("rptools/commands/sh_attributes.lua")
 
   include("rptools/core/sh_logs.lua")
   include("rptools/core/sh_utilities.lua")
