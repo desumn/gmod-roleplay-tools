@@ -29,7 +29,7 @@ local msgTypeNames = {
 ---@return boolean, string
 function RPTools.Network.ValidateMessageType(msgType)
   return RPTools.Utilities.MakeError(
-    RPTools.Utilities.IsNumber(msgType) and msgType >= 1 and msgType <= 7,
+    RPTools.Utilities.IsNumber(msgType) and msgType >= 1 and msgType <= 8,
     "Invalid message type" .. tostring(msgType)
   )
 end

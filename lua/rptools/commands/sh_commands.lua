@@ -5,7 +5,6 @@ RPTools.Commands = RPTools.Commands or {}
 ---@param ply Player
 ---@param string string
 function RPTools.Commands.PrintToPlayer(ply, string)
-  print("test")
   RPTools.Network.SendToPlayer(ply, RPTools.Network.MSG_TYPE.PRINT, function ()
     net.WriteString(string)
   end)
