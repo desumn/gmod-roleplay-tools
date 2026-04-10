@@ -57,7 +57,7 @@ function RPTools.Utilities.FindPlayerByName(name)
   local players = {}
 
   for _, ply in ipairs(player.GetAll()) do
-    if string.find(string.lower(ply:Nick()), name) then
+    if string.find(string.lower(ply:Nick()), string.lower(name)) then
       table.insert(players, ply)
     end
   end

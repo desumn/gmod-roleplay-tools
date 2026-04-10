@@ -14,6 +14,7 @@ concommand.Add("rptools_save", function(ply, _, args, _)
   end
 
   RPTools.Save.SaveAll(name)
+  print("Successfully saved " .. name)
 end)
 
 concommand.Add("rptools_load", function(ply, _, args, _)
@@ -28,7 +29,12 @@ concommand.Add("rptools_load", function(ply, _, args, _)
     return
   end
 
-  RPTools.Save.LoadAll(name)
+  local loadSuccess = RPTools.Save.LoadAll(name)
+  if not loadSuccess then
+    print("Failed to load save " .. name .. " (do not include the .json extension in the name!)")
+  else
+    print("Successfully loaded save " .. name)  
+  end
 end)
 
 concommand.Add("rptools_saves", function(ply, _, args, _)
@@ -36,7 +42,11 @@ concommand.Add("rptools_saves", function(ply, _, args, _)
     return
   end
 
-  PrintTable(RPTools.Save.ListSave())
+  local saves = RPTools.Save.ListSaves()
+  print("Saves: ")
+  for _, savename in pairs(saves) do
+    print("  " .. savename)
+  end
 end)
 
 concommand.Add("rptools_delete_save", function(ply, _, args, _)
@@ -51,5 +61,11 @@ concommand.Add("rptools_delete_save", function(ply, _, args, _)
     return
   end
 
-  RPTools.Save.Delete(name)
+  local deletionSuccess = RPTools.Save.Delete(name)
+
+  if not deletionSuccess then
+    print("Failed to delete save " .. name .. ", does it exists?")
+  else
+    print("Successfully deleted save " .. name)
+  end
 end)

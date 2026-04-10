@@ -2,49 +2,50 @@ RPTools = RPTools or {}
 RPTools.Serialization = RPTools.Serialization or {}
 RPTools.Save = RPTools.Save or {}
 
-local function serializeNodes()
+local function preSerializeNodes()
   local nodes = table.Copy(RPTools.NodeRegister.GetAllNodes())
   for _, node in ipairs(nodes) do
     node.id = nil
   end
-  return util.TableToJSON(nodes, true)
+  return nodes
 end
 
-local function deserializeNodes(json)
-  return util.JSONToTable(json)
+local function postSerializeNodes(nodes)
+  return nodes
 end
 
-local function serializeBlackboard()
+local function preSerializeBlackboard()
   local blackboard = RPTools.Blackboard.GetAll()
   local serializedBlackboard = {}
   for steamid, data in pairs(blackboard) do
     serializedBlackboard[":" .. steamid] = data
   end
-  return util.TableToJSON(serializedBlackboard)
+  return serializedBlackboard
 end
 
-local function deserializeBlackboard(blackboard_json)
-  local newBlackboard = util.JSONToTable(blackboard_json)
+local function postSerializeBlackboard(newBlackboard)
   if not newBlackboard then
     return nil
   end
 
+  local deserializedBlackboard = {}
+
   for steamid, data in pairs(newBlackboard) do
-    newBlackboard[string.TrimLeft(steamid, ":")] = data
+    deserializedBlackboard[string.TrimLeft(steamid, ":")] = data
   end
 
-  return newBlackboard
+  return deserializedBlackboard
 end
 
 ---@param name string
 function RPTools.Save.SaveAll(name)
   local save = {
     version = 0,
-    nodes = serializeNodes(),
-    blackboard = serializeBlackboard(),
+    nodes = preSerializeNodes(),
+    blackboard = preSerializeBlackboard(),
   }
 
-  local text = util.TableToJSON(save)
+  local text = util.TableToJSON(save, true)
 
   file.CreateDir("rptools/saves")
   file.Write("rptools/saves/" .. name .. ".json", text)
@@ -69,7 +70,7 @@ function RPTools.Save.LoadAll(name)
   if not save.blackboard then
     return false
   end
-  local blackboard = deserializeBlackboard(save.blackboard)
+  local blackboard = postSerializeBlackboard(save.blackboard)
   if not blackboard then
     return false
   end
@@ -79,7 +80,7 @@ function RPTools.Save.LoadAll(name)
   if not save.nodes then
     return false
   end
-  local nodes = deserializeNodes(save.nodes)
+  local nodes = postSerializeNodes(save.nodes)
 
   if not nodes then
     return false
@@ -95,7 +96,7 @@ function RPTools.Save.LoadAll(name)
 end
 
 ---@return string[]
-function RPTools.Save.ListSave()
+function RPTools.Save.ListSaves()
   local files = file.Find("rptools/saves/*", "DATA")
   return files
 end
