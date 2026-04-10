@@ -3,6 +3,7 @@ RPTools.Commands = RPTools.Commands or {}
 
 local printToPlayer = RPTools.Commands.PrintToPlayer
 
+if SERVER then
 concommand.Add("rptools_save", function(ply, _, args, _)
   if CLIENT then return end
   if not RPTools.Commands.requireAdmin(ply) then
@@ -75,3 +76,4 @@ concommand.Add("rptools_delete_save", function(ply, _, args, _)
     printToPlayer(ply, "Successfully deleted save " .. name)
   end
 end)
+end

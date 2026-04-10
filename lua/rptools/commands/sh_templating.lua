@@ -1,5 +1,6 @@
 RPTools = RPTools or {}
 
+if SERVER then
 local function requireTemplate(args, pos)
   local templateName = args[pos]
   if templateName == nil or templateName == "" then
@@ -75,3 +76,4 @@ concommand.Add("rptools_template_execute", function(ply, _, args, _)
     RPTools.NodeRegister.RegisterNode(node)
   end
 end)
+end

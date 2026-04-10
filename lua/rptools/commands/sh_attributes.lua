@@ -5,6 +5,7 @@ local printToPlayer = RPTools.Commands.PrintToPlayer
 
 local attrTable = "attributes"
 
+if SERVER then
 concommand.Add("rptools_attr", function(ply, _, args, _)
   if CLIENT then return end
   if not RPTools.Commands.requireAdmin(ply) then
@@ -70,3 +71,4 @@ concommand.Add("rptools_attr", function(ply, _, args, _)
     end
   end
 end)
+end

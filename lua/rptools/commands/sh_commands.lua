@@ -24,14 +24,14 @@ function RPTools.Commands.requireAdmin(ply)
   if not IsValid(ply) then return true end
   if not ply:IsAdmin() then
     printToPlayer(ply, "Permission denied")
-    return
+    return false
   else
     return true
   end
 end
 
 local coordinatorStarted = false
-
+if SERVER then
 concommand.Add("rptools_list_node", function(ply, _, _, _)
   if not RPTools.Commands.requireAdmin(ply) then
     return
@@ -166,3 +166,4 @@ concommand.Add("rptools_toggle", function(ply, _, _, _)
   end
   coordinatorStarted = not coordinatorStarted
 end)
+end
