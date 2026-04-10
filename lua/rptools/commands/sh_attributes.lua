@@ -6,6 +6,7 @@ local printToPlayer = RPTools.Commands.PrintToPlayer
 local attrTable = "attributes"
 
 concommand.Add("rptools_attr", function(ply, _, args, _)
+  if CLIENT then return end
   if not RPTools.Commands.requireAdmin(ply) then
     return
   end
@@ -19,7 +20,7 @@ concommand.Add("rptools_attr", function(ply, _, args, _)
 
   local target_players = RPTools.Utilities.FindPlayerByName(name)
 
-  if table.IsEmpty(player) then
+  if table.IsEmpty(target_players) then
     printToPlayer(ply, "No player found for name " .. name)
   end
 
@@ -44,7 +45,7 @@ concommand.Add("rptools_attr", function(ply, _, args, _)
   if not value then
     for _, target_player in ipairs(target_players) do
       local playerAttributes = RPTools.Blackboard.Read(target_player, attrTable)
-      print(
+      printToPlayer(ply,
         target_player:Nick()
           .. " ("
           .. attribute

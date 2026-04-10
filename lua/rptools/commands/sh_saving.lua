@@ -3,8 +3,8 @@ RPTools.Commands = RPTools.Commands or {}
 
 local printToPlayer = RPTools.Commands.PrintToPlayer
 
-
 concommand.Add("rptools_save", function(ply, _, args, _)
+  if CLIENT then return end
   if not RPTools.Commands.requireAdmin(ply) then
     return
   end
@@ -21,6 +21,7 @@ concommand.Add("rptools_save", function(ply, _, args, _)
 end)
 
 concommand.Add("rptools_load", function(ply, _, args, _)
+  if CLIENT then return end
   if not RPTools.Commands.requireAdmin(ply) then
     return
   end
@@ -41,6 +42,7 @@ concommand.Add("rptools_load", function(ply, _, args, _)
 end)
 
 concommand.Add("rptools_saves", function(ply, _, args, _)
+  if CLIENT then return end
   if not RPTools.Commands.requireAdmin(ply) then
     return
   end
@@ -53,6 +55,7 @@ concommand.Add("rptools_saves", function(ply, _, args, _)
 end)
 
 concommand.Add("rptools_delete_save", function(ply, _, args, _)
+  if CLIENT then return end
   if not RPTools.Commands.requireAdmin(ply) then
     return
   end

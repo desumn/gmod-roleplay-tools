@@ -38,8 +38,8 @@ local function loadAddon()
     include("rptools/state/sv_serialization.lua")
     include("rptools/commands/sh_commands.lua")
     include("rptools/commands/sh_templating.lua")
-    include("rptools/commands/sv_saving.lua")
-    include("rptools/commands/sv_attributes.lua")
+    include("rptools/commands/sh_saving.lua")
+    include("rptools/commands/sh_attributes.lua")
   end
 
   if CLIENT then
@@ -51,6 +51,8 @@ local function loadAddon()
     include("rptools/ui/cl_template_menu.lua")
     include("rptools/commands/sh_commands.lua")
     include("rptools/commands/sh_templating.lua")
+    include("rptools/commands/sh_saving.lua")
+    include("rptools/commands/sh_attributes.lua")
   end
 
 end
