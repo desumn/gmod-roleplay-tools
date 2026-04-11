@@ -136,7 +136,7 @@ local function evaluateConditions(evaluationContexts)
         local value = condition.value
 
         local sourceValue =
-          RPTools.Sources.GetFunction(source)(evaluationContext.ply, evaluationContext.node, sourceParam)
+          RPTools.Sources.Server.GetFunction(source)(evaluationContext.ply, evaluationContext.node, sourceParam)
 
         local conditionResult = RPTools.Operators.GetFunction(operator)(sourceValue, value)
 

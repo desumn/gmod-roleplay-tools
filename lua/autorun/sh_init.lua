@@ -13,6 +13,14 @@ local function loadActions()
   end
 end
 
+local function loadSources()
+  local actionsFiles = file.Find("rptools/sources/sh_*.lua", "LUA")
+  for _, f in ipairs(actionsFiles) do
+    AddCSLuaFile("rptools/sources/" .. f)
+    include("rptools/sources/" .. f)
+  end
+end
+
 local function loadAddon()
   AddCSLuaFile("rptools/core/sh_logs.lua")
   AddCSLuaFile("rptools/core/sh_utilities.lua")
@@ -37,7 +45,7 @@ local function loadAddon()
   if SERVER then
     include("rptools/network/sv_network.lua")
     include("rptools/data/sv_operators.lua")
-    include("rptools/data/sv_sources.lua")
+    include("rptools/sources/sv_sources.lua")
     include("rptools/data/sv_conditions.lua")
     include("rptools/actions/sv_actions.lua")
     include("rptools/data/sv_node.lua")
@@ -70,6 +78,7 @@ local function loadAddon()
     include("rptools/commands/sh_attributes.lua")
   end
 
+  loadSources()
   loadActions()
 end
 
