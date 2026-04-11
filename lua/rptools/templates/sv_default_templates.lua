@@ -19,6 +19,13 @@ RPTools.Templating.RegisterTemplate({
       default = 200,
     },
     {
+      name = "angle",
+      description = "activation angle",
+      type = "number",
+      required = true,
+      default = 30,
+    },
+    {
       name = "flag",
       description = "required flag for activating",
       type = "string",
@@ -31,6 +38,12 @@ RPTools.Templating.RegisterTemplate({
 
     local conditions = RPTools.Condition.EmptyConditionSet()
     RPTools.Condition.AddToSet(conditions, distance_cond)
+
+    local angle_cond = RPTools.Condition.Create("view_angle", nil, "le", args.angle)
+    RPTools.Condition.AddToSet(conditions, angle_cond)
+
+    local los_cond = RPTools.Condition.Create("line_of_sight", nil, "eq", true)
+    RPTools.Condition.AddToSet(conditions, los_cond)
 
     if args.flag ~= nil then
       local flag_cond = RPTools.Condition.Create("flag", args.flag, "eq", true)
