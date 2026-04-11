@@ -1,7 +1,7 @@
 RPTools = RPTools or {}
 RPTools.Debug = RPTools.Debug or {}
 
-local debugMode = false
+local debugMode = {}
 
 function RPTools.Debug.WriteDebugNode(node)
   local id = RPTools.Node.GetId(node)
@@ -36,7 +36,14 @@ local function sendAllNodes()
   if #nodes == 0 then
     return
   end
-  RPTools.Network.SendToAdmins(RPTools.Network.MSG_TYPE.DEBUG_SYNC, function()
+
+  local targets = {}
+
+  for _, ply in pairs(debugMode) do
+    table.insert(targets, ply)
+  end
+
+  RPTools.Network.SendToClients(targets, RPTools.Network.MSG_TYPE.DEBUG_SYNC, function()
     net.WriteUInt(#nodes, 12)
     for _, node in ipairs(nodes) do
       RPTools.Debug.WriteDebugNode(node)
@@ -44,25 +51,26 @@ local function sendAllNodes()
   end)
 end
 
-local function enableDebug()
-  debugMode = true
-  timer.Create("rptools_debugMode", 1, 0, function()
-    sendAllNodes()
-  end)
+local function enableDebug(ply)
+  debugMode[ply:SteamID64()] = ply
 end
 
-local function disableDebug()
-  debugMode = false
-  timer.Remove("rptools_debugMode")
+local function disableDebug(ply)
+  debugMode[ply:SteamID64()] = nil
 end
+
+timer.Create("rptools_debugMode", 1, 0, function()
+  if table.IsEmpty(debugMode) then return end
+  sendAllNodes()
+end)
 
 RPTools.Network.OnClientMessage(RPTools.Network.MSG_TYPE.DEBUG_TOGGLE, function(ply)
   if not ply:IsAdmin() then
     return
   end
-  if debugMode then
-    disableDebug()
+  if debugMode[ply:SteamID64()] then
+    disableDebug(ply)
   else
-    enableDebug()
+    enableDebug(ply)
   end
 end)
