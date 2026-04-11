@@ -28,7 +28,8 @@ function RPTools.Condition.ValidateCondition(condition)
   end
 
   if sourceValid then
-    local paramValid, paramErrorMessage = RPTools.Sources.Server.ValidateParameter(condition.source, condition.sourceParameter)
+    local paramValid, paramErrorMessage =
+      RPTools.Sources.Server.ValidateParameter(condition.source, condition.sourceParameter)
     finalResult = finalResult and paramValid
     if not paramValid then
       accumulatedErrorMessage = paramErrorMessage .. ", " .. accumulatedErrorMessage
