@@ -84,11 +84,38 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
   
   for _, node in ipairs(nodes) do
     local position = node.position
-    local offsetVector = nodeNormal[node.id] * 50
-
+    local normal = nodeNormal[node.id]
+    local offsetVector = normal * 100
+    
+    local radius = node.distance
+    
     local color = RPTools.Coordinator.stateColor[node.state] or color_white
     render.SetMaterial(Material("sprites/light_glow02_add"))
     render.DrawBeam(position, position + offsetVector, 10, 0, 1, ColorAlpha(color, 100))
-    render.DrawSprite(position, 32, 32, color)
+    render.DrawSprite(position, 48, 48, color)
+    
+    local ang1 = normal:Angle()
+    ang1:RotateAroundAxis(ang1:Right(), -90)
+
+    cam.Start3D2D(position + (normal * 1), ang1, 1)
+      surface.DrawCircle(0, 0, radius, 0, 255, 0, 255)
+    cam.End3D2D()
+
+    local ang2 = normal:Angle()
+    ang2:RotateAroundAxis(ang2:Forward(), 90)
+    
+    cam.Start3D2D(position + (normal * 1), ang2, 1)
+      surface.DrawCircle(0, 0, radius, 0, 255, 0, 255) -- En rouge pour différencier
+    cam.End3D2D()
+
+    ang2:RotateAroundAxis(ang2:Right(), 180)
+    cam.Start3D2D(position + (normal * 1), ang2, 1)
+      surface.DrawCircle(0, 0, radius, 0, 255, 0, 255) -- En rouge pour différencier
+    cam.End3D2D()
+
+
+
+
+    
   end
 end)
