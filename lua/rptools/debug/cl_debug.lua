@@ -1,5 +1,4 @@
 RPTools = RPTools or {}
-
 RPTools.Debug = RPTools.Debug or {}
 
 surface.CreateFont("RPTools_DebugText", {
@@ -19,6 +18,7 @@ function RPTools.Debug.ReadDebugNode()
   local position = net.ReadVector()
   local distance = net.ReadUInt(16)
   local state = net.ReadUInt(3)
+  
   local node = { id = id, position = position, distance = distance, state = state }
   return node
 end
@@ -27,11 +27,39 @@ function RPTools.Debug.GetDebugNodes()
   return nodes
 end
 
+local directions = {
+  Vector(0, 0, -1), 
+  Vector(1, 0, 0),
+  Vector(-1, 0, 0), 
+  Vector(0, 1, 0),  
+  Vector(0, -1, 0),
+  Vector(0, 0, 1)
+}
+
+local function inferNormal(pos)
+  for _, dir in ipairs(directions) do
+    local tr = util.TraceLine({
+      start = pos - (dir * 2),
+      endpos = pos + (dir * 15),
+    })
+    
+    if tr.Hit and not tr.StartSolid then
+      return tr.HitNormal
+    end
+  end
+  return Vector(0, 0, 1)
+end
+
+local nodeNormal = {}
+
 RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_SYNC, function()
   local nodeCount = net.ReadUInt(12)
   nodes = {}
   for i = 1, nodeCount do
     nodes[i] = RPTools.Debug.ReadDebugNode()
+    if not nodeNormal[nodes[i].id] then
+      nodeNormal[nodes[i].id] = inferNormal(nodes[i].position)
+    end
   end
   drawDebug = true
 end)
@@ -53,43 +81,14 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
   if not drawDebug then
     return
   end
-
+  
   for _, node in ipairs(nodes) do
     local position = node.position
-    local distance = node.distance
+    local offsetVector = nodeNormal[node.id] * 50
 
-    render.DrawWireframeSphere(position, 20, 15, 15, RPTools.Coordinator.stateColor[node.state], true)
-
-    if distance ~= 0 then
-      render.DrawWireframeSphere(
-        position,
-        distance,
-        15,
-        15,
-        ColorAlpha(RPTools.Coordinator.stateColor[node.state], 60),
-        true
-      )
-    end
-
-    local textPos = position + Vector(0, 0, 5)
-
-    local ang = LocalPlayer():EyeAngles()
-
-    ang:RotateAroundAxis(ang:Forward(), 90)
-    ang:RotateAroundAxis(ang:Right(), 90)
-
-    cam.Start3D2D(textPos, ang, 0.1)
-
-    draw.SimpleText(node.id, "RPTools_DebugText", 0, 0, color_white, TEXT_ALIGN_CENTER)
-    draw.SimpleText(
-      RPTools.Coordinator.stateText[node.state],
-      "RPTools_DebugText",
-      0,
-      70,
-      RPTools.Coordinator.stateColor[node.state],
-      TEXT_ALIGN_CENTER
-    ) -- Y ajusté
-
-    cam.End3D2D()
+    local color = RPTools.Coordinator.stateColor[node.state] or color_white
+    render.SetMaterial(Material("sprites/light_glow02_add"))
+    render.DrawBeam(position, position + offsetVector, 10, 0, 1, ColorAlpha(color, 100))
+    render.DrawSprite(position, 32, 32, color)
   end
 end)
