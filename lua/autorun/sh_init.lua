@@ -3,7 +3,6 @@ RPTools = RPTools or {}
 ---@type string
 RPTools.VERSION = "0.1.0"
 
-
 AddCSLuaFile("autorun/sh_init.lua")
 
 local function loadActions()
@@ -13,7 +12,6 @@ local function loadActions()
     include("rptools/actions/" .. f)
   end
 end
-
 
 local function loadAddon()
   AddCSLuaFile("rptools/core/sh_logs.lua")
@@ -31,11 +29,10 @@ local function loadAddon()
   AddCSLuaFile("rptools/commands/sh_attributes.lua")
   AddCSLuaFile("rptools/actions/cl_actions.lua")
 
-
   include("rptools/core/sh_logs.lua")
   include("rptools/core/sh_utilities.lua")
   include("rptools/network/sh_network.lua")
-  
+
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "Starting shared")
   if SERVER then
     include("rptools/network/sv_network.lua")
@@ -58,7 +55,7 @@ local function loadAddon()
     include("rptools/commands/sh_saving.lua")
     include("rptools/commands/sh_attributes.lua")
   end
-  
+
   if CLIENT then
     include("rptools/network/cl_network.lua")
     include("rptools/actions/cl_actions.lua")
@@ -74,7 +71,6 @@ local function loadAddon()
   end
 
   loadActions()
-
 end
 
 loadAddon()

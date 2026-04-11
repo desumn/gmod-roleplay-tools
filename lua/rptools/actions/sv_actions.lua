@@ -16,8 +16,8 @@ end
 
 function RPTools.Actions.Server.RegisterClientAction(name, validator)
   validators[name] = validator
-  serverFunction[name] = function (ply, node, params)
-    RPTools.Network.SendToPlayer(ply, RPTools.Network.MSG_TYPE.CLIENT_ACTION, function ()
+  serverFunction[name] = function(ply, node, params)
+    RPTools.Network.SendToPlayer(ply, RPTools.Network.MSG_TYPE.CLIENT_ACTION, function()
       net.WriteString(name)
       net.WriteTable(params)
     end)
@@ -35,30 +35,28 @@ end
 function RPTools.Actions.Server.ValidateAction(action)
   local func = serverFunction[action.actionType]
   local validator = validators[action.actionType]
-  
+
   local isValid = true
   local errorMessage = ""
-  
+
   if not func or not isfunction(func) then
     isValid = false
     errorMessage = "Invalid function for action: " .. action.actionType .. " " .. errorMessage
-    end
-    
-    if not validator or not isfunction(validator) then
-      isValid = false
-      errorMessage = "Invalid validator for action: " .. action.actionType .. " " .. errorMessage
-    else
-      local paramsValid, paramsError = validator(action.params)
-      
-      if not paramsValid then
-        isValid = false
-        errorMessage = paramsError .. action.actionType .. " " .. errorMessage
-      end
-      
-    end
-    return isValid, errorMessage
   end
 
+  if not validator or not isfunction(validator) then
+    isValid = false
+    errorMessage = "Invalid validator for action: " .. action.actionType .. " " .. errorMessage
+  else
+    local paramsValid, paramsError = validator(action.params)
+
+    if not paramsValid then
+      isValid = false
+      errorMessage = paramsError .. action.actionType .. " " .. errorMessage
+    end
+  end
+  return isValid, errorMessage
+end
 
 ---@param actionType string
 ---@param params table
@@ -66,7 +64,7 @@ function RPTools.Actions.Server.ValidateAction(action)
 function RPTools.Actions.Server.Create(actionType, params)
   local action = { actionType = actionType, params = params }
   local actionValid, errorMessage = RPTools.Actions.Server.ValidateAction(action)
-  
+
   if actionValid then
     return action, nil
   else
@@ -102,7 +100,7 @@ end
 function RPTools.Actions.Server.ValidateActionsSet(actions)
   local allActionsValid = true
   local accumulatedErrorMessage = ""
-  
+
   for _, action in ipairs(actions) do
     local actionValid, conditionErrorMessage = RPTools.Actions.Server.ValidateAction(action)
     allActionsValid = actionValid and allActionsValid
@@ -110,7 +108,7 @@ function RPTools.Actions.Server.ValidateActionsSet(actions)
       accumulatedErrorMessage = conditionErrorMessage .. ", " .. accumulatedErrorMessage
     end
   end
-  
+
   if not allActionsValid then
     return false, accumulatedErrorMessage
   else

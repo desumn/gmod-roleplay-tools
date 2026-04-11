@@ -26,7 +26,7 @@ local msgTypeNames = {
   [RPTools.Network.MSG_TYPE.DELETE_NODE] = "delete node",
   [RPTools.Network.MSG_TYPE.PRINT] = "print",
   [RPTools.Network.MSG_TYPE.DEBUG_TOGGLE] = "toggle debug mode",
-  [RPTools.Network.MSG_TYPE.CLIENT_ACTION] = "perform client action"
+  [RPTools.Network.MSG_TYPE.CLIENT_ACTION] = "perform client action",
 }
 
 ---@param msgType RPToolsMsgType
