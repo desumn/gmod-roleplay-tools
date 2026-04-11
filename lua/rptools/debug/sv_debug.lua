@@ -59,7 +59,7 @@ local function disableDebug(ply)
   debugMode[ply:SteamID64()] = nil
 end
 
-timer.Create("rptools_debugMode", 1, 0, function()
+timer.Create("rptools_debugMode", 0.1, 0, function()
   if table.IsEmpty(debugMode) then return end
   sendAllNodes()
 end)

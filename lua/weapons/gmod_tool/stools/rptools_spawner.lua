@@ -158,6 +158,7 @@ if CLIENT then
 
     return
   end
+
 end
 
 function TOOL:LeftClick(tr)
@@ -208,4 +209,22 @@ function TOOL:Reload(_)
     return true
   end
   return true
+end
+
+function TOOL:Holster()
+  if CLIENT then
+    if self.debugActive then
+        LocalPlayer():ConCommand("rptools_toggle_debug")
+        self.debugActive = false
+    end
+  end
+end
+
+function TOOL:Think()
+    if CLIENT then
+        if not self.debugActive then
+            LocalPlayer():ConCommand("rptools_toggle_debug")
+            self.debugActive = true
+        end
+    end
 end
