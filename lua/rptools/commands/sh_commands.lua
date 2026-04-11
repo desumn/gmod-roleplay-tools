@@ -14,7 +14,7 @@ function RPTools.Commands.PrintToPlayer(ply, string)
 end
 
 if CLIENT then
-  RPTools.Network.RegisterServerHandler(RPTools.Network.MSG_TYPE.PRINT, function()
+  RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.PRINT, function()
     local string = net.ReadString()
     print(string)
   end)

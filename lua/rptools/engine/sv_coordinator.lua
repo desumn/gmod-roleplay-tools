@@ -240,8 +240,8 @@ local function execute(evaluationContexts, time)
     evaluationContext.state.timer = 0
     local executionSuccess, error = pcall(function()
       for _, action in ipairs(evaluationContext.actionsToExecute) do
-        local params = RPTools.Actions.GetParams(action)
-        RPTools.Actions.GetFunction(RPTools.Actions.GetActionType(action))(
+        local params = RPTools.Actions.Server.GetParams(action)
+        RPTools.Actions.Server.GetFunction(RPTools.Actions.Server.GetActionType(action))(
           evaluationContext.ply,
           evaluationContext.node,
           params

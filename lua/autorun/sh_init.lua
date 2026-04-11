@@ -6,6 +6,15 @@ RPTools.VERSION = "0.1.0"
 
 AddCSLuaFile("autorun/sh_init.lua")
 
+local function loadActions()
+  local actionsFiles = file.Find("rptools/actions/sh_*.lua", "LUA")
+  for _, f in ipairs(actionsFiles) do
+    AddCSLuaFile("rptools/actions/" .. f)
+    include("rptools/actions/" .. f)
+  end
+end
+
+
 local function loadAddon()
   AddCSLuaFile("rptools/core/sh_logs.lua")
   AddCSLuaFile("rptools/core/sh_utilities.lua")
@@ -20,18 +29,20 @@ local function loadAddon()
   AddCSLuaFile("rptools/engine/sh_node_state.lua")
   AddCSLuaFile("rptools/commands/sh_saving.lua")
   AddCSLuaFile("rptools/commands/sh_attributes.lua")
+  AddCSLuaFile("rptools/actions/cl_actions.lua")
+
 
   include("rptools/core/sh_logs.lua")
   include("rptools/core/sh_utilities.lua")
   include("rptools/network/sh_network.lua")
-
+  
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Init", "Starting shared")
   if SERVER then
     include("rptools/network/sv_network.lua")
     include("rptools/data/sv_operators.lua")
     include("rptools/data/sv_sources.lua")
     include("rptools/data/sv_conditions.lua")
-    include("rptools/data/sv_actions.lua")
+    include("rptools/actions/sv_actions.lua")
     include("rptools/data/sv_node.lua")
     include("rptools/state/sv_blackboard.lua")
     include("rptools/state/sv_node_register.lua")
@@ -47,9 +58,10 @@ local function loadAddon()
     include("rptools/commands/sh_saving.lua")
     include("rptools/commands/sh_attributes.lua")
   end
-
+  
   if CLIENT then
     include("rptools/network/cl_network.lua")
+    include("rptools/actions/cl_actions.lua")
     include("rptools/engine/sh_node_state.lua")
     include("rptools/debug/cl_debug.lua")
     include("rptools/templates/sh_template_validation.lua")
@@ -60,6 +72,9 @@ local function loadAddon()
     include("rptools/commands/sh_saving.lua")
     include("rptools/commands/sh_attributes.lua")
   end
+
+  loadActions()
+
 end
 
 loadAddon()

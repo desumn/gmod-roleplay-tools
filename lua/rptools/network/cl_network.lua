@@ -7,7 +7,7 @@ local serverHandlers = {}
 
 ---@param msgType RPToolsMsgType
 ---@param handler fun()
-function RPTools.Network.RegisterServerHandler(msgType, handler)
+function RPTools.Network.OnServerMessage(msgType, handler)
   if not isfunction(handler) then
     return
   end

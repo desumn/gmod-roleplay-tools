@@ -37,10 +37,10 @@ RPTools.Templating.RegisterTemplate({
       RPTools.Condition.AddToSet(conditions, flag_cond)
     end
 
-    local action = RPTools.Actions.Create("chat_message", { message = args.message })
+    local action = RPTools.Actions.Server.Create("chat_message", { message = args.message })
 
-    local actions = RPTools.Actions.EmptyActionSet()
-    RPTools.Actions.AddToSet(actions, action)
+    local actions = RPTools.Actions.Server.EmptyActionSet()
+    RPTools.Actions.Server.AddToSet(actions, action)
 
     local node = RPTools.Node.Create(
       context.position,

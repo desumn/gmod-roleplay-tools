@@ -54,7 +54,7 @@ function RPTools.Templating.ReadTemplateInfo()
   return template
 end
 
-RPTools.Network.RegisterServerHandler(RPTools.Network.MSG_TYPE.TEMPLATE_SYNC, function()
+RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.TEMPLATE_SYNC, function()
   local templateCount = net.ReadUInt(8)
   RPTools.Templating.ClientCache = {}
   for i = 1, templateCount do

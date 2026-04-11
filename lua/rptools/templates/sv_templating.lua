@@ -182,7 +182,7 @@ function RPTools.Templating.WriteTemplateInfo(template)
   end
 end
 
-RPTools.Network.RegisterClientHandler(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function(ply)
+RPTools.Network.OnClientMessage(RPTools.Network.MSG_TYPE.CREATE_FROM_TEMPLATE, function(ply)
   if not ply:IsAdmin() then
     return
   end

@@ -88,7 +88,7 @@ function RPTools.NodeRegister.ClearAll()
   nodeRegister = {}
 end
 
-RPTools.Network.RegisterClientHandler(RPTools.Network.MSG_TYPE.DELETE_NODE, function(ply)
+RPTools.Network.OnClientMessage(RPTools.Network.MSG_TYPE.DELETE_NODE, function(ply)
   if not ply:IsAdmin() then
     return
   end

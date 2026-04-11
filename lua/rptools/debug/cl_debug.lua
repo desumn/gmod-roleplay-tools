@@ -27,7 +27,7 @@ function RPTools.Debug.GetDebugNodes()
   return nodes
 end
 
-RPTools.Network.RegisterServerHandler(RPTools.Network.MSG_TYPE.DEBUG_SYNC, function()
+RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_SYNC, function()
   local nodeCount = net.ReadUInt(12)
   nodes = {}
   for i = 1, nodeCount do
@@ -40,7 +40,7 @@ concommand.Add("rptools_toggle_debug", function()
   if not LocalPlayer():IsAdmin() then
     return
   end
-  RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.DEBUG_SYNC, function() end)
+  RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.DEBUG_TOGGLE, function() end)
   if drawDebug then
     drawDebug = false
     nodes = {}

@@ -10,7 +10,7 @@ local clientHandlers = {}
 
 ---@param msgType RPToolsMsgType
 ---@param handler fun(ply: Player)
-function RPTools.Network.RegisterClientHandler(msgType, handler)
+function RPTools.Network.OnClientMessage(msgType, handler)
   if not isfunction(handler) then
     return
   end
