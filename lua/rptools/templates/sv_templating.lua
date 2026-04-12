@@ -209,7 +209,7 @@ concommand.Add("rptools_sync_templates", function(ply)
   if not ply:IsAdmin() then
     return
   end
-  RPTools.Network.SendToAdmins(RPTools.Network.MSG_TYPE.TEMPLATE_SYNC, function()
+  RPTools.Network.SendToPlayer(ply, RPTools.Network.MSG_TYPE.TEMPLATE_SYNC, function()
     local seqRegister = table.ClearKeys(templateRegister)
     net.WriteUInt(#seqRegister, 8)
 
