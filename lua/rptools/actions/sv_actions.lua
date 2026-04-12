@@ -17,11 +17,15 @@ function RPTools.Actions.Server.RegisterAction(name, func, validator, formatter)
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Registered action " .. name .. " on the server")
 end
 
-function RPTools.Actions.Server.RegisterClientAction(name, validator, formatter)
+function RPTools.Actions.Server.RegisterClientAction(name, validator, formatter, target)
   validators[name] = validator
   formatters[name] = formatter
+
+  local safeTarget = target or function (ply, _, _)
+    return { ply }
+  end
   serverFunction[name] = function(ply, node, params)
-    RPTools.Network.SendToPlayer(ply, RPTools.Network.MSG_TYPE.CLIENT_ACTION, function()
+    RPTools.Network.SendToClients(safeTarget(ply, node, params), RPTools.Network.MSG_TYPE.CLIENT_ACTION, function()
       net.WriteString(name)
       net.WriteTable(params)
     end)
