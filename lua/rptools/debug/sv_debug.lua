@@ -3,8 +3,11 @@ RPTools.Debug = RPTools.Debug or {}
 
 local debugMode = {}
 
+---@param node RPToolsNode
 function RPTools.Debug.WriteDebugNode(node)
   local id = RPTools.Node.GetId(node)
+  local policy = RPTools.Node.GetTriggerPolicy(node)
+  local policyText = RPTools.Node.FormatPolicy(policy)
   local position = RPTools.Node.GetPosition(node)
 
   local conditions = RPTools.Node.GetConditions(node)
@@ -25,10 +28,26 @@ function RPTools.Debug.WriteDebugNode(node)
 
   local state = RPTools.Coordinator.GetNodeRunningState(id)
 
+  local conditionsDesc = {}
+  for _, condition in ipairs(node.conditions) do
+    local formattedSource = RPTools.Sources.Server.GetFormatter(condition.source)(condition.sourceParameter)
+    local formattedCondition = RPTools.Operators.GetFormatter(condition.operator)(formattedSource, condition.value)
+    table.insert(conditionsDesc, formattedCondition)
+  end
+
+  local actionsDesc = {}
+  for _, action in ipairs(node.actions) do
+    table.insert(actionsDesc, RPTools.Actions.Server.GetFormatter(action.actionType)(action.params))
+  end
+
   net.WriteString(id)
+  net.WriteUInt(policy, 3)
+  net.WriteString(policyText)
   net.WriteVector(position)
   net.WriteUInt((table.IsEmpty(distances) and 0) or math.max(unpack(distances)), 16)
   net.WriteUInt(state or 1, 3)
+  net.WriteTable(conditionsDesc, true)
+  net.WriteTable(actionsDesc, true)
 end
 
 local function sendAllNodes()

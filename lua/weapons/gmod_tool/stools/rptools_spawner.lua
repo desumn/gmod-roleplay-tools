@@ -101,6 +101,80 @@ if CLIENT then
     end
   end
 
+
+  local function drawInfoPanel(node, panelX, panelTopY)
+    local padding = 10
+    local lineHeight = 20
+    local headerHeight = 22
+    local separatorHeight = 11
+
+    local conditions = node.conditionsDesc or {}
+    local actions = node.actionsDesc or {}
+
+    local height = padding
+        + headerHeight -- id/state
+        + headerHeight -- policy
+        + separatorHeight
+        + lineHeight -- titre conditions
+        + #conditions * lineHeight
+        + separatorHeight
+        + lineHeight -- titre actions
+        + #actions * lineHeight
+        + padding
+
+    local x = panelX
+    local y = panelTopY
+    local w = 300
+
+    draw.RoundedBox(8, x, y, w, height, Color(30, 30, 35, 200))
+
+    local cursorY = y + padding
+
+    draw.SimpleText(node.id, "DermaDefaultBold", x + padding, cursorY, color_white, TEXT_ALIGN_LEFT)
+    draw.SimpleText(
+        RPTools.Coordinator.stateText[node.state],
+        "DermaDefault",
+        x + w - padding,
+        cursorY,
+        RPTools.Coordinator.stateColor[node.state],
+        TEXT_ALIGN_RIGHT
+    )
+    cursorY = cursorY + headerHeight
+
+    draw.SimpleText(node.triggerPolicyText or "unknown", "DermaDefault", x + padding, cursorY, Color(150, 155, 160))
+    cursorY = cursorY + headerHeight
+
+    cursorY = cursorY + 5
+    surface.SetDrawColor(Color(80, 85, 95))
+    surface.DrawRect(x + padding, cursorY, w - padding * 2, 1)
+    cursorY = cursorY + 6
+
+    draw.SimpleText("Conditions", "DermaDefaultBold", x + padding, cursorY, Color(200, 200, 200))
+    cursorY = cursorY + lineHeight
+
+    for _, desc in ipairs(conditions) do
+        local text = string.sub(desc, 1, 40)
+        if #desc > 40 then text = text .. "..." end
+        draw.SimpleText(text, "DermaDefault", x + padding + 5, cursorY, Color(180, 180, 180))
+        cursorY = cursorY + lineHeight
+    end
+
+    cursorY = cursorY + 5
+    surface.SetDrawColor(Color(80, 85, 95))
+    surface.DrawRect(x + padding, cursorY, w - padding * 2, 1)
+    cursorY = cursorY + 6
+
+    draw.SimpleText("Actions", "DermaDefaultBold", x + padding, cursorY, Color(200, 200, 200))
+    cursorY = cursorY + lineHeight
+
+    for _, desc in ipairs(actions) do
+        local text = string.sub(desc, 1, 40)
+        if #desc > 40 then text = text .. "..." end
+        draw.SimpleText(text, "DermaDefault", x + padding + 5, cursorY, Color(180, 180, 180))
+        cursorY = cursorY + lineHeight
+    end
+  end
+
   function TOOL:DrawHUD()
     if visibleNodeCache.lastCalculation == 0 or CurTime() - visibleNodeCache.lastCalculation > 0.2 then
       detectNodes()
@@ -155,6 +229,10 @@ if CLIENT then
         TEXT_ALIGN_CENTER
       )
     end
+
+    local selectedNode = nodes[selectedIndex]
+
+    drawInfoPanel(selectedNode, x, y + height + 8)
 
     return
   end

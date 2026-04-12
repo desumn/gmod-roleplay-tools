@@ -30,6 +30,40 @@ local operatorFunctions = {
   end,
 }
 
+local formatters = {
+  lt = function(l, r)
+    return l .. " < " .. tostring(r)
+  end,
+  gt = function(l, r)
+    return l .. " > " .. tostring(r)
+  end,
+  eq = function(l, r)
+    return l .. " = " .. tostring(r)
+  end,
+  ne = function(l, r)
+    return l .. " ≠ " .. tostring(r)
+  end,
+  le = function(l, r)
+    return l .. " ≤ " .. tostring(r)
+  end,
+  ge = function(l, r)
+    return l .. " ≥ " .. tostring(r)
+  end,
+
+  between = function(value, bound)
+    return value .. " between " .. tostring(bound[1]) .. " and " .. tostring(bound[2])
+  end,
+
+  one_of = function(value, set)
+    local formattedSet = "["
+    for key, _ in pairs(set) do
+      formattedSet = tostring(key) .. ", " .. formattedSet
+    end
+    formattedSet = formattedSet .. "]"
+    return value .. " one of " .. formattedSet
+  end,
+}
+
 ---@param operator string
 ---@return function|nil, string|nil
 function RPTools.Operators.GetFunction(operator)
@@ -37,6 +71,16 @@ function RPTools.Operators.GetFunction(operator)
 
   if operatorValid then
     return operatorFunctions[operator], nil
+  else
+    return nil, operatorErrorMessage
+  end
+end
+
+function RPTools.Operators.GetFormatter(operator)
+  local operatorValid, operatorErrorMessage = RPTools.Operators.ValidateOperator(operator)
+
+  if operatorValid then
+    return formatters[operator], nil
   else
     return nil, operatorErrorMessage
   end

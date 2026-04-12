@@ -6,10 +6,12 @@ local logModuleName = "Sources:Server"
 
 local sourceFunctions = {}
 local validators = {}
+local formatters = {}
 
-function RPTools.Sources.Server.RegisterSource(name, func, validator)
+function RPTools.Sources.Server.RegisterSource(name, func, validator, formatter)
   sourceFunctions[name] = func
   validators[name] = validator
+  formatters[name] = formatter
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Registered source " .. name .. " on the server")
 end
 
@@ -23,6 +25,10 @@ end
 ---@return fun(ply: Player, node: RPToolsNode, param: any): any
 function RPTools.Sources.Server.GetFunction(source)
   return sourceFunctions[source]
+end
+
+function RPTools.Sources.Server.GetFormatter(source)
+  return formatters[source]
 end
 
 ---@param source string

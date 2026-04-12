@@ -8,14 +8,18 @@ local serverFunction = {}
 
 local validators = {}
 
-function RPTools.Actions.Server.RegisterAction(name, func, validator)
+local formatters = {}
+
+function RPTools.Actions.Server.RegisterAction(name, func, validator, formatter)
   serverFunction[name] = func
   validators[name] = validator
+  formatters[name] = formatter
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Registered action " .. name .. " on the server")
 end
 
-function RPTools.Actions.Server.RegisterClientAction(name, validator)
+function RPTools.Actions.Server.RegisterClientAction(name, validator, formatter)
   validators[name] = validator
+  formatters[name] = formatter
   serverFunction[name] = function(ply, node, params)
     RPTools.Network.SendToPlayer(ply, RPTools.Network.MSG_TYPE.CLIENT_ACTION, function()
       net.WriteString(name)
@@ -28,6 +32,10 @@ end
 
 function RPTools.Actions.Server.GetFunction(name)
   return serverFunction[name]
+end
+
+function RPTools.Actions.Server.GetFormatter(name)
+  return formatters[name]
 end
 
 ---@param action RPToolsAction

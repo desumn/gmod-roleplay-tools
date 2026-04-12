@@ -7,5 +7,7 @@ if SERVER then
         return angle
     end, function(param)
         return param == nil
+    end, function (_)
+        return "view angle (in deg)"
     end)
 end

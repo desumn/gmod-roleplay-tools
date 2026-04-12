@@ -8,5 +8,7 @@ if SERVER then
         return not trace.Hit
     end, function(param)
         return param == nil
+    end, function (_)
+        return "line of sight"
     end)
 end

@@ -15,11 +15,15 @@ local drawDebug = false
 
 function RPTools.Debug.ReadDebugNode()
   local id = net.ReadString()
+  local policy = net.ReadUInt(3)
+  local policyText = net.ReadString()
   local position = net.ReadVector()
   local distance = net.ReadUInt(16)
   local state = net.ReadUInt(3)
+  local conditionsDesc = net.ReadTable(true)
+  local actionsDesc = net.ReadTable(true)
   
-  local node = { id = id, position = position, distance = distance, state = state }
+  local node = { id = id, triggerPolicy = policy, triggerPolicyText = policyText, position = position, distance = distance, state = state, conditionsDesc = conditionsDesc, actionsDesc = actionsDesc }
   return node
 end
 
@@ -98,24 +102,17 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
     ang1:RotateAroundAxis(ang1:Right(), -90)
 
     cam.Start3D2D(position + (normal * 1), ang1, 1)
-      surface.DrawCircle(0, 0, radius, 0, 255, 0, 255)
+      surface.DrawCircle(0, 0, radius, 0, 255, 0, 50)
     cam.End3D2D()
 
     local ang2 = normal:Angle()
     ang2:RotateAroundAxis(ang2:Forward(), 90)
     
     cam.Start3D2D(position + (normal * 1), ang2, 1)
-      surface.DrawCircle(0, 0, radius, 0, 255, 0, 255) -- En rouge pour différencier
+      surface.DrawCircle(0, 0, radius, 0, 255, 0, 50)
     cam.End3D2D()
 
-    ang2:RotateAroundAxis(ang2:Right(), 180)
-    cam.Start3D2D(position + (normal * 1), ang2, 1)
-      surface.DrawCircle(0, 0, radius, 0, 255, 0, 255) -- En rouge pour différencier
-    cam.End3D2D()
-
-
-
-
-    
+    PrintTable(node.conditionsDesc)
+    PrintTable(node.actionsDesc)
   end
 end)

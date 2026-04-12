@@ -5,5 +5,7 @@ if SERVER then
     return istable(params)
       and isstring(params.key)
       and (isstring(params.value) or isbool(params.value) or RPTools.Utilities.IsNumber(params.value))
+  end, function(params)
+    return "flag " .. params.key .. " = " .. tostring(params.value)
   end)
 end

@@ -43,6 +43,17 @@ RPTools.Node.TRIGGER_POLICY = {
   CONTINOUS = 4,
 }
 
+local policyFormat = {
+  [RPTools.Node.TRIGGER_POLICY.MANUAL] = "manual",
+  [RPTools.Node.TRIGGER_POLICY.ONE_SHOT] = "one shot",
+  [RPTools.Node.TRIGGER_POLICY.COOLDOWN] = "cooldown",
+  [RPTools.Node.TRIGGER_POLICY.CONTINOUS] = "continous"
+}
+
+function RPTools.Node.FormatPolicy(policy)
+  return policyFormat[policy]
+end
+
 local function validateTriggerPolicy(trigger_policy)
   return RPTools.Utilities.MakeError(
     RPTools.Utilities.IsNumber(trigger_policy) and trigger_policy >= 1 and trigger_policy <= 4,

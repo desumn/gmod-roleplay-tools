@@ -3,5 +3,7 @@ if SERVER then
     return RPTools.Blackboard.Read(ply, param)
   end, function(param)
     return isstring(param)
+  end, function (param)
+    return "flag " .. param
   end)
 end
