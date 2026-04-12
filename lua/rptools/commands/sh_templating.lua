@@ -26,7 +26,7 @@ if SERVER then
     if not RPTools.Commands.requireAdmin(ply) then
       return
     end
-    local templateList = RPTools.Templating.GetAllTemplateNames()
+    local templateList = RPTools.Templating.GetAllTemplates()
 
     PrintTable(templateList)
   end)
@@ -75,5 +75,16 @@ if SERVER then
     for _, node in ipairs(result_nodes) do
       RPTools.NodeRegister.RegisterNode(node)
     end
+  end)
+end
+
+if CLIENT then
+  concommand.Add("rptools_template_list_cl", function(ply, _, args, _)
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
+    local templateList = RPTools.Templating.GetAllTemplates()
+
+    PrintTable(templateList)
   end)
 end

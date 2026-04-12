@@ -14,10 +14,18 @@ local function loadActions()
 end
 
 local function loadSources()
-  local actionsFiles = file.Find("rptools/sources/sh_*.lua", "LUA")
-  for _, f in ipairs(actionsFiles) do
+  local sourcesFiles = file.Find("rptools/sources/sh_*.lua", "LUA")
+  for _, f in ipairs(sourcesFiles) do
     AddCSLuaFile("rptools/sources/" .. f)
     include("rptools/sources/" .. f)
+  end
+end
+
+local function loadTemplates()
+  local templateFiles = file.Find("rptools/templates/templates/sh_*.lua", "LUA")
+  for _, f in ipairs(templateFiles) do
+    AddCSLuaFile("rptools/templates/templates/" .. f)
+    include("rptools/templates/templates/" .. f)
   end
 end
 
@@ -26,12 +34,13 @@ local function loadAddon()
   AddCSLuaFile("rptools/core/sh_utilities.lua")
   AddCSLuaFile("rptools/commands/sh_commands.lua")
   AddCSLuaFile("rptools/templates/sh_template_validation.lua")
+  AddCSLuaFile("rptools/templates/sh_template_register.lua")
+  AddCSLuaFile("rptools/templates/sh_template_helpers.lua")
   AddCSLuaFile("rptools/commands/sh_templating.lua")
   AddCSLuaFile("rptools/network/sh_network.lua")
   AddCSLuaFile("rptools/network/cl_network.lua")
   AddCSLuaFile("rptools/debug/cl_debug.lua")
   AddCSLuaFile("rptools/ui/cl_template_menu.lua")
-  AddCSLuaFile("rptools/templates/cl_templating.lua")
   AddCSLuaFile("rptools/engine/sh_node_state.lua")
   AddCSLuaFile("rptools/commands/sh_saving.lua")
   AddCSLuaFile("rptools/commands/sh_attributes.lua")
@@ -55,8 +64,8 @@ local function loadAddon()
     include("rptools/engine/sv_coordinator.lua")
     include("rptools/debug/sv_debug.lua")
     include("rptools/templates/sh_template_validation.lua")
-    include("rptools/templates/sv_templating.lua")
-    include("rptools/templates/sv_default_templates.lua")
+    include("rptools/templates/sh_template_register.lua")
+    include("rptools/templates/sh_template_helpers.lua")
     include("rptools/state/sv_serialization.lua")
     include("rptools/commands/sh_commands.lua")
     include("rptools/commands/sh_templating.lua")
@@ -70,7 +79,8 @@ local function loadAddon()
     include("rptools/engine/sh_node_state.lua")
     include("rptools/debug/cl_debug.lua")
     include("rptools/templates/sh_template_validation.lua")
-    include("rptools/templates/cl_templating.lua")
+    include("rptools/templates/sh_template_register.lua")
+    include("rptools/templates/sh_template_helpers.lua")
     include("rptools/ui/cl_template_menu.lua")
     include("rptools/commands/sh_commands.lua")
     include("rptools/commands/sh_templating.lua")
@@ -80,12 +90,7 @@ local function loadAddon()
 
   loadSources()
   loadActions()
-
-  if CLIENT then
-    hook.Add("InitPostEntity", "RPTools_InitialSync", function()
-      LocalPlayer():ConCommand("rptools_sync_templates")
-    end)
-  end
+  loadTemplates()
 end
 
 loadAddon()

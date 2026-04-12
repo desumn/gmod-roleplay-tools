@@ -120,8 +120,5 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
     cam.Start3D2D(position + (normal * 1), ang2, 1)
     surface.DrawCircle(0, 0, radius, 0, 255, 0, 50)
     cam.End3D2D()
-
-    PrintTable(node.conditionsDesc)
-    PrintTable(node.actionsDesc)
   end
 end)

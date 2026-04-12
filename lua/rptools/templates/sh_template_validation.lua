@@ -1,163 +1,188 @@
 RPTools = RPTools or {}
 RPTools.Templating = RPTools.Templating or {}
 
-local displayType = {
-  ["string"] = {
-    ["short"] = true,
-    ["long"] = true,
+local function validateName(name)
+  if isstring(name) and name ~= "" then
+    return true
+  else
+    return false, "Invalid description: " .. name
+  end
+end
+
+local function validateDescription(description)
+  if isstring(description) and description ~= "" then
+    return true
+  else
+    return false, "Invalid description: " .. description
+  end
+end
+
+local parameterTypes = {
+  string = {
+    validate = isstring,
   },
-  ["number"] = {},
-  ["boolean"] = {},
+  number = {
+    validate = RPTools.Utilities.IsNumber,
+    min = RPTools.Utilities.IsNumber,
+    max = RPTools.Utilities.IsNumber,
+  },
+  boolean = {
+    validate = isbool,
+  },
 }
 
-local function validateDisplay(paramType, display)
-  return RPTools.Utilities.MakeError(
-    displayType[paramType][display] == true,
-    "display type invalid " .. tostring(display) .. " for " .. tostring(paramType)
-  )
-end
-
----@param paramType string
----@param value any
----@return boolean, string
-function RPTools.Templating.ValidateValue(paramType, value)
-  return RPTools.Utilities.MakeError(
-    (paramType == "number" and RPTools.Utilities.IsNumber(value))
-      or (paramType == "boolean" and isbool(value))
-      or (paramType == "string" and isstring(value)),
-    "type error, expecting for value of type " .. paramType .. " got " .. tostring(value)
-  )
-end
-
-local function validateParameterType(paramType)
-  return RPTools.Utilities.MakeError(
-    isstring(paramType) and (paramType == "boolean" or paramType == "number" or paramType == "string"),
-    "parameter type must be boolean, number or string"
-  )
-end
-
----@param parameter RPToolsParameter
----@return boolean, string|nil
-function RPTools.Templating.ValidateParameter(parameter)
-  if not parameter or not istable(parameter) then
-    return nil, "parameter is not a table"
-  end
-
+local function validateParameters(parameters)
+  local errors = ""
   local isValid = true
-  local errorMessage = ""
 
-  local name = parameter.name
-  if not isstring(name) or name == "" then
-    errorMessage = errorMessage .. ", name is not a string or is empty"
-    isValid = false
-  end
+  for _, parameter in pairs(parameters) do
+    local name = parameter.name
+    if not isstring(name) or name == "" then
+      isValid = false
+      errors = name .. " name: " .. (name or "not provided") .. " is invalid" .. ", " .. errors
+    end
 
-  local description = parameter.description
-  if not isstring(description) or description == "" then
-    errorMessage = errorMessage .. ", description is not a string or is empty"
-    isValid = false
-  end
+    local desc = parameter.description
+    if not isstring(desc) or desc == "" then
+      isValid = false
+      errors = name .. " description: " .. (desc or "not provided") .. " is invalid" .. ", " .. errors
+    end
 
-  local required = parameter.required
-  if not isbool(required) then
-    errorMessage = errorMessage .. ", requirement not defined or is not bool"
-    isValid = false
-  end
+    local required = parameter.required
+    if not isbool(required) then
+      isValid = false
+      errors = name .. " required: " .. (required or "not provided") .. " is invalid" .. ", " .. errors
+    end
 
-  local paramTypeValid, paramTypeError = validateParameterType(parameter.type)
+    local group = parameter.group
+    if not isstring(group) or group == "" then
+      isValid = false
+      errors = name .. " group: " .. (group or "not provided") .. " is invalid" .. ", " .. errors
+    end
 
-  if not paramTypeValid then
-    errorMessage = errorMessage .. ", " .. paramTypeError
-    isValid = false
-  end
+    local type = parameter.type
+    local typeValid = true
+    if not isstring(type) or parameterTypes[type] == nil then
+      isValid = false
+      typeValid = false
+      errors = name .. " type " .. (type or "not provided") .. " is invalid " .. ", " .. errors
+    end
 
-  local defaultValue = parameter.default
-  local display = parameter.display
-  local defaultValid, defaultError = true, ""
-  local displayValid, displayError = true, ""
+    if typeValid then
+      local default = parameter.default
 
-  if defaultValue == nil then
-    defaultValid, defaultError = true, ""
-  elseif paramTypeValid then
-    defaultValid, defaultError = RPTools.Templating.ValidateValue(parameter.type, defaultValue)
-  else
-    defaultValid = false
-  end
+      if default and not parameterTypes[type].validate(default) then
+        isValid = false
+        errors = name
+          .. " default type (required "
+          .. type
+          .. ")"
+          .. ":"
+          .. tostring(default)
+          .. "is invalid "
+          .. ", "
+          .. errors
+      end
 
-  if display == nil then
-    displayValid, displayError = true, ""
-  elseif paramTypeValid then
-    displayValid, displayError = validateDisplay(parameter.type, display)
-  else
-    displayValid = false
-  end
-
-  if not defaultValid then
-    errorMessage = errorMessage .. ", " .. defaultError
-    isValid = false
-  end
-
-  if not displayValid then
-    errorMessage = errorMessage .. ", " .. displayError
-    isValid = false
-  end
-
-  if isValid then
-    return true, nil
-  else
-    return false, errorMessage
-  end
-end
-
----@param parameters RPToolsParameter[]
----@return boolean, string|nil
-function RPTools.Templating.ValidateParameters(parameters)
-  local allValid = true
-  local errorMessage = ""
-  for _, parameter in ipairs(parameters) do
-    local validParameter, parameterErrorMessage = RPTools.Templating.ValidateParameter(parameter)
-    if not validParameter then
-      allValid = false
-      errorMessage = errorMessage .. ", " .. parameterErrorMessage
+      if table.Count(parameterTypes[type]) > 1 then
+        for field, validator in pairs(parameterTypes[type]) do
+          if field == "validate" then
+            continue
+          end
+          local paramField = parameter[field]
+          if paramField and not validator(paramField) then
+            isValid = false
+            errors = name
+              .. " "
+              .. field
+              .. "  (required type "
+              .. type
+              .. ")"
+              .. ":"
+              .. tostring(paramField)
+              .. "is invalid "
+              .. ", "
+              .. errors
+          end
+        end
+      end
     end
   end
 
-  if allValid then
-    return true, nil
+  if isValid then
+    return true
   else
-    return false, errorMessage
+    return false, errors
+  end
+end
+
+function RPTools.Templating.ValidateTemplate(template)
+  local isValid = true
+  local errors = ""
+  local nameValid, nameError = validateName(template.name)
+  if not nameValid then
+    isValid = false
+    errors = nameError .. ", " .. errors
+  end
+
+  local descValid, descError = validateDescription(template.description)
+  if not descValid then
+    isValid = false
+    errors = descError .. ", " .. errors
+  end
+
+  local paramsValid, paramsError = validateParameters(template.parameters)
+  if not paramsValid then
+    isValid = false
+    errors = paramsError .. ", " .. errors
+  end
+
+  if SERVER then
+    if not isfunction(template.transformer) then
+      isValid = false
+      errors = "transofrmer not valid" .. ", " .. errors
+    end
+  end
+
+  if not isValid then
+    return false, errors
+  else
+    return true
   end
 end
 
 ---@param template RPToolsTemplate
----@param arguments table
----@return table|nil, string|nil
-function RPTools.Templating.ApplyParameters(template, arguments)
-  local unprovidedParameters = ""
-  local wronglyTypedArguments = ""
-
-  local finalArguments = {}
-
-  for _, parameter in ipairs(template.parameters) do
-    if arguments[parameter.name] == nil then
-      if parameter.default == nil and parameter.required then
-        unprovidedParameters = unprovidedParameters .. ", " .. parameter.name
-      else
-        finalArguments[parameter.name] = parameter.default
+---@param args table
+function RPTools.Templating.Apply(template, args)
+  local finalArgs = {}
+  local errors = ""
+  for param, infos in pairs(template.parameters) do
+    if not args[param] then
+      if infos.default == nil and infos.required then
+        errors = "parameter " .. param .. " not provided," .. errors
+        continue
+      end
+      if infos.default ~= nil then
+        finalArgs[param] = infos.default
       end
     else
-      local valueValid, valueError = RPTools.Templating.ValidateValue(parameter.type, arguments[parameter.name])
-      if valueValid then
-        finalArguments[parameter.name] = arguments[parameter.name]
-      else
-        wronglyTypedArguments = wronglyTypedArguments .. ", " .. valueError
+      if not parameterTypes[infos.type].validate(args[param]) then
+        errors = "parameter "
+          .. param
+          .. " has wrong type, got "
+          .. type(args[param])
+          .. " expected "
+          .. infos.type
+          .. errors
+        continue
       end
+      finalArgs[param] = args[param]
     end
   end
 
-  if wronglyTypedArguments == "" and unprovidedParameters == "" then
-    return finalArguments, nil
+  if errors ~= "" then
+    return nil, errors
   else
-    return nil, "unprovided: " .. unprovidedParameters .. "and wrongly typed: " .. wronglyTypedArguments
+    return finalArgs
   end
 end

@@ -23,7 +23,7 @@ RPTools.Logs.LEVEL = {
 }
 
 local logLevel =
-  CreateConVar("rptools_logs_level", RPTools.Logs.LEVEL.WARNING, nil, "Log level for the Roleplay Tools addon", 0, 3)
+  CreateConVar("rptools_logs_level", RPTools.Logs.LEVEL.DEBUG, nil, "Log level for the Roleplay Tools addon", 0, 3)
 
 ---@param level RPToolsLogLevel
 ---@param source string

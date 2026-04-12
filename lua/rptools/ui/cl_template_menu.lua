@@ -2,205 +2,307 @@ RPTools = RPTools or {}
 RPTools.UI = RPTools.UI or {}
 
 RPTools.UI.CurrentTemplate = ""
-
 RPTools.UI.CurrentParams = {}
 
-local function nonEmptyOrNil(value)
-  if value == nil or (isstring(value) and value == "") then
-    return nil
-  else
-    return value
+function RPTools.UI.BuildTemplateList(panel)
+  local templateList = vgui.Create("DListView", panel)
+  templateList:SetTall(150)
+  templateList:SetMultiSelect(false)
+  templateList:SetSortable(true)
+
+  local nameColumn = templateList:AddColumn("Name")
+  templateList:AddColumn("Description")
+
+  templateList.OnSizeChanged = function(self, width, height)
+    nameColumn:SetFixedWidth(width * 0.3)
   end
+
+  local templates = RPTools.Templating.GetAllTemplates()
+
+  for _, template in pairs(templates) do
+    local line = templateList:AddLine(string.NiceName(template.name), string.NiceName(template.description))
+    line.name = template.name
+  end
+
+  panel:AddItem(templateList)
+
+  return templateList
 end
 
-local function makeTitle(name, frame)
-  local title = vgui.Create("DLabel", frame)
+---@param panel TOOL
+---@param template RPToolsTemplate
+---@param widgetTable table
+function RPTools.UI.BuildTemplateForm(panel, template, widgetTable)
+  PrintTable(widgetTable)
+  for _, element in ipairs(widgetTable) do
+    if IsValid(element) then
+      element:Remove()
+    end
+  end
+
+  table.Empty(widgetTable)
+
+  local title = vgui.Create("DLabel")
+  title:SetText(string.upper(template.name))
   title:SetFont("DermaLarge")
-  title:SetText(name)
-  title:SetTextColor(color_white)
-  title:SizeToContents()
-  title:SetContentAlignment(5)
+  title:SetColor(Color(255, 255, 255))
   title:SetTall(30)
-  title:DockMargin(10, 10, 10, 5)
-  title:Dock(TOP)
-  return title
-end
+  title:SetContentAlignment(5)
 
-local function makeDescription(description, frame)
-  local descLabel = vgui.Create("DLabel", frame)
-  descLabel:SetFont("DermaDefault")
-  descLabel:SetText(description)
-  descLabel:SetTextColor(Color(190, 195, 200))
-
-  descLabel:SetWrap(true)
-  descLabel:SetTall(60)
-
-  descLabel:SetContentAlignment(5)
-  descLabel:DockMargin(10, 0, 10, 10)
-  descLabel:Dock(TOP)
-  return descLabel
-end
-
-local function makeSeparator(frame)
-  local separator = vgui.Create("DPanel", frame)
-
-  separator:SetTall(2)
-
-  separator.Paint = function(self, w, h)
-    surface.SetDrawColor(Color(80, 85, 95))
-    surface.DrawRect(0, 0, w, h)
+  title.Paint = function(self, w, h)
+    draw.RoundedBox(4, 0, 0, w, h, Color(50, 100, 150, 255))
   end
 
-  separator:DockMargin(10, 5, 10, 5)
-  separator:Dock(TOP)
+  title:DockMargin(5, 10, 5, 10)
 
-  return separator
-end
+  panel:AddItem(title)
 
-local displayWidget = {
-  ["boolean"] = {
-    ["default"] = function(parent, default, name)
-      local checkbox = vgui.Create("DCheckBoxLabel", parent)
-      checkbox:SetText("")
-      checkbox:SetValue(default or false)
-      checkbox:Dock(TOP)
+  table.insert(widgetTable, title)
 
-      checkbox.OnChange = function(self, value)
-        hook.Run("rptools_template_ui_value_change", name, value)
-      end
+  local desc = vgui.Create("DLabel")
+  desc:SetText(string.NiceName(template.description) .. "\n")
+  desc:SetFont("Trebuchet18")
+  desc:SetTextColor(Color(60, 60, 60))
+  desc:SetWrap(true)
+  desc:SetAutoStretchVertical(true)
 
-      return checkbox
-    end,
-  },
-  ["number"] = {
-    ["default"] = function(parent, default, name)
-      local numberEntry = vgui.Create("DNumberWang", parent)
-      numberEntry:SetValue(default or 0)
-      numberEntry:SetTall(30)
-      numberEntry:SetMinMax(0, 65635)
-      numberEntry:Dock(TOP)
+  desc:DockMargin(10, 5, 10, 15)
 
-      numberEntry.OnValueChanged = function(self, value)
-        hook.Run("rptools_template_ui_value_change", name, value)
-      end
+  desc:SetTextInset(10, 10)
 
-      return numberEntry
-    end,
-  },
-  ["string"] = {
-    ["default"] = function(parent, default, name)
-      local textEntry = vgui.Create("DTextEntry", parent)
-      textEntry:SetText(default or "")
-      textEntry:SetTall(30)
-      textEntry:SetUpdateOnType(true)
-      textEntry:Dock(TOP)
-      textEntry:SetPlaceholderText("Please enter a " .. name)
-
-      textEntry.OnValueChange = function(self, value)
-        hook.Run("rptools_template_ui_value_change", name, value)
-      end
-
-      return textEntry
-    end,
-    ["short"] = function(parent, default, name)
-      local textEntry = vgui.Create("DTextEntry", parent)
-      textEntry:SetText(default or "")
-      textEntry:SetTall(30)
-      textEntry:SetUpdateOnType(true)
-      textEntry:Dock(TOP)
-      textEntry:SetPlaceholderText("Please enter a " .. name)
-
-      textEntry.OnValueChange = function(self, value)
-        hook.Run("rptools_template_ui_value_change", name, value)
-      end
-
-      return textEntry
-    end,
-    ["long"] = function(parent, default, name)
-      local textEntry = vgui.Create("DTextEntry", parent)
-      textEntry:SetText(default or "")
-      textEntry:SetMultiline(true)
-      textEntry:SetTall(80)
-      textEntry:SetUpdateOnType(true)
-      textEntry:Dock(TOP)
-      textEntry:SetPlaceholderText("Please enter a " .. name)
-
-      textEntry.OnValueChange = function(self, value)
-        hook.Run("rptools_template_ui_value_change", name, value)
-      end
-
-      return textEntry
-    end,
-  },
-}
-
-local function makeParameters(parameters, frame)
-  local valueContainers = {}
-
-  for _, parameter in ipairs(parameters) do
-    local parameterPanel = vgui.Create("DPanel", frame)
-    parameterPanel.Paint = function() end
-    parameterPanel:DockMargin(5, 8, 5, 8)
-    parameterPanel:Dock(TOP)
-
-    local label = vgui.Create("DLabel", parameterPanel)
-    label:SetTall(15)
-    label:SetText(string.NiceName(parameter.name) .. (parameter.required and " (Required)" or " (Optional)"))
-    if parameter.required then
-      label:SetTextColor(Color(230, 180, 80))
-    else
-      label:SetTextColor(Color(150, 155, 160))
-    end
-    label:Dock(TOP)
-
-    local entry =
-      displayWidget[parameter.type][parameter.display or "default"](parameterPanel, parameter.default, parameter.name)
-
-    parameterPanel:InvalidateLayout(true)
-    local height = label:GetTall() + entry:GetTall() + 12
-    parameterPanel:SetTall(height)
-
-    valueContainers[parameter.name] = entry
+  desc.Paint = function(self, w, h)
+    draw.RoundedBox(4, 0, 0, w, h, Color(0, 0, 0, 15))
   end
 
-  return valueContainers
+  panel:AddItem(desc)
+  table.insert(widgetTable, desc)
+
+  local groups = {}
+
+  for name, parameter in pairs(template.parameters) do
+    groups[parameter.group] = groups[parameter.group] or {}
+
+    table.insert(groups[parameter.group], { name = name, param = parameter })
+  end
+
+  if groups["trigger"] then
+    RPTools.UI.BuildParameterGroup(panel, "trigger", groups["trigger"], widgetTable)
+  end
+
+  if groups["action"] then
+    RPTools.UI.BuildParameterGroup(panel, "action", groups["action"], widgetTable)
+  end
+
+  for groupName, params in pairs(groups) do
+    if groupName == "action" or groupName == "trigger" then
+      continue
+    end
+    RPTools.UI.BuildParameterGroup(panel, groupName, params, widgetTable)
+  end
 end
 
-function RPTools.UI.OpenTemplateMenu(frame, template)
-  frame:Clear()
-  makeTitle(string.NiceName(template.name), frame)
-  makeDescription(template.description, frame)
-  makeSeparator(frame)
-  makeParameters(template.parameters, frame)
+---@param panel TOOL
+---@param groupName string
+---@param params RPToolsParameter[]
+---@param widgetTable table
+function RPTools.UI.BuildParameterGroup(panel, groupName, params, widgetTable)
+  local category = vgui.Create("DCollapsibleCategory")
+  category:SetLabel(string.NiceName(groupName))
+  category:SetExpanded(1)
+  category:DockMargin(10, 15, 10, 0)
+  category:Dock(TOP)
 
-  local arguments = {}
+  local parametersList = vgui.Create("DListLayout")
 
-  local stateIndicator = vgui.Create("DLabel", frame)
-  stateIndicator:SetFont("DermaDefault")
-  stateIndicator:SetText("Template not valid - please fill the required parameters.")
-  stateIndicator:SetTextColor(Color(220, 160, 170))
+  parametersList:DockPadding(15, 10, 5, 10)
 
-  stateIndicator:SetWrap(true)
-  stateIndicator:SetTall(60)
+  parametersList.Paint = function(self, w, h)
+    draw.RoundedBox(0, 0, 0, w, h, Color(0, 0, 0, 8))
 
-  stateIndicator:SetContentAlignment(5)
-  stateIndicator:DockMargin(8, 0, 8, 10)
-  stateIndicator:Dock(TOP)
+    surface.SetDrawColor(100, 150, 200, 255)
+    surface.DrawRect(0, 0, 3, h)
+  end
 
-  hook.Add("rptools_template_ui_value_change", frame, function(_, name, newValue)
-    arguments[name] = nonEmptyOrNil(newValue)
-    local newFinalArguments = RPTools.Templating.ApplyParameters(template, arguments)
+  category:SetContents(parametersList)
 
-    if newFinalArguments then
-      RPTools.UI.CurrentParams = newFinalArguments
-      RPTools.UI.CurrentTemplate = template.name
-      stateIndicator:SetText("Template valid - you can now place a node in world. ")
-      stateIndicator:SetTextColor(Color(100, 200, 100))
+  local required = {}
+  local nonRequired = {}
+
+  for _, parameter in pairs(params) do
+    if parameter.param.required then
+      table.insert(required, parameter)
     else
-      RPTools.UI.CurrentParams = {}
-      RPTools.UI.CurrentTemplate = ""
-      stateIndicator:SetText("Template not valid - please fill the required parameters.")
-      stateIndicator:SetTextColor(Color(220, 160, 170))
+      table.insert(nonRequired, parameter)
     end
-  end)
+  end
+
+  for _, param in ipairs(required) do
+    RPTools.UI.BuildParameterWidget(parametersList, param)
+  end
+
+  for _, param in ipairs(nonRequired) do
+    RPTools.UI.BuildParameterWidget(parametersList, param)
+  end
+
+  panel:AddItem(category)
+  table.insert(widgetTable, category)
+end
+
+local widgetBuilders = {}
+widgetBuilders["string"] = {}
+widgetBuilders["boolean"] = {}
+widgetBuilders["number"] = {}
+
+local function parameterTitle(row, parameter)
+  local label = vgui.Create("DLabel", row)
+  label:Dock(TOP)
+  label:DockMargin(0, 0, 0, 5)
+  label:SetDark(true)
+  label:SetFont("DermaDefaultBold")
+  label:SetTextColor(Color(30, 30, 30))
+
+  local titleText = string.NiceName(parameter.name) .. ((parameter.required and " *") or "")
+  label:SetText(titleText)
+
+  return label
+end
+
+widgetBuilders["string"]["short"] = function(row, name, parameter)
+  row:SetTall(55)
+
+  local label = parameterTitle(row, parameter)
+
+  local entry = vgui.Create("DTextEntry", row)
+  entry:Dock(TOP)
+  entry:SetUpdateOnType(true)
+  entry:SetTall(25)
+
+  entry.OnValueChange = function(self, value)
+    hook.Run("RPTools_Template_Value_Change", name, value)
+  end
+
+  if parameter.default then
+    entry:SetValue(parameter.default)
+  end
+
+  if parameter.description then
+    label:SetTooltip(parameter.description)
+  end
+end
+
+widgetBuilders["string"]["long"] = function(row, name, parameter)
+  row:SetTall(110)
+
+  local label = parameterTitle(row, parameter)
+
+  if parameter.description then
+    label:SetTooltip(parameter.description)
+  end
+
+  local entry = vgui.Create("DTextEntry", row)
+  entry:Dock(FILL)
+  entry:SetUpdateOnType(true)
+  entry:SetMultiline(true)
+
+  entry.OnValueChange = function(self, value)
+    hook.Run("RPTools_Template_Value_Change", name, value)
+  end
+
+  entry:SetDrawLanguageID(false)
+
+  if parameter.default then
+    entry:SetValue(parameter.default)
+  end
+end
+
+widgetBuilders["string"]["default"] = widgetBuilders["string"]["short"]
+
+widgetBuilders["boolean"]["default"] = function(row, name, parameter)
+  row:SetTall(30)
+
+  local checkbox = vgui.Create("DCheckBoxLabel", row)
+  checkbox:Dock(TOP)
+  checkbox:DockMargin(0, 5, 0, 0)
+  checkbox:SetDark(true)
+
+  checkbox.OnChange = function(self, value)
+    hook.Run("RPTools_Template_Value_Change", name, value)
+  end
+
+  local titleText = string.NiceName(parameter.name) .. ((parameter.required and " *") or "")
+  checkbox:SetText(titleText)
+
+  if parameter.description then
+    checkbox:SetTooltip(parameter.description)
+  end
+
+  if parameter.default ~= nil then
+    checkbox:SetChecked(parameter.default)
+  end
+end
+
+widgetBuilders["number"]["default"] = function(row, name, parameter)
+  row:SetTall(55)
+
+  local label = parameterTitle(row, parameter)
+
+  if parameter.description then
+    label:SetTooltip(parameter.description)
+  end
+
+  if parameter.min and parameter.max then
+    local slider = vgui.Create("DNumSlider", row)
+    slider:Dock(TOP)
+    slider:SetMinMax(parameter.min, parameter.max)
+    slider:SetDecimals(0)
+    slider:SetDark(true)
+
+    slider:SetText("")
+    slider.Label:SetVisible(false)
+
+    slider.Slider:Dock(FILL)
+
+    slider.TextArea:Dock(RIGHT)
+    slider.TextArea:SetWide(45)
+
+    slider.OnValueChange = function(self, value)
+      hook.Run("RPTools_Template_Value_Change", name, value)
+    end
+
+    if parameter.default then
+      slider:SetValue(parameter.default)
+    end
+  else
+    local numWang = vgui.Create("DNumberWang", row)
+    numWang:Dock(TOP)
+    numWang:SetTall(25)
+
+    numWang.OnValueChange = function(self, value)
+      hook.Run("RPTools_Template_Value_Change", name, value)
+    end
+
+    if parameter.min then
+      numWang:SetMin(parameter.min)
+    end
+    if parameter.max then
+      numWang:SetMax(parameter.max)
+    end
+
+    if parameter.default then
+      numWang:SetValue(parameter.default)
+    end
+  end
+end
+
+function RPTools.UI.BuildParameterWidget(panel, parameter)
+  local row = vgui.Create("DPanel", panel)
+  row:Dock(TOP)
+  row:DockMargin(5, 5, 5, 10)
+  row.Paint = function() end
+
+  local param = parameter.param
+
+  local builder = widgetBuilders[param.type][param.display] or widgetBuilders[param.type]["default"]
+
+  builder(row, parameter.name, param)
 end

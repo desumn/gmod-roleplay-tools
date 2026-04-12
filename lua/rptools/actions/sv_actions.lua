@@ -64,7 +64,7 @@ function RPTools.Actions.Server.ValidateAction(action)
 
     if not paramsValid then
       isValid = false
-      errorMessage = paramsError .. action.actionType .. " " .. errorMessage
+      errorMessage = (paramsError or "") .. action.actionType .. " " .. errorMessage
     end
   end
   return isValid, errorMessage

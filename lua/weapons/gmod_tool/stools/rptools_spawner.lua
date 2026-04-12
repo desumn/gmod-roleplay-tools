@@ -62,43 +62,71 @@ if CLIENT then
     visibleNodeCache.length = #visibleNodes
   end
 
-  local function updateTemplates(templateList, templates)
-    templateList:Clear()
-    for _, template in pairs(templates) do
-      local line = templateList:AddLine(string.NiceName(template.name), template.description)
-      line.name = template.name
-    end
-  end
+  RPTools.UI.CurrentTemplate = ""
+  RPTools.UI.CurrentParams = {}
 
   function TOOL.BuildCPanel(panel)
     panel:Help("1. Select a template.\n2. Configure the template.\n3. Spawn a node from this template.")
 
-    local templateList = vgui.Create("DListView")
-    templateList:SetTall(80)
-    templateList:SetMultiSelect(false)
-    templateList:AddColumn("Template Name")
+    local templateList = RPTools.UI.BuildTemplateList(panel)
 
-    updateTemplates(templateList, RPTools.Templating.ClientCache)
+    local sep = vgui.Create("DPanel")
+    sep:SetTall(2)
 
-    hook.Add("RPTools_TemplateSync", templateList, function(self, templates)
-      updateTemplates(self, templates)
+    sep.Paint = function(self, w, h)
+      surface.SetDrawColor(0, 0, 0, 100)
+
+      surface.DrawRect(0, 0, w, h)
+    end
+
+    panel:AddItem(sep)
+
+    local formWidgets = {}
+
+    local stateIndicator = vgui.Create("DLabel", panel)
+    stateIndicator.Paint = function(self, w, h)
+      draw.RoundedBox(4, 0, 0, w, h, Color(0, 0, 0, 150))
+
+      surface.SetDrawColor(255, 255, 255, 20)
+      surface.DrawOutlinedRect(0, 0, w, h)
+    end
+    stateIndicator:SetTall(50)
+    stateIndicator:SetText("Select a template...")
+    stateIndicator:SetContentAlignment(5)
+    stateIndicator:SetWrap(true)
+    stateIndicator:SetAutoStretchVertical(true)
+    stateIndicator:SetFont("DermaDefaultBold")
+    stateIndicator:SetTextColor(Color(30, 30, 30))
+    stateIndicator:DockMargin(5, 10, 5, 5)
+    stateIndicator:SetTextInset(10, 0)
+    stateIndicator:SetFont("Trebuchet18")
+
+    panel:AddItem(stateIndicator)
+
+    local template = {}
+
+    templateList.OnRowSelected = function(_, rowIndex, row)
+      template = RPTools.Templating.GetTemplateByName(row.name)
+      RPTools.UI.BuildTemplateForm(panel, template, formWidgets)
+      stateIndicator:SetText("Template not valid - please fill the required parameters.")
+    end
+
+    local arguments = {}
+
+    hook.Add("RPTools_Template_Value_Change", templateList, function(_, name, newValue)
+      arguments[name] = newValue
+      local newFinalArguments = RPTools.Templating.Apply(template, arguments)
+
+      if newFinalArguments then
+        RPTools.UI.CurrentParams = newFinalArguments
+        RPTools.UI.CurrentTemplate = template.name
+        stateIndicator:SetText("Template valid - you can now place a node in world. ")
+      else
+        RPTools.UI.CurrentParams = {}
+        RPTools.UI.CurrentTemplate = ""
+        stateIndicator:SetText("Template not valid - please fill the required parameters.")
+      end
     end)
-
-    local configPanel = vgui.Create("DPanel", panel)
-
-    configPanel:SetSize(0, 0)
-    configPanel.Paint = function(self, w, h)
-      draw.RoundedBox(4, 0, 0, w, h, Color(45, 48, 55, 220))
-    end
-
-    panel:AddItem(templateList)
-    panel:AddItem(configPanel)
-
-    templateList.OnRowSelected = function(self, index, row)
-      RPTools.UI.OpenTemplateMenu(configPanel, RPTools.Templating.GetTemplateFromClientCache(row.name))
-      configPanel:InvalidateLayout(true)
-      configPanel:SizeToChildren(false, true)
-    end
   end
 
   local function drawInfoPanel(node, panelX, panelTopY)

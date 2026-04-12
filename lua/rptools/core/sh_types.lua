@@ -27,15 +27,18 @@
 ---@field name string Unique template identifier
 ---@field description string Human-readable description for the UI
 ---@field parameters RPToolsParameter[] Declared parameters
----@field transformer fun(args: table, context: RPToolsContext): RPToolsNode[]|nil Builds nodes from validated arguments
+---@field transformer fun(args: table, context: RPToolsContext)|boolean: RPToolsNode[]|nil Builds nodes from validated arguments
 
 ---@class RPToolsParameter
 ---@field name string Parameter identifier
 ---@field description string Human-readable description
 ---@field type string Value type: "string", "number", or "boolean"
----@field display? string UI widget hint: "short", "long" (string only)
+---@field display? string UI widget hint
 ---@field required boolean Whether the parameter must be provided
 ---@field default? any Default value if not provided
+---@field group string Parameter group
+---@field min? number Minimum parameter value, if applicable
+---@field max? number Maximum parameter value, if applicable
 
 ---@class RPToolsContext
 ---@field position Vector World position for node placement
