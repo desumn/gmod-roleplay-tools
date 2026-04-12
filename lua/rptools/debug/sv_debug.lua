@@ -79,7 +79,9 @@ local function disableDebug(ply)
 end
 
 timer.Create("rptools_debugMode", 0.1, 0, function()
-  if table.IsEmpty(debugMode) then return end
+  if table.IsEmpty(debugMode) then
+    return
+  end
   sendAllNodes()
 end)
 

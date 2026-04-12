@@ -101,7 +101,6 @@ if CLIENT then
     end
   end
 
-
   local function drawInfoPanel(node, panelX, panelTopY)
     local padding = 10
     local lineHeight = 20
@@ -112,15 +111,15 @@ if CLIENT then
     local actions = node.actionsDesc or {}
 
     local height = padding
-        + headerHeight -- id/state
-        + headerHeight -- policy
-        + separatorHeight
-        + lineHeight -- titre conditions
-        + #conditions * lineHeight
-        + separatorHeight
-        + lineHeight -- titre actions
-        + #actions * lineHeight
-        + padding
+      + headerHeight -- id/state
+      + headerHeight -- policy
+      + separatorHeight
+      + lineHeight -- titre conditions
+      + #conditions * lineHeight
+      + separatorHeight
+      + lineHeight -- titre actions
+      + #actions * lineHeight
+      + padding
 
     local x = panelX
     local y = panelTopY
@@ -132,12 +131,12 @@ if CLIENT then
 
     draw.SimpleText(node.id, "DermaDefaultBold", x + padding, cursorY, color_white, TEXT_ALIGN_LEFT)
     draw.SimpleText(
-        RPTools.Coordinator.stateText[node.state],
-        "DermaDefault",
-        x + w - padding,
-        cursorY,
-        RPTools.Coordinator.stateColor[node.state],
-        TEXT_ALIGN_RIGHT
+      RPTools.Coordinator.stateText[node.state],
+      "DermaDefault",
+      x + w - padding,
+      cursorY,
+      RPTools.Coordinator.stateColor[node.state],
+      TEXT_ALIGN_RIGHT
     )
     cursorY = cursorY + headerHeight
 
@@ -153,10 +152,12 @@ if CLIENT then
     cursorY = cursorY + lineHeight
 
     for _, desc in ipairs(conditions) do
-        local text = string.sub(desc, 1, 40)
-        if #desc > 40 then text = text .. "..." end
-        draw.SimpleText(text, "DermaDefault", x + padding + 5, cursorY, Color(180, 180, 180))
-        cursorY = cursorY + lineHeight
+      local text = string.sub(desc, 1, 40)
+      if #desc > 40 then
+        text = text .. "..."
+      end
+      draw.SimpleText(text, "DermaDefault", x + padding + 5, cursorY, Color(180, 180, 180))
+      cursorY = cursorY + lineHeight
     end
 
     cursorY = cursorY + 5
@@ -168,10 +169,12 @@ if CLIENT then
     cursorY = cursorY + lineHeight
 
     for _, desc in ipairs(actions) do
-        local text = string.sub(desc, 1, 40)
-        if #desc > 40 then text = text .. "..." end
-        draw.SimpleText(text, "DermaDefault", x + padding + 5, cursorY, Color(180, 180, 180))
-        cursorY = cursorY + lineHeight
+      local text = string.sub(desc, 1, 40)
+      if #desc > 40 then
+        text = text .. "..."
+      end
+      draw.SimpleText(text, "DermaDefault", x + padding + 5, cursorY, Color(180, 180, 180))
+      cursorY = cursorY + lineHeight
     end
   end
 
@@ -236,7 +239,6 @@ if CLIENT then
 
     return
   end
-
 end
 
 function TOOL:LeftClick(tr)
@@ -292,17 +294,17 @@ end
 function TOOL:Holster()
   if CLIENT then
     if self.debugActive then
-        LocalPlayer():ConCommand("rptools_toggle_debug")
-        self.debugActive = false
+      LocalPlayer():ConCommand("rptools_toggle_debug")
+      self.debugActive = false
     end
   end
 end
 
 function TOOL:Think()
-    if CLIENT then
-        if not self.debugActive then
-            LocalPlayer():ConCommand("rptools_toggle_debug")
-            self.debugActive = true
-        end
+  if CLIENT then
+    if not self.debugActive then
+      LocalPlayer():ConCommand("rptools_toggle_debug")
+      self.debugActive = true
     end
+  end
 end

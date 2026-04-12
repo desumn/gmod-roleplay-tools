@@ -47,7 +47,7 @@ local policyFormat = {
   [RPTools.Node.TRIGGER_POLICY.MANUAL] = "manual",
   [RPTools.Node.TRIGGER_POLICY.ONE_SHOT] = "one shot",
   [RPTools.Node.TRIGGER_POLICY.COOLDOWN] = "cooldown",
-  [RPTools.Node.TRIGGER_POLICY.CONTINOUS] = "continous"
+  [RPTools.Node.TRIGGER_POLICY.CONTINOUS] = "continous",
 }
 
 function RPTools.Node.FormatPolicy(policy)

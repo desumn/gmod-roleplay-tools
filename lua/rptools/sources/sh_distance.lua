@@ -3,7 +3,7 @@ if SERVER then
     return ply:GetPos():Distance(node.position)
   end, function(param)
     return param == nil
-  end, function (_)
+  end, function(_)
     return "distance"
   end)
 end

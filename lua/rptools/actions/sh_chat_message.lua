@@ -1,7 +1,7 @@
 if SERVER then
   RPTools.Actions.Server.RegisterClientAction("chat_message", function(params)
     return istable(params) and isstring(params.message)
-  end, function (params)
+  end, function(params)
     return "chat message: " .. params.message
   end)
 end
