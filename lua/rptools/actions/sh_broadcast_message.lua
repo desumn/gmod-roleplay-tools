@@ -3,7 +3,7 @@ if SERVER then
     return istable(params) and isstring(params.message)
   end, function(params)
     return "broadcast message: " .. params.message
-  end, function (_, _, _)
+  end, function(_, _, _)
     return player.GetAll()
   end)
 end

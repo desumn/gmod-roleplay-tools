@@ -154,10 +154,8 @@ function RPTools.Blackboard.Merge(otherBlackboard)
   table.Merge(blackboard, otherBlackboard)
 end
 
-
 RPTools.Blackboard.Key = RPTools.Blackboard.Key or {}
 
 function RPTools.Blackboard.Key.Flag(key)
   return "flag_" .. key
 end
-

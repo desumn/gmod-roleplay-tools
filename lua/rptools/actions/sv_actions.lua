@@ -21,7 +21,7 @@ function RPTools.Actions.Server.RegisterClientAction(name, validator, formatter,
   validators[name] = validator
   formatters[name] = formatter
 
-  local safeTarget = target or function (ply, _, _)
+  local safeTarget = target or function(ply, _, _)
     return { ply }
   end
   serverFunction[name] = function(ply, node, params)

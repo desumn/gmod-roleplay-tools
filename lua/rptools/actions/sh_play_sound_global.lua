@@ -1,9 +1,9 @@
 if SERVER then
   RPTools.Actions.Server.RegisterClientAction("play_sound_global", function(params)
     return istable(params)
-        and isstring(params.sound)
-        and RPTools.Utilities.IsNumber(params.pitch)
-        and RPTools.Utilities.IsNumber(params.volume)
+      and isstring(params.sound)
+      and RPTools.Utilities.IsNumber(params.pitch)
+      and RPTools.Utilities.IsNumber(params.volume)
   end, function(params)
     return "play sound: " .. params.sound .. " (v:" .. params.volume .. ", p:" .. params.pitch .. ")"
   end)
