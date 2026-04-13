@@ -63,14 +63,14 @@ function RPTools.Commands.Args.String(caller, str, label)
   return str
 end
 
-function RPTools.Commands.CompletePlayers(name)
+function RPTools.Commands.CompletePlayers(cmd, name)
   local foundPlayers = {}
   for _, ply in player.Iterator() do
     local lowerName = string.lower(ply:Nick())
     local lowerTargetName = string.lower(name)
 
     if string.find(lowerName, lowerTargetName, 1, true) then
-      table.insert(foundPlayers, ply:Nick())
+      table.insert(foundPlayers, cmd .. " " .. ply:Nick())
     end
   end
   return foundPlayers

@@ -16,9 +16,9 @@ concommand.Add("rptools_flag", function(ply, cmd, args, argStr)
     RPTools.Blackboard.Write(target, RPTools.Blackboard.Key.Flag(flagName), true)
     RPTools.Commands.PrintToPlayer(ply, "Set flag " .. flagName .. " for player " .. target:Nick())
   end
-end, function(_, _, args)
+end, function(cmd, _, args)
   if args[1] and not args[2] then
-    return RPTools.Commands.CompletePlayers(args[1])
+    return RPTools.Commands.CompletePlayers(cmd, args[1])
   end
   return {}
 end)
@@ -41,9 +41,9 @@ concommand.Add("rptools_unflag", function(ply, cmd, args, argStr)
     RPTools.Blackboard.Write(target, RPTools.Blackboard.Key.Flag(flagName), false)
     RPTools.Commands.PrintToPlayer(ply, "Set flag " .. flagName .. " for player " .. target:Nick())
   end
-end, function(_, _, args)
+end, function(cmd, _, args)
   if args[1] and not args[2] then
-    return RPTools.Commands.CompletePlayers(args[1])
+    return RPTools.Commands.CompletePlayers(cmd, args[1])
   end
   return {}
 end)
