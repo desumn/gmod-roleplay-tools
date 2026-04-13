@@ -20,9 +20,6 @@ end, function(_, _, args)
   if args[1] and not args[2] then
     return RPTools.Commands.CompletePlayers(args[1])
   end
-  if args[1] and args[2] and not args[3] then
-    return RPTools.Commands.CompleteBlackboardByPrefix(args[1], RPTools.Blackboard.Key.Flag())
-  end
   return {}
 end)
 
@@ -47,9 +44,6 @@ concommand.Add("rptools_unflag", function(ply, cmd, args, argStr)
 end, function(_, _, args)
   if args[1] and not args[2] then
     return RPTools.Commands.CompletePlayers(args[1])
-  end
-  if args[1] and args[2] and not args[3] then
-    return RPTools.Commands.CompleteBlackboardByPrefix(args[1], RPTools.Blackboard.Key.Flag())
   end
   return {}
 end)
