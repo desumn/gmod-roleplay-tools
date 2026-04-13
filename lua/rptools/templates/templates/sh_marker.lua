@@ -25,7 +25,7 @@ RPTools.Templating.RegisterTemplate({
     end
 
     if args.inFlag ~= nil then
-      local flag_cond = RPTools.Condition.Create("flag", args.flag, "eq", true)
+      local flag_cond = RPTools.Condition.Create("flag", args.inFlag, "eq", true)
       RPTools.Condition.AddToSet(conditions, flag_cond)
     end
 

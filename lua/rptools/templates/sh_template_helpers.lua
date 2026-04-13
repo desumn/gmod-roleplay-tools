@@ -110,7 +110,7 @@ function RPTools.Templating.Parameters.Number(name, description, min, max, requi
     min = min or nil,
     max = max or nil,
     required = required or false,
-    defualt = default or 0,
+    default = default or 0,
     group = group or "trigger",
   }
 end
@@ -129,6 +129,7 @@ function RPTools.Templating.Parameters.Duration(name, description, required, gro
     type = "number",
     min = min or 1,
     max = max or 120,
+    default = 5,
     required = required or false,
     group = group or "action",
   }

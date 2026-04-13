@@ -104,17 +104,23 @@ if CLIENT then
     panel:AddItem(stateIndicator)
 
     local template = {}
+    local arguments = {}
 
     templateList.OnRowSelected = function(_, rowIndex, row)
       template = RPTools.Templating.GetTemplateByName(row.name)
       RPTools.UI.BuildTemplateForm(panel, template, formWidgets)
       stateIndicator:SetText("Template not valid - please fill the required parameters.")
+      arguments = {}
+      for name, parameter in pairs(template.parameters) do
+        if parameter.default ~= nil then
+          print(name, parameter.default)
+          arguments[name] = parameter.default
+        end
+      end
     end
 
-    local arguments = {}
-
     hook.Add("RPTools_Template_Value_Change", templateList, function(_, name, newValue)
-      arguments[name] = newValue
+      arguments[name] = (RPTools.Utilities.NonEmpty(newValue) and newValue) or nil
       local newFinalArguments = RPTools.Templating.Apply(template, arguments)
 
       if newFinalArguments then

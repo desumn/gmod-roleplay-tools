@@ -70,7 +70,11 @@ function RPTools.Operators.GetFunction(operator)
   local operatorValid, operatorErrorMessage = RPTools.Operators.ValidateOperator(operator)
 
   if operatorValid then
-    return operatorFunctions[operator], nil
+    local opFunc = operatorFunctions[operator]
+    local safeFunc = function(l, r)
+      return l ~= nil and r ~= nil and opFunc(l, r)
+    end
+    return safeFunc, nil
   else
     return nil, operatorErrorMessage
   end

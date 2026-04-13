@@ -11,7 +11,7 @@ RPTools.Templating.RegisterTemplate({
     angle = param.Angle(),
     sight = param.CheckSight(),
     inFlag = param.Flag("Input Flag", "Flag required for activation", false),
-    outFlag = param.Flag("Output flag", "Flag that will be set to true", true, "action")
+    outFlag = param.Flag("Output flag", "Flag that will be set to true", false, "action")
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()
@@ -28,7 +28,7 @@ RPTools.Templating.RegisterTemplate({
     end
 
     if args.inFlag ~= nil then
-      local flag_cond = RPTools.Condition.Create("flag", args.flag, "eq", true)
+      local flag_cond = RPTools.Condition.Create("flag", args.inFlag, "eq", true)
       RPTools.Condition.AddToSet(conditions, flag_cond)
     end
 
@@ -44,6 +44,8 @@ RPTools.Templating.RegisterTemplate({
     if args.useHUD then
         messageAction = RPTools.Actions.Server.Create("hud_message", { message = args.message, duration = args.duration })
     end
+
+    RPTools.Actions.Server.AddToSet(actions, messageAction)
 
     local node = RPTools.Node.Create(
       context.position,

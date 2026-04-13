@@ -53,7 +53,7 @@ if CLIENT then
       alpha = math.Clamp((timeLeft / fadeDuration) * 255, 0, 255)
     end
 
-    surface.SetFont("HUDMessageFont")
+    surface.SetFont("RPToolsHUDMessageFont")
     local textWidth, textHeight = surface.GetTextSize(message.text)
 
     local paddingX = 20

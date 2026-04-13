@@ -159,3 +159,7 @@ RPTools.Blackboard.Key = RPTools.Blackboard.Key or {}
 function RPTools.Blackboard.Key.Flag(key)
   return "flag_" .. key
 end
+
+function RPTools.Blackboard.Key.Counter(key)
+  return "counter_" .. key
+end
