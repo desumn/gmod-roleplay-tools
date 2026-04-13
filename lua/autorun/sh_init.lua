@@ -44,6 +44,7 @@ local function loadAddon()
   AddCSLuaFile("rptools/engine/sh_node_state.lua")
   AddCSLuaFile("rptools/commands/sh_saving.lua")
   AddCSLuaFile("rptools/commands/sh_attributes.lua")
+  AddCSLuaFile("rptools/commands/sh_flags.lua")
   AddCSLuaFile("rptools/actions/cl_actions.lua")
 
   include("rptools/core/sh_logs.lua")
@@ -71,6 +72,7 @@ local function loadAddon()
     include("rptools/commands/sh_templating.lua")
     include("rptools/commands/sh_saving.lua")
     include("rptools/commands/sh_attributes.lua")
+    include("rptools/commands/sh_flags.lua")
   end
 
   if CLIENT then
@@ -86,6 +88,7 @@ local function loadAddon()
     include("rptools/commands/sh_templating.lua")
     include("rptools/commands/sh_saving.lua")
     include("rptools/commands/sh_attributes.lua")
+    include("rptools/commands/sh_flags.lua")
   end
 
   loadSources()

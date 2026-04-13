@@ -7,7 +7,7 @@ RPTools.Templating.RegisterTemplate({
     distance = param.Distance(),
     step = param.Number("Step", "how much the counter is incremented, may be negative", nil, nil, true, 1, "action"),
     inFlag = param.Flag("Input Flag", "Flag required for activation", false),
-    outCounter = param.Flag("Counter name", "Counter that will be incremented", true, "action")
+    outCounter = param.Flag("Counter name", "Counter that will be incremented", true, "action"),
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()

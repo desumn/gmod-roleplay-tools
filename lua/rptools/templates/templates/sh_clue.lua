@@ -11,7 +11,7 @@ RPTools.Templating.RegisterTemplate({
     angle = param.Angle(),
     sight = param.CheckSight(),
     inFlag = param.Flag("Input Flag", "Flag required for activation", false),
-    outFlag = param.Flag("Output flag", "Flag that will be set to true", false, "action")
+    outFlag = param.Flag("Output flag", "Flag that will be set to true", false, "action"),
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()
@@ -35,14 +35,14 @@ RPTools.Templating.RegisterTemplate({
     local actions = RPTools.Actions.Server.EmptyActionSet()
 
     if args.outFlag ~= nil then
-        local action = RPTools.Actions.Server.Create("flag", { key = args.outFlag, value = true })
-        RPTools.Actions.Server.AddToSet(actions, action)
+      local action = RPTools.Actions.Server.Create("flag", { key = args.outFlag, value = true })
+      RPTools.Actions.Server.AddToSet(actions, action)
     end
 
     local messageAction = RPTools.Actions.Server.Create("chat_message", { message = args.message })
 
     if args.useHUD then
-        messageAction = RPTools.Actions.Server.Create("hud_message", { message = args.message, duration = args.duration })
+      messageAction = RPTools.Actions.Server.Create("hud_message", { message = args.message, duration = args.duration })
     end
 
     RPTools.Actions.Server.AddToSet(actions, messageAction)

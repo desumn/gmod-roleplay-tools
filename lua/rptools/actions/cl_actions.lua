@@ -7,7 +7,6 @@ local logModuleName = "Action:Client"
 local clientFunctions = {}
 
 function RPTools.Actions.Client.RegisterAction(name, func)
-  print("ff")
   clientFunctions[name] = func
 end
 

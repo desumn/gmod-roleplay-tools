@@ -144,6 +144,31 @@ function RPTools.Blackboard.GetAll()
   return table.Copy(blackboard)
 end
 
+function RPTools.Blackboard.FindByPrefix(ply, prefix)
+  if not ply or not ply:IsValid() then
+    RPTools.Logs.log(
+      RPTools.Logs.LEVEL.WARNING,
+      logModuleName,
+      "Tried to read blackboard on invalid player: " .. tostring(ply)
+    )
+    return
+  end
+
+  local values = blackboard[ply:SteamID64()]
+  if values == nil or table.IsEmpty(values) then
+    return
+  end
+  local subBoard = {}
+
+  for key, value in pairs(values) do
+    if string.Explode("_", key)[1] == prefix then
+      subBoard[key] = value
+    end
+  end
+
+  return subBoard
+end
+
 function RPTools.Blackboard.ClearAll()
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Cleared all blackboard")
   blackboard = {}
@@ -157,9 +182,9 @@ end
 RPTools.Blackboard.Key = RPTools.Blackboard.Key or {}
 
 function RPTools.Blackboard.Key.Flag(key)
-  return "flag_" .. key
+  return (key ~= nil and key ~= "" and ("flag_" .. key)) or "flag"
 end
 
 function RPTools.Blackboard.Key.Counter(key)
-  return "counter_" .. key
+  return (key ~= nil and key ~= "" and ("counter_" .. key)) or "counter"
 end

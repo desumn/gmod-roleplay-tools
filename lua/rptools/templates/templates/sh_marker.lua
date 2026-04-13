@@ -8,7 +8,7 @@ RPTools.Templating.RegisterTemplate({
     angle = param.Angle(),
     sight = param.CheckSight(),
     inFlag = param.Flag("Input Flag", "Flag required for activation", false),
-    outFlag = param.Flag("Output flag", "Flag that will be set to true", true, "action")
+    outFlag = param.Flag("Output flag", "Flag that will be set to true", true, "action"),
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()

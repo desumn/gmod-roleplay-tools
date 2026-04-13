@@ -1,0 +1,85 @@
+concommand.Add("rptools_flag", function(ply, cmd, args, argStr)
+  if CLIENT then
+    return
+  end
+
+  if SERVER then
+    local target = RPTools.Commands.Args.Player(ply, args[1])
+    if not target or not IsValid(target) then
+      return
+    end
+    local flagName = RPTools.Commands.Args.String(ply, args[2], "flag")
+    if not flagName then
+      return
+    end
+
+    RPTools.Blackboard.Write(target, RPTools.Blackboard.Key.Flag(flagName), true)
+    RPTools.Commands.PrintToPlayer(ply, "Set flag " .. flagName .. " for player " .. target:Nick())
+  end
+end, function(_, _, args)
+  if args[1] and not args[2] then
+    return RPTools.Commands.CompletePlayers(args[1])
+  end
+  if args[1] and args[2] and not args[3] then
+    return RPTools.Commands.CompleteBlackboardByPrefix(args[1], RPTools.Blackboard.Key.Flag())
+  end
+  return {}
+end)
+
+concommand.Add("rptools_unflag", function(ply, cmd, args, argStr)
+  if CLIENT then
+    return
+  end
+
+  if SERVER then
+    local target = RPTools.Commands.Args.Player(ply, args[1])
+    if not target or not IsValid(target) then
+      return
+    end
+    local flagName = RPTools.Commands.Args.String(ply, args[2], "flag")
+    if not flagName then
+      return
+    end
+
+    RPTools.Blackboard.Write(target, RPTools.Blackboard.Key.Flag(flagName), false)
+    RPTools.Commands.PrintToPlayer(ply, "Set flag " .. flagName .. " for player " .. target:Nick())
+  end
+end, function(_, _, args)
+  if args[1] and not args[2] then
+    return RPTools.Commands.CompletePlayers(args[1])
+  end
+  if args[1] and args[2] and not args[3] then
+    return RPTools.Commands.CompleteBlackboardByPrefix(args[1], RPTools.Blackboard.Key.Flag())
+  end
+  return {}
+end)
+
+concommand.Add("rptools_listflags", function(ply, cmd, args, argStr)
+  if CLIENT then
+    return
+  end
+
+  if SERVER then
+    local target = RPTools.Commands.Args.Player(ply, args[1])
+    if not target or not IsValid(target) then
+      return
+    end
+    local flags = RPTools.Blackboard.FindByPrefix(target, RPTools.Blackboard.Key.Flag())
+
+    if not flags or table.IsEmpty(flags) then
+      RPTools.Commands.PrintToPlayer(ply, "No flags found for player " .. ply:Nick())
+      return
+    end
+
+    RPTools.Commands.PrintToPlayer(ply, ply:Nick() .. " flags:")
+    for flag, value in pairs(flags) do
+      local flagName = string.sub(flag, string.len(RPTools.Blackboard.Key.Flag()) + 2)
+      RPTools.Commands.PrintToPlayer(ply, flagName .. " = " .. tostring(value))
+    end
+  end
+end, function(_, _, args)
+  if args[1] and not args[2] then
+    return RPTools.Commands.CompletePlayers(args[1])
+  end
+  return {}
+end)

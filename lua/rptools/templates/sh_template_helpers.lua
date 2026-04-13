@@ -80,7 +80,6 @@ function RPTools.Templating.Parameters.Boolean(name, description)
   }
 end
 
-
 ---@param name? string
 ---@param description? string
 function RPTools.Templating.Parameters.LongString(name, description)
@@ -93,7 +92,6 @@ function RPTools.Templating.Parameters.LongString(name, description)
     group = "action",
   }
 end
-
 
 ---@param name? string
 ---@param description? string

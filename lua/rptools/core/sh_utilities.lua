@@ -77,7 +77,6 @@ function RPTools.Utilities.Map(table, f)
   return returnTable
 end
 
-
 function RPTools.Utilities.NonEmpty(value)
   return value ~= nil and value ~= ""
 end

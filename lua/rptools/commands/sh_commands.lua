@@ -1,6 +1,8 @@
 RPTools = RPTools or {}
 RPTools.Commands = RPTools.Commands or {}
 
+RPTools.Commands.Args = RPTools.Commands.Args or {}
+
 ---@param ply Player
 ---@param string string
 function RPTools.Commands.PrintToPlayer(ply, string)
@@ -11,6 +13,98 @@ function RPTools.Commands.PrintToPlayer(ply, string)
   RPTools.Network.SendToPlayer(ply, RPTools.Network.MSG_TYPE.PRINT, function()
     net.WriteString(string)
   end)
+end
+
+function RPTools.Commands.Args.Player(caller, name)
+  if name == nil or not (isstring(name)) or name == "" then
+    RPTools.Commands.PrintToPlayer(caller, "Please provide a player name")
+    return
+  end
+
+  local foundPlayers = {}
+  for _, ply in player.Iterator() do
+    local lowerName = string.lower(ply:Nick())
+    local lowerTargetName = string.lower(name)
+
+    if lowerName == lowerTargetName then
+      return ply
+    end
+
+    if string.find(lowerName, lowerTargetName, 1, true) then
+      table.insert(foundPlayers, ply)
+    end
+  end
+
+  if #foundPlayers == 0 then
+    RPTools.Commands.PrintToPlayer(caller, "Player " .. name .. " not found")
+    return
+  end
+
+  if #foundPlayers > 1 then
+    local nicks = foundPlayers[1]:Nick()
+    for idx, ply in ipairs(foundPlayers) do
+      if idx == 1 then
+        continue
+      end
+      nicks = ply:Nick() .. ", " .. nicks
+    end
+    RPTools.Commands.PrintToPlayer(caller, "Found multiple players: " .. nicks)
+    return
+  end
+
+  return foundPlayers[1]
+end
+
+function RPTools.Commands.Args.String(caller, str, label)
+  if str == nil or not isstring(str) or str == "" then
+    RPTools.Commands.PrintToPlayer(caller, (label or "") .. ": Please provide a valid string")
+    return
+  end
+  return str
+end
+
+function RPTools.Commands.CompletePlayers(name)
+  local foundPlayers = {}
+  for _, ply in player.Iterator() do
+    local lowerName = string.lower(ply:Nick())
+    local lowerTargetName = string.lower(name)
+
+    if string.find(lowerName, lowerTargetName, 1, true) then
+      table.insert(foundPlayers, ply:Nick())
+    end
+  end
+  return foundPlayers
+end
+
+function RPTools.Commands.CompleteBlackboardByPrefix(name, prefix)
+  local target = nil
+
+  local foundPlayers = {}
+  for _, ply in player.Iterator() do
+    local lowerName = string.lower(ply:Nick())
+    local lowerTargetName = string.lower(name)
+
+    if lowerName == lowerTargetName then
+      ply = ply
+      break
+    end
+
+    if string.find(lowerName, lowerTargetName, 1, true) then
+      table.insert(foundPlayers, ply)
+    end
+  end
+
+  if #foundPlayers == 0 then
+    return {}
+  end
+
+  if #foundPlayers > 1 then
+    return {}
+  end
+
+  local flags = RPTools.Blackboard.FindByPrefix(target, prefix)
+  print("t")
+  return (not flags == nil and not table.IsEmpty(flags) and table.GetKeys(flags)) or {}
 end
 
 if CLIENT then
