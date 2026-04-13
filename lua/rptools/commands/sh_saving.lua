@@ -7,19 +7,21 @@ concommand.Add("rptools_save", function(ply, _, args, _)
   if CLIENT then
     return
   end
-  if not RPTools.Commands.requireAdmin(ply) then
-    return
+  if SERVER then
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
+
+    local name = args[1]
+
+    if not name then
+      printToPlayer(ply, "Please provide a save name")
+      return
+    end
+
+    RPTools.Save.SaveAll(name)
+    printToPlayer(ply, "Successfully saved " .. name)
   end
-
-  local name = args[1]
-
-  if not name then
-    printToPlayer(ply, "Please provide a save name")
-    return
-  end
-
-  RPTools.Save.SaveAll(name)
-  printToPlayer(ply, "Successfully saved " .. name)
 end)
 
 concommand.Add("rptools_load", function(ply, _, args, _)
