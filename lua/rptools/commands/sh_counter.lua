@@ -3,7 +3,10 @@ concommand.Add("rptools_increment", function(ply, cmd, args, argStr)
     return
   end
 
-  if SERVER then
+  if SERVER then    
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
     local target = RPTools.Commands.Args.Player(ply, args[1])
     if not target or not IsValid(target) then
       return
@@ -30,6 +33,9 @@ concommand.Add("rptools_reset_counter", function(ply, cmd, args, argStr)
   end
 
   if SERVER then
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
     local target = RPTools.Commands.Args.Player(ply, args[1])
     if not target or not IsValid(target) then
       return
@@ -55,6 +61,9 @@ concommand.Add("rptools_listcounters", function(ply, cmd, args, argStr)
   end
 
   if SERVER then
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
     local target = RPTools.Commands.Args.Player(ply, args[1])
     if not target or not IsValid(target) then
       return

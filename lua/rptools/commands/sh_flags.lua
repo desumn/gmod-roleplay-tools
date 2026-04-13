@@ -4,6 +4,9 @@ concommand.Add("rptools_flag", function(ply, cmd, args, argStr)
   end
 
   if SERVER then
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
     local target = RPTools.Commands.Args.Player(ply, args[1])
     if not target or not IsValid(target) then
       return
@@ -29,6 +32,9 @@ concommand.Add("rptools_unflag", function(ply, cmd, args, argStr)
   end
 
   if SERVER then
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
     local target = RPTools.Commands.Args.Player(ply, args[1])
     if not target or not IsValid(target) then
       return
@@ -54,6 +60,9 @@ concommand.Add("rptools_listflags", function(ply, cmd, args, argStr)
   end
 
   if SERVER then
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
     local target = RPTools.Commands.Args.Player(ply, args[1])
     if not target or not IsValid(target) then
       return
