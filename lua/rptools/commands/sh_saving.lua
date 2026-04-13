@@ -3,24 +3,30 @@ RPTools.Commands = RPTools.Commands or {}
 
 local printToPlayer = RPTools.Commands.PrintToPlayer
 
-if SERVER then
-  concommand.Add("rptools_save", function(ply, _, args, _)
-    if not RPTools.Commands.requireAdmin(ply) then
-      return
-    end
+concommand.Add("rptools_save", function(ply, _, args, _)
+  if CLIENT then
+    return
+  end
+  if not RPTools.Commands.requireAdmin(ply) then
+    return
+  end
 
-    local name = args[1]
+  local name = args[1]
 
-    if not name then
-      printToPlayer(ply, "Please provide a save name")
-      return
-    end
+  if not name then
+    printToPlayer(ply, "Please provide a save name")
+    return
+  end
 
-    RPTools.Save.SaveAll(name)
-    printToPlayer(ply, "Successfully saved " .. name)
-  end)
+  RPTools.Save.SaveAll(name)
+  printToPlayer(ply, "Successfully saved " .. name)
+end)
 
-  concommand.Add("rptools_load", function(ply, _, args, _)
+concommand.Add("rptools_load", function(ply, _, args, _)
+  if CLIENT then
+    return
+  end
+  if SERVER then
     if not RPTools.Commands.requireAdmin(ply) then
       return
     end
@@ -38,9 +44,14 @@ if SERVER then
     else
       printToPlayer(ply, "Successfully loaded save " .. name)
     end
-  end)
+  end
+end)
 
-  concommand.Add("rptools_saves", function(ply, _, args, _)
+concommand.Add("rptools_saves", function(ply, _, args, _)
+  if CLIENT then
+    return
+  end
+  if SERVER then
     if not RPTools.Commands.requireAdmin(ply) then
       return
     end
@@ -50,13 +61,17 @@ if SERVER then
     for _, savename in pairs(saves) do
       printToPlayer(ply, "  " .. savename)
     end
-  end)
+  end
+end)
 
-  concommand.Add("rptools_delete_save", function(ply, _, args, _)
-    if not RPTools.Commands.requireAdmin(ply) then
-      return
-    end
-
+concommand.Add("rptools_delete_save", function(ply, _, args, _)
+  if CLIENT then
+    return
+  end
+  if not RPTools.Commands.requireAdmin(ply) then
+    return
+  end
+  if SERVER then
     local name = args[1]
 
     if not name then
@@ -71,5 +86,5 @@ if SERVER then
     else
       printToPlayer(ply, "Successfully deleted save " .. name)
     end
-  end)
-end
+  end
+end)

@@ -3,7 +3,7 @@ concommand.Add("rptools_increment", function(ply, cmd, args, argStr)
     return
   end
 
-  if SERVER then    
+  if SERVER then
     if not RPTools.Commands.requireAdmin(ply) then
       return
     end
@@ -18,7 +18,10 @@ concommand.Add("rptools_increment", function(ply, cmd, args, argStr)
     local step = RPTools.Commands.Args.Number(ply, args[3], "step", true, 1)
 
     RPTools.Blackboard.Increment(target, RPTools.Blackboard.Key.Counter(counterName), step)
-    RPTools.Commands.PrintToPlayer(ply, "Incremented " .. counterName .. " for player " .. target:Nick() .. " by " .. tonumber(step))
+    RPTools.Commands.PrintToPlayer(
+      ply,
+      "Incremented " .. counterName .. " for player " .. target:Nick() .. " by " .. tonumber(step)
+    )
   end
 end, function(cmd, _, args)
   if args[1] and not args[2] then

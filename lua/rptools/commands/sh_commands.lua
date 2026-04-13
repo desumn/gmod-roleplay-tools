@@ -61,7 +61,9 @@ function RPTools.Commands.Args.String(caller, str, label, optional, default)
     RPTools.Commands.PrintToPlayer(caller, (label or "") .. ": Please provide a valid string")
     return
   end
-  if safeOptional and str == nil then return default end
+  if safeOptional and str == nil then
+    return default
+  end
   return str
 end
 
@@ -71,7 +73,9 @@ function RPTools.Commands.Args.Number(caller, num, label, optional, default)
     RPTools.Commands.PrintToPlayer(caller, (label or "") .. ": Please provide a valid number")
     return
   end
-  if safeOptional and num == nil then return default end
+  if safeOptional and num == nil then
+    return default
+  end
   return tonumber(num)
 end
 
