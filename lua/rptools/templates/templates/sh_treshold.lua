@@ -1,7 +1,7 @@
 local param = RPTools.Templating.Parameters
 
 RPTools.Templating.RegisterTemplate({
-  name = "counter",
+  name = "treshold",
   description = "check for a numeric flag, if it's over the treshold set a boolean flag",
   parameters = {
     distance = param.Distance(),

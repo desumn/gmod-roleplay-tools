@@ -39,25 +39,26 @@ local function validateParameters(parameters)
     local name = parameter.name
     if not isstring(name) or name == "" then
       isValid = false
-      errors = name .. " name: " .. (name or "not provided") .. " is invalid" .. ", " .. errors
+      errors = tostring(name) .. " name: " .. (tostring(name) or "not provided") .. " is invalid" .. ", " .. errors
+      name = tostring(name)
     end
 
     local desc = parameter.description
     if not isstring(desc) or desc == "" then
       isValid = false
-      errors = name .. " description: " .. (desc or "not provided") .. " is invalid" .. ", " .. errors
+      errors = name .. " description: " .. (tostring(desc) or "not provided") .. " is invalid" .. ", " .. errors
     end
 
     local required = parameter.required
     if not isbool(required) then
       isValid = false
-      errors = name .. " required: " .. (required or "not provided") .. " is invalid" .. ", " .. errors
+      errors = name .. " required: " .. (tostring(required) or "not provided") .. " is invalid" .. ", " .. errors
     end
 
     local group = parameter.group
     if not isstring(group) or group == "" then
       isValid = false
-      errors = name .. " group: " .. (group or "not provided") .. " is invalid" .. ", " .. errors
+      errors = name .. " group: " .. (tostring(group) or "not provided") .. " is invalid" .. ", " .. errors
     end
 
     local type = parameter.type
@@ -65,7 +66,7 @@ local function validateParameters(parameters)
     if not isstring(type) or parameterTypes[type] == nil then
       isValid = false
       typeValid = false
-      errors = name .. " type " .. (type or "not provided") .. " is invalid " .. ", " .. errors
+      errors = name .. " type " .. (tostring(type) or "not provided") .. " is invalid " .. ", " .. errors
     end
 
     if typeValid then
@@ -75,7 +76,7 @@ local function validateParameters(parameters)
         isValid = false
         errors = name
           .. " default type (required "
-          .. type
+          .. tostring(type)
           .. ")"
           .. ":"
           .. tostring(default)
@@ -94,9 +95,9 @@ local function validateParameters(parameters)
             isValid = false
             errors = name
               .. " "
-              .. field
+              .. tostring(field)
               .. "  (required type "
-              .. type
+              .. tostring(type)
               .. ")"
               .. ":"
               .. tostring(paramField)
