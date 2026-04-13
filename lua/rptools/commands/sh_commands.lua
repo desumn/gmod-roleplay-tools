@@ -55,19 +55,31 @@ function RPTools.Commands.Args.Player(caller, name)
   return foundPlayers[1]
 end
 
-function RPTools.Commands.Args.String(caller, str, label)
-  if str == nil or not isstring(str) or str == "" then
+function RPTools.Commands.Args.String(caller, str, label, optional, default)
+  local safeOptional = optional or false
+  if not safeOptional and (str == nil or not isstring(str) or str == "") then
     RPTools.Commands.PrintToPlayer(caller, (label or "") .. ": Please provide a valid string")
     return
   end
+  if safeOptional and str == nil then return default end
   return str
+end
+
+function RPTools.Commands.Args.Number(caller, num, label, optional, default)
+  local safeOptional = optional or false
+  if not safeOptional and (num == nil or not RPTools.Utilities.IsNumber(tonumber(num))) then
+    RPTools.Commands.PrintToPlayer(caller, (label or "") .. ": Please provide a valid number")
+    return
+  end
+  if safeOptional and num == nil then return default end
+  return tonumber(num)
 end
 
 function RPTools.Commands.CompletePlayers(cmd, name)
   local foundPlayers = {}
   for _, ply in player.Iterator() do
     local lowerName = string.lower(ply:Nick())
-    local lowerTargetName = string.lower(name)
+    local lowerTargetName = (name and string.lower(name)) or ""
 
     if string.find(lowerName, lowerTargetName, 1, true) then
       table.insert(foundPlayers, cmd .. " " .. ply:Nick())
