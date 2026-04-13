@@ -70,7 +70,9 @@ function RPTools.Blackboard.Write(ply, key, value)
   )
 
   blackboard[steamid] = blackboard[steamid] or {}
+  local oldValue = blackboard[steamid][key]
   blackboard[steamid][key] = value
+  hook.Run("RPTools_BlackboardChanged", ply, key, value, oldValue)
 end
 
 ---@param ply Player
@@ -121,6 +123,7 @@ function RPTools.Blackboard.Increment(ply, key, value)
   )
 
   blackboard[steamid][key] = oldValue + incrementValue
+  hook.Run("RPTools_BlackboardChanged", ply, key, value, oldValue)
 end
 
 ---@param ply Player
@@ -137,6 +140,7 @@ function RPTools.Blackboard.ClearForPlayer(ply)
 
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Cleared blackboard for player: " .. tostring(ply:Nick()))
   blackboard[steamid] = {}
+  hook.Run("RPTools_BlackboardChanged", ply)
 end
 
 ---@return table

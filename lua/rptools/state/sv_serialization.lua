@@ -50,6 +50,7 @@ function RPTools.Save.SaveAll(name)
   file.CreateDir("rptools/saves")
   file.Write("rptools/saves/" .. name .. ".json", text)
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Save", "Wrote save " .. name .. " to the disk.")
+  hook.Run("RPTools_SaveCompleted", name)
 end
 
 ---@param name string
@@ -91,6 +92,8 @@ function RPTools.Save.LoadAll(name)
   end
 
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, "Save", "Loaded save " .. name .. " from the disk.")
+
+  hook.Run("RPTools_LoadCompleted", name)
 
   return true
 end

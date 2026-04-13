@@ -15,7 +15,9 @@ end
 ---@param nodeId string
 ---@param state RPToolsNodeState
 function RPTools.Coordinator.SetNodeRunningState(nodeId, state)
+  local oldState = nodeState[nodeId]
   nodeState[nodeId] = state
+  hook.Add("RPTools_NodeStateChanged", nodeId, state, oldState)
 end
 
 local nodePlayerState = {}
@@ -230,6 +232,7 @@ local function execute(evaluationContexts, time)
     end
     if evaluationContext.shouldDeactivate then
       evaluationContext.state.isActive = false
+      hook.Run("RPTools_NodeDeactivated", evaluationContext.ply, table.Copy(evaluationContext.node))
     end
     if not evaluationContext.shouldActivate then
       continue
@@ -268,6 +271,13 @@ local function execute(evaluationContexts, time)
           .. ", "
           .. #evaluationContext.actionsToExecute
           .. " actions executed"
+      )
+
+      hook.Run(
+        "RPTools_NodeActivated",
+        evaluationContext.ply,
+        table.Copy(evaluationContext.node),
+        table.Copy(evaluationContext.actionsToExecute)
       )
     end
   end

@@ -4,7 +4,7 @@ RPTools.Network = RPTools.Network or {}
 
 ---@enum RPToolsMsgType
 RPTools.Network.MSG_TYPE = {
-  DEBUG_SYNC = 1,
+  DEBUG_ADD = 1,
   DEBUG_TOGGLE = 2,
   NODE_SYNC = 3,
   TEMPLATE_SYNC = 4,
@@ -14,10 +14,11 @@ RPTools.Network.MSG_TYPE = {
   DELETE_NODE = 8,
   PRINT = 9,
   CLIENT_ACTION = 10,
+  DEBUG_REMOVE = 11,
 }
 
 local msgTypeNames = {
-  [RPTools.Network.MSG_TYPE.DEBUG_SYNC] = "debug sync",
+  [RPTools.Network.MSG_TYPE.DEBUG_ADD] = "debug add",
   [RPTools.Network.MSG_TYPE.NODE_SYNC] = "node sync",
   [RPTools.Network.MSG_TYPE.TEMPLATE_SYNC] = "template sync",
   [RPTools.Network.MSG_TYPE.CLIENT_RESULT] = "client sync",
@@ -27,6 +28,7 @@ local msgTypeNames = {
   [RPTools.Network.MSG_TYPE.PRINT] = "print",
   [RPTools.Network.MSG_TYPE.DEBUG_TOGGLE] = "toggle debug mode",
   [RPTools.Network.MSG_TYPE.CLIENT_ACTION] = "perform client action",
+  [RPTools.Network.MSG_TYPE.DEBUG_REMOVE] = "debug remove",
 }
 
 ---@param msgType RPToolsMsgType

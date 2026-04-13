@@ -21,7 +21,8 @@ function RPTools.NodeRegister.RegisterNode(node)
 
   nodeRegister[id] = node
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Added node with id:(" .. id .. ") to the node register.")
-  -- Hook pour prévenir de l'ajout?
+
+  hook.Run("RPTools_NodeCreated", id, node)
 end
 
 ---@param id string
@@ -40,7 +41,8 @@ function RPTools.NodeRegister.UnregisterNode(id)
     logModuleName,
     "Removed node with id:(" .. id .. ") from the node register."
   )
-  -- Hook pour prévenir de la suppression?
+
+  hook.Run("RPTools_NodeRemoved", id)
 end
 
 ---@param id string
@@ -80,12 +82,14 @@ function RPTools.NodeRegister.EditNode(id, subNode)
   end
 
   nodeRegister[id] = node
-
   RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Edited node with id:(" .. id .. ")")
+
+  hook.Run("RPTools_NodeEdited", id, node)
 end
 
 function RPTools.NodeRegister.ClearAll()
   nodeRegister = {}
+  hook.Run("RPTools_NodeCleared")
 end
 
 RPTools.Network.OnClientMessage(RPTools.Network.MSG_TYPE.DELETE_NODE, function(ply)

@@ -65,16 +65,33 @@ end
 
 local nodeNormal = {}
 
-RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_SYNC, function()
+RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_ADD, function()
   local nodeCount = net.ReadUInt(12)
-  nodes = {}
   for i = 1, nodeCount do
-    nodes[i] = RPTools.Debug.ReadDebugNode()
-    if not nodeNormal[nodes[i].id] then
-      nodeNormal[nodes[i].id] = inferNormal(nodes[i].position)
+    local node = RPTools.Debug.ReadDebugNode()
+    table.insert(nodes, node)
+    if not nodeNormal[node.id] then
+      nodeNormal[node.id] = inferNormal(node.position)
     end
   end
-  drawDebug = true
+end)
+
+RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_REMOVE, function()
+  local nodeId = net.ReadString()
+
+  local idxToRemove = nil
+  for idx, node in ipairs(nodes) do
+    if node.id == nodeId then
+      idxToRemove = idx
+      break
+    end
+  end
+
+  if idxToRemove == nil then
+    return
+  end
+
+  table.remove(nodes, idxToRemove)
 end)
 
 concommand.Add("rptools_toggle_debug", function()
