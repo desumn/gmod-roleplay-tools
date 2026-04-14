@@ -92,7 +92,6 @@ RPTools.Network.OnClientMessage(RPTools.Network.MSG_TYPE.DEBUG_TOGGLE, function(
     return
   end
   ply:SetNW2Bool("rptools_debug", not ply:GetNW2Bool("rptools_debug", false))
-  print(ply:GetNW2Bool("rptools_debug", false))
   if ply:GetNW2Bool("rptools_debug", false) then
     sendAllNodes(ply)
   end

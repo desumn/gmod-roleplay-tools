@@ -113,7 +113,6 @@ if CLIENT then
       arguments = {}
       for name, parameter in pairs(template.parameters) do
         if parameter.default ~= nil then
-          print(name, parameter.default)
           arguments[name] = parameter.default
         end
       end
