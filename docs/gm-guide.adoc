@@ -82,7 +82,7 @@ Once these conditions are set, you can use the tool gun to place them in your wo
 
 If one of the node isn't configured properly, you can remove it using a right click.
 
-And that's it! Activate the coordinator with `rptools_toggle` and test this setup.
+And that's it! Activate the coordinator with `rptools_start` and test this setup.
 
 == What now?
 
