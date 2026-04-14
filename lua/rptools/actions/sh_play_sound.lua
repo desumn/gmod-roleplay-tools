@@ -4,22 +4,18 @@ if SERVER then
       and isstring(params.sound)
       and RPTools.Utilities.IsNumber(params.volume)
       and RPTools.Utilities.IsNumber(params.pitch)
-      and RPTools.Utilities.IsNumber(params.level)
-      and isvector(params.position)
   end, function(params)
-    return "play sound: "
-      .. params.sound
+    return "play sound"
       .. " (v:"
-      .. params.volume
+      .. tostring(params.volume)
       .. ", p:"
-      .. params.pitch
-      .. ", l:"
-      .. params.level
-      .. ")"
+      .. tostring(params.pitch)
+      .. "): "
+      .. params.sound
   end)
 end
 if CLIENT then
   RPTools.Actions.Client.RegisterAction("play_sound", function(params)
-    sound.Play(params.sound, params.position, params.level, params.pitch, params.volume)
+    LocalPlayer():EmitSound(params.sound, 0, params.pitch, params.volume)
   end)
 end
