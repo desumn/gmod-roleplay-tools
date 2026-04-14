@@ -5,9 +5,9 @@ RPTools.Templating.RegisterTemplate({
   description = "send a message to the player, potentially mark him",
   parameters = {
     message = param.LongString("message", "message to send to the player"),
-    useHUD = param.Boolean("Use HUD", "wheter to send the message through HUD"),
+    useHUD = param.Boolean("Use HUD", "wheter to send the message through HUD", "action"),
     sendToChat = param.Boolean("Send to chat", "if Use HUD is true: whether to send or not the message to chat, too.", "HUD Options"),
-    duration = param.Duration("Duration", "how long the message will be shwon (HUD only)"),
+    duration = param.Duration("Duration", "how long the message will be shwon (HUD only)", false, "HUD Options"),
     distance = param.Distance(),
     angle = param.Angle(),
     sight = param.CheckSight(),
