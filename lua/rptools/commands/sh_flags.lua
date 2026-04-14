@@ -45,7 +45,7 @@ concommand.Add("rptools_unflag", function(ply, cmd, args, argStr)
     end
 
     RPTools.Blackboard.Write(target, RPTools.Blackboard.Key.Flag(flagName), false)
-    RPTools.Commands.PrintToPlayer(ply, "Set flag " .. flagName .. " for player " .. target:Nick())
+    RPTools.Commands.PrintToPlayer(ply, "Unset flag " .. flagName .. " for player " .. target:Nick())
   end
 end, function(cmd, _, args)
   if args[1] and not args[2] then
