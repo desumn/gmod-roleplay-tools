@@ -8,6 +8,6 @@ end
 
 if CLIENT then
   RPTools.Actions.Client.RegisterAction("chat_message", function(params)
-    chat.AddText(Color(200, 220, 240), params.message)
+    chat.AddText(Color(185, 180, 200), params.message)
   end)
 end
