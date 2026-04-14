@@ -86,7 +86,7 @@ And that's it! Activate the coordinator with `rptools_toggle` and test this setu
 
 == What now?
 
-You can take a look at link:docs/templates.adoc[the available templates] and link:docs/commands.adoc[commands] to see what the addon is capable of, and have some fun!
+You can take a look at link:templates.adoc[the available templates] and link:commands.adoc[commands] to see what the addon is capable of, and have some fun!
 
 CAUTION: Again, this addon is in pre-release and lack a lot of features, especially in the QOL department.
 
