@@ -187,7 +187,6 @@ concommand.Add("rptools_stop", function (ply)
   end
 end)
 
-
 concommand.Add("rptools_stop", function (ply)
   if CLIENT then
     return
