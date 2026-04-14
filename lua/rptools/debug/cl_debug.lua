@@ -99,16 +99,10 @@ concommand.Add("rptools_toggle_debug", function()
     return
   end
   RPTools.Network.SendToServer(RPTools.Network.MSG_TYPE.DEBUG_TOGGLE, function() end)
-  if drawDebug then
-    drawDebug = false
-    nodes = {}
-  else
-    drawDebug = true
-  end
 end)
 
 hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
-  if not drawDebug then
+  if not LocalPlayer():GetNW2Bool("rptools_debug", false) then
     return
   end
 
