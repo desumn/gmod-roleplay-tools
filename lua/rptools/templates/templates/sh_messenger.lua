@@ -9,6 +9,7 @@ RPTools.Templating.RegisterTemplate({
     angle = param.Angle(),
     sight = param.CheckSight(),
     flag = param.Flag(),
+    invertInFlag = param.Boolean("Send to chat", "invert the input flag condition"),
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()
@@ -24,8 +25,9 @@ RPTools.Templating.RegisterTemplate({
       RPTools.Condition.AddToSet(conditions, los_cond)
     end
 
-    if args.flag ~= nil then
-      local flag_cond = RPTools.Condition.Create("flag", args.flag, "eq", true)
+    if args.flag ~= nil then      
+      local op = (args.invertInFlag and "ne") or "eq"
+      local flag_cond = RPTools.Condition.Create("flag", args.flag, op, true)
       RPTools.Condition.AddToSet(conditions, flag_cond)
     end
 

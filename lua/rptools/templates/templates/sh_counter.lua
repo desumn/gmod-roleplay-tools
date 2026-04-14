@@ -7,6 +7,7 @@ RPTools.Templating.RegisterTemplate({
     distance = param.Distance(),
     step = param.Number("Step", "how much the counter is incremented, may be negative", nil, nil, true, 1, "action"),
     inFlag = param.Flag("Input Flag", "Flag required for activation", false),
+    invertInFlag = param.Boolean("Send to chat", "invert the input flag condition"),
     outCounter = param.Flag("Counter name", "Counter that will be incremented", true, "action"),
   },
   transformer = SERVER and function(args, context)
@@ -16,7 +17,8 @@ RPTools.Templating.RegisterTemplate({
     RPTools.Condition.AddToSet(conditions, distance_cond)
 
     if args.inFlag ~= nil then
-      local flag_cond = RPTools.Condition.Create("flag", args.inFlag, "eq", true)
+      local op = (args.invertInFlag and "ne") or "eq"
+      local flag_cond = RPTools.Condition.Create("flag", args.inFlag, op, true)
       RPTools.Condition.AddToSet(conditions, flag_cond)
     end
 

@@ -8,6 +8,7 @@ RPTools.Templating.RegisterTemplate({
     angle = param.Angle(),
     sight = param.CheckSight(),
     inFlag = param.Flag("Input Flag", "Flag required for activation", false),
+    invertInFlag = param.Boolean("Send to chat", "invert the input flag condition"),
     outFlag = param.Flag("Output flag", "Flag that will be set to true", true, "action"),
   },
   transformer = SERVER and function(args, context)
@@ -24,8 +25,9 @@ RPTools.Templating.RegisterTemplate({
       RPTools.Condition.AddToSet(conditions, los_cond)
     end
 
-    if args.inFlag ~= nil then
-      local flag_cond = RPTools.Condition.Create("flag", args.inFlag, "eq", true)
+    if args.inFlag ~= nil then      
+      local op = (args.invertInFlag and "ne") or "eq"
+      local flag_cond = RPTools.Condition.Create("flag", args.inFlag, op, true)
       RPTools.Condition.AddToSet(conditions, flag_cond)
     end
 
