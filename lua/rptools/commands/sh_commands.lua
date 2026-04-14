@@ -162,6 +162,7 @@ concommand.Add("rptools_start", function (ply)
     end
 
     RPTools.Coordinator.Start()
+    coordinatorStarted = true
     RPTools.Commands.PrintToPlayer(ply, "Started coordinator!")
   end
 end)
@@ -182,11 +183,12 @@ concommand.Add("rptools_stop", function (ply)
     end
 
     RPTools.Coordinator.Stop()
+    coordinatorStarted = false
     RPTools.Commands.PrintToPlayer(ply, "Stopped coordinator!")
   end
 end)
 
-concommand.Add("rptools_stop", function (ply)
+concommand.Add("rptools_status", function (ply)
   if CLIENT then
     return
   end

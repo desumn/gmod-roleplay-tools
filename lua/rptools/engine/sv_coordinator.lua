@@ -312,5 +312,5 @@ function RPTools.Coordinator.Start()
 end
 
 function RPTools.Coordinator.Stop()
-  timer.Stop("RPTools_Coordinator")
+  timer.Remove("RPTools_Coordinator")
 end
