@@ -70,19 +70,19 @@ concommand.Add("rptools_listflags", function(ply, cmd, args, argStr)
     local flags = RPTools.Blackboard.FindByPrefix(target, RPTools.Blackboard.Key.Flag())
 
     if not flags or table.IsEmpty(flags) then
-      RPTools.Commands.PrintToPlayer(ply, "No flags found for player " .. ply:Nick())
+      RPTools.Commands.PrintToPlayer(ply, "No flags found for player " .. target:Nick())
       return
     end
 
-    RPTools.Commands.PrintToPlayer(ply, ply:Nick() .. " flags:")
+    RPTools.Commands.PrintToPlayer(ply, target:Nick() .. " flags:")
     for flag, value in pairs(flags) do
       local flagName = string.sub(flag, string.len(RPTools.Blackboard.Key.Flag()) + 2)
       RPTools.Commands.PrintToPlayer(ply, flagName .. " = " .. tostring(value))
     end
   end
-end, function(_, _, args)
+end, function(cmd, _, args)
   if args[1] and not args[2] then
-    return RPTools.Commands.CompletePlayers(args[1])
+    return RPTools.Commands.CompletePlayers(cmd, args[1])
   end
   return {}
 end)
