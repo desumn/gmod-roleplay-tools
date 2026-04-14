@@ -101,7 +101,7 @@ function RPTools.Commands.CompleteBlackboardByPrefix(name, prefix)
     local lowerTargetName = string.lower(name)
 
     if lowerName == lowerTargetName then
-      ply = ply
+      target = ply
       break
     end
 
@@ -119,8 +119,7 @@ function RPTools.Commands.CompleteBlackboardByPrefix(name, prefix)
   end
 
   local flags = RPTools.Blackboard.FindByPrefix(target, prefix)
-  print("t")
-  return (not flags == nil and not table.IsEmpty(flags) and table.GetKeys(flags)) or {}
+  return (flags ~= nil and not table.IsEmpty(flags) and table.GetKeys(flags)) or {}
 end
 
 if CLIENT then
