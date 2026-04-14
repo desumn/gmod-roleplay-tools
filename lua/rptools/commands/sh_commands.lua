@@ -162,10 +162,10 @@ concommand.Add("rptools_start", function (ply)
     end
 
     RPTools.Coordinator.Start()
+    coordinatorStarted = true
     RPTools.Commands.PrintToPlayer(ply, "Started coordinator!")
   end
 end)
-
 
 concommand.Add("rptools_stop", function (ply)
   if CLIENT then
@@ -183,11 +183,12 @@ concommand.Add("rptools_stop", function (ply)
     end
 
     RPTools.Coordinator.Stop()
+    coordinatorStarted = false
     RPTools.Commands.PrintToPlayer(ply, "Stopped coordinator!")
   end
 end)
 
-concommand.Add("rptools_stop", function (ply)
+concommand.Add("rptools_status", function (ply)
   if CLIENT then
     return
   end
@@ -206,3 +207,38 @@ concommand.Add("rptools_stop", function (ply)
     end
   end
 end)
+
+concommand.Add("rptools_vanish", function(ply)
+  if CLIENT then
+    return
+  end
+
+  if SERVER then
+    if not RPTools.Commands.requireAdmin(ply) then return end
+    local currentValue = ply:GetNW2Bool("rptools_vanish")
+    if currentValue then
+      printToPlayer(ply, "You are already vanished.")
+      return
+    end
+    ply:SetNW2Bool("rptools_vanish", true)
+    printToPlayer(ply, "You vanished, you'll not be able to activate nodes.")
+  end
+end)
+
+concommand.Add("rptools_unvanish", function(ply)
+  if CLIENT then
+    return
+  end
+
+  if SERVER then
+    if not RPTools.Commands.requireAdmin(ply) then return end
+    local currentValue = ply:GetNW2Bool("rptools_vanish")
+    if not currentValue then
+      printToPlayer(ply, "You are not vanished!")
+      return
+    end
+    ply:SetNW2Bool("rptools_vanish", false)
+    printToPlayer(ply, "You're now visible again.")
+  end
+end)
+

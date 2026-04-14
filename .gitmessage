@@ -1,0 +1,4 @@
+# type(scope): description
+#
+# Types: feat, fix, refactor, docs, chore
+# Scopes: coordinator, templates, debug, blackboard, network, commands, ui, actions, sources

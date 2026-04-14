@@ -291,7 +291,12 @@ local function mainLoop()
   lastTime = time
 
   local nodes = RPTools.NodeRegister.GetAllNodes()
-  local plys = player.GetAll()
+  local plys = {}
+  for _, ply in player.Iterator() do
+    if not ply:IsAdmin() or not ply:GetNW2Bool("rptools_vanish", false) then
+      table.insert(plys, ply)
+    end
+  end
 
   local evaluationContexts = createEvaluationContexts(plys, nodes)
 
@@ -307,5 +312,5 @@ function RPTools.Coordinator.Start()
 end
 
 function RPTools.Coordinator.Stop()
-  timer.Stop("RPTools_Coordinator")
+  timer.Remove("RPTools_Coordinator")
 end
