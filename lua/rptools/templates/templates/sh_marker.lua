@@ -8,7 +8,7 @@ RPTools.Templating.RegisterTemplate({
     angle = param.Angle(),
     sight = param.CheckSight(),
     inFlag = param.Flag("Input Flag", "Flag required for activation", false),
-    invertInFlag = param.Boolean("Send to chat", "invert the input flag condition"),
+    invertInFlag = param.Boolean("Invert flag", "invert the input flag condition"),
     outFlag = param.Flag("Output flag", "Flag that will be set to true", true, "action"),
   },
   transformer = SERVER and function(args, context)
