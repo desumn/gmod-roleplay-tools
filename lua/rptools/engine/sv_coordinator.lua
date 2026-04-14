@@ -17,7 +17,7 @@ end
 function RPTools.Coordinator.SetNodeRunningState(nodeId, state)
   local oldState = nodeState[nodeId]
   nodeState[nodeId] = state
-  hook.Add("RPTools_NodeStateChanged", nodeId, state, oldState)
+  hook.Run("RPTools_NodeStateChanged", nodeId, state, oldState)
 end
 
 local nodePlayerState = {}
