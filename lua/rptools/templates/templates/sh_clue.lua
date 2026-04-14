@@ -6,6 +6,7 @@ RPTools.Templating.RegisterTemplate({
   parameters = {
     message = param.LongString("message", "message to send to the player"),
     useHUD = param.Boolean("Use HUD", "wheter to send the message through HUD"),
+    sendToChat = param.Boolean("Send to chat", "if Use HUD is true: whether to send or not the message to chat, too.", "HUD Options"),
     duration = param.Duration("Duration", "how long the message will be shwon (HUD only)"),
     distance = param.Distance(),
     angle = param.Angle(),
@@ -42,6 +43,9 @@ RPTools.Templating.RegisterTemplate({
     local messageAction = RPTools.Actions.Server.Create("chat_message", { message = args.message })
 
     if args.useHUD then
+      if args.sendToChat then
+        RPTools.Actions.Server.AddToSet(actions, messageAction)
+      end
       messageAction = RPTools.Actions.Server.Create("hud_message", { message = args.message, duration = args.duration })
     end
 

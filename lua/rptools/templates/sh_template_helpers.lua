@@ -69,14 +69,14 @@ end
 ---@param name? string
 ---@param description? string
 ---@return RPToolsParameter
-function RPTools.Templating.Parameters.Boolean(name, description)
+function RPTools.Templating.Parameters.Boolean(name, description, group)
   return {
     name = (name ~= nil and name ~= "" and name) or "flag",
     description = (description ~= nil and description ~= "" and description) or "flag required for activation",
     type = "boolean",
     required = false,
     default = false,
-    group = "trigger",
+    group = group or "trigger",
   }
 end
 
