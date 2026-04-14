@@ -1,4 +1,4 @@
-= Roleplay Tools:Alternatively, Node Editor tool and a couple other things;...
+= Roleplay Tools:Alternatively, Node Editor tool and a couple other things
 
 CAUTION: This addon is still in pre-release and its systems and APIs may significantly evolve from a version to another.
 
@@ -14,7 +14,7 @@ Every part of the addon is easily extensible with Lua by external developers or 
 
 == Installation instructions
 
-Installing the addon is very easy, its done in a couple simple steps:
+.Installing the addon is very easy, its done in a couple simple steps:
 * Download a release zips from Github.
 * Unzip it in your servers `addons/` folder.
 * Start or reboot your server.
