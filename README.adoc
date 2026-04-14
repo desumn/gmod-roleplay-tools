@@ -1,0 +1,22 @@
+= Roleplay Tools:Alternatively, Node Editor tool and a couple other things;...
+
+CAUTION: This addon is still in pre-release and its systems and APIs may significantly evolve from a version to another.
+
+Roleplay Tools adds a system that allows server administrator to create reactive systems on their map without having to do mapping or lua scripting, while offering good performances and high flexibility.
+
+.Roleplay Tools offers:
+* An interactive system that allows admins to place nodes (points) on the map that check for conditions (distance, line of sight, etc) on player and apply effects to them (hud message, sound, set falg, etc)
+* Flag and counters that allows admins to track state by players.
+* A template system that allows for easy creation of nodes.
+
+Every part of the addon is easily extensible with Lua by external developers or motivated admins.
+
+
+== Installation instructions
+
+Installing the addon is very easy, its done in a couple simple steps:
+* Download a release zips from Github.
+* Unzip it in your servers `addons/` folder.
+* Start or reboot your server.
+
+You can then write `rptools_logs` in the server console to see if the addon is correctly installed.
