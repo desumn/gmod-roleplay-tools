@@ -22,7 +22,7 @@ function RPTools.Debug.ReadDebugNode()
   local state = net.ReadUInt(3)
   local conditionsDesc = net.ReadTable(true)
   local actionsDesc = net.ReadTable(true)
-  
+
   local node = {
     id = id,
     triggerPolicy = policy,
@@ -55,7 +55,7 @@ local function inferNormal(pos)
       start = pos - (dir * 2),
       endpos = pos + (dir * 15),
     })
-    
+
     if tr.Hit and not tr.StartSolid then
       return tr.HitNormal
     end
@@ -78,7 +78,7 @@ end)
 
 RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_REMOVE, function()
   local nodeId = net.ReadString()
-  
+
   local idxToRemove = nil
   for idx, node in ipairs(nodes) do
     if node.id == nodeId then
@@ -86,11 +86,11 @@ RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_REMOVE, function(
       break
     end
   end
-  
+
   if idxToRemove == nil then
     return
   end
-  
+
   table.remove(nodes, idxToRemove)
 end)
 
@@ -105,21 +105,21 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
   if not LocalPlayer():GetNW2Bool("rptools_debug", false) then
     return
   end
-  
+
   for _, node in ipairs(nodes) do
     local position = node.position
     local normal = nodeNormal[node.id]
     local offsetVector = normal * 150
-    
+
     local radius = node.distance
-    
+
     local color = RPTools.Coordinator.stateColor[node.state] or color_white
     render.SetMaterial(Material("sprites/sent_ball"))
     render.DrawSprite(position, 24, 24, ColorAlpha(color_black, 180))
     render.SetMaterial(Material("sprites/light_glow02_add"))
     render.DrawBeam(position, position + offsetVector, 12, 0, 1, ColorAlpha(color, 100))
     render.DrawSprite(position, 48, 48, color)
-    
+
     local beamMaterial = Material("trails/laser")
     render.SetMaterial(beamMaterial)
     local segments = 64
@@ -130,7 +130,7 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
       render.AddBeam(p, 16, i / segments, color)
     end
     render.EndBeam()
-    
+
     render.StartBeam(segments + 1)
     for i = 0, segments do
       local a = (i / segments) * math.pi * 2

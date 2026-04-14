@@ -101,7 +101,7 @@ function RPTools.Commands.CompleteBlackboardByPrefix(name, prefix)
     local lowerTargetName = string.lower(name)
 
     if lowerName == lowerTargetName then
-      ply = ply
+      target = ply
       break
     end
 
@@ -119,8 +119,7 @@ function RPTools.Commands.CompleteBlackboardByPrefix(name, prefix)
   end
 
   local flags = RPTools.Blackboard.FindByPrefix(target, prefix)
-  print("t")
-  return (not flags == nil and not table.IsEmpty(flags) and table.GetKeys(flags)) or {}
+  return (flags ~= nil and not table.IsEmpty(flags) and table.GetKeys(flags)) or {}
 end
 
 if CLIENT then
@@ -146,7 +145,7 @@ end
 
 local coordinatorStarted = false
 
-concommand.Add("rptools_start", function (ply)
+concommand.Add("rptools_start", function(ply)
   if CLIENT then
     return
   end
@@ -167,7 +166,7 @@ concommand.Add("rptools_start", function (ply)
   end
 end)
 
-concommand.Add("rptools_stop", function (ply)
+concommand.Add("rptools_stop", function(ply)
   if CLIENT then
     return
   end
@@ -188,7 +187,7 @@ concommand.Add("rptools_stop", function (ply)
   end
 end)
 
-concommand.Add("rptools_status", function (ply)
+concommand.Add("rptools_status", function(ply)
   if CLIENT then
     return
   end
@@ -197,7 +196,7 @@ concommand.Add("rptools_status", function (ply)
     if not RPTools.Commands.requireAdmin(ply) then
       return
     end
-    
+
     if not coordinatorStarted then
       RPTools.Commands.PrintToPlayer(ply, "Coordinator off.")
       return
@@ -214,7 +213,9 @@ concommand.Add("rptools_vanish", function(ply)
   end
 
   if SERVER then
-    if not RPTools.Commands.requireAdmin(ply) then return end
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
     local currentValue = ply:GetNW2Bool("rptools_vanish")
     if currentValue then
       printToPlayer(ply, "You are already vanished.")
@@ -231,7 +232,9 @@ concommand.Add("rptools_unvanish", function(ply)
   end
 
   if SERVER then
-    if not RPTools.Commands.requireAdmin(ply) then return end
+    if not RPTools.Commands.requireAdmin(ply) then
+      return
+    end
     local currentValue = ply:GetNW2Bool("rptools_vanish")
     if not currentValue then
       printToPlayer(ply, "You are not vanished!")
@@ -241,4 +244,3 @@ concommand.Add("rptools_unvanish", function(ply)
     printToPlayer(ply, "You're now visible again.")
   end
 end)
-

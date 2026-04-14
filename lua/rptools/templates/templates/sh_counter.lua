@@ -6,9 +6,9 @@ RPTools.Templating.RegisterTemplate({
   parameters = {
     distance = param.Distance(),
     step = param.Number("Step", "how much the counter is incremented, may be negative", nil, nil, true, 1, "action"),
-    inFlag = param.Flag("Input Flag", "Flag required for activation", false),
+    inFlag = param.ShortString("Input Flag", "Flag required for activation", false),
     invertInFlag = param.Boolean("Send to chat", "invert the input flag condition"),
-    outCounter = param.Flag("Counter name", "Counter that will be incremented", true, "action"),
+    outCounter = param.ShortString("Counter name", "Counter that will be incremented", true, "action"),
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()

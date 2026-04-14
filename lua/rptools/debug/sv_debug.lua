@@ -87,7 +87,6 @@ local function sendAllNodes(target)
   end)
 end
 
-
 RPTools.Network.OnClientMessage(RPTools.Network.MSG_TYPE.DEBUG_TOGGLE, function(ply)
   if not ply:IsAdmin() then
     return

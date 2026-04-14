@@ -15,9 +15,9 @@ RPTools.Templating.RegisterTemplate({
     distance = param.Distance(),
     angle = param.Angle(),
     sight = param.CheckSight(),
-    inFlag = param.Flag("Input Flag", "Flag required for activation", false),
+    inFlag = param.ShortString("Input Flag", "Flag required for activation", false),
     invertInFlag = param.Boolean("Invert flag", "invert the input flag condition"),
-    outFlag = param.Flag("Output flag", "Flag that will be set to true", false, "action"),
+    outFlag = param.ShortString("Output flag", "Flag that will be set to true", false, "action"),
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()

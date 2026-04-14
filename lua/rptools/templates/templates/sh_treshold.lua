@@ -6,8 +6,8 @@ RPTools.Templating.RegisterTemplate({
   parameters = {
     distance = param.Distance(),
     treshold = param.Number("Treshold", "required treshold", nil, nil, true, nil, "trigger"),
-    inCounter = param.Flag("Counter name", "Counter name", true),
-    outFlag = param.Flag("Flag name", "Flag that will be set to true", true, "action"),
+    inCounter = param.ShortString("Counter name", "Counter name", true),
+    outFlag = param.ShortString("Flag name", "Flag that will be set to true", true, "action"),
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()

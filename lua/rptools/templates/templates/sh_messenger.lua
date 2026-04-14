@@ -8,7 +8,7 @@ RPTools.Templating.RegisterTemplate({
     distance = param.Distance(),
     angle = param.Angle(),
     sight = param.CheckSight(),
-    flag = param.Flag(),
+    flag = param.ShortString("Flag", "required flag"),
     invertInFlag = param.Boolean("Invert flag", "invert the input flag condition"),
   },
   transformer = SERVER and function(args, context)
