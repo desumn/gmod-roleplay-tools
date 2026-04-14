@@ -12,7 +12,6 @@ RPTools.Templating.RegisterTemplate({
     sound = param.ShortString("Sound", "Path to a sound in sound/", true, "action"),
     pitch = param.Number("pitch", "pitch of the played sound (0-255)", 0, 255, false, 100, "Sound Settings"),
     volume = param.Number("volume", "volume of the played sound (0-1)", 0, 1, false, 1, "Sound Settings"),
-    global = param.Boolean("Global", "wheter the sound should be played to all players or not", "action")
   },
   transformer = SERVER and function(args, context)
     local conditions = RPTools.Condition.EmptyConditionSet()
