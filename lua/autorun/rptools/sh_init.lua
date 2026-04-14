@@ -1,7 +1,7 @@
 RPTools = RPTools or {}
 
 ---@type string
-RPTools.VERSION = "0.1.0"
+RPTools.VERSION = "0.2.1"
 
 AddCSLuaFile("autorun/sh_init.lua")
 
