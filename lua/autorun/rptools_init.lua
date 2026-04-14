@@ -3,7 +3,7 @@ RPTools = RPTools or {}
 ---@type string
 RPTools.VERSION = "0.2.1"
 
-AddCSLuaFile("autorun/sh_init.lua")
+AddCSLuaFile("autorun/rptools_init.lua")
 
 local function loadActions()
   local actionsFiles = file.Find("rptools/actions/sh_*.lua", "LUA")
