@@ -30,7 +30,7 @@ function RPTools.Templating.Parameters.ShortString(name, description, required, 
     description = (description ~= nil and description ~= "" and description) or "a short string",
     type = "string",
     display = "short",
-    required = (required ~= nil) or false,
+    required = (required ~= nil and required) or false,
     group = group or "trigger",
   }
 end
@@ -88,7 +88,7 @@ function RPTools.Templating.Parameters.LongString(name, description, required, g
     description = (description ~= nil and description ~= "" and description) or "No desc",
     type = "string",
     display = "long",
-    required = (required ~= nil) or true,
+    required = (required ~= nil and required) or true,
     group = group or "action",
   }
 end
