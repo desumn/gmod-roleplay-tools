@@ -24,13 +24,13 @@ end
 ---@param required? boolean
 ---@param group? string
 ---@return RPToolsParameter
-function RPTools.Templating.Parameters.Flag(name, description, required, group)
+function RPTools.Templating.Parameters.ShortString(name, description, required, group)
   return {
-    name = (name ~= nil and name ~= "" and name) or "flag",
-    description = (description ~= nil and description ~= "" and description) or "flag required for activation",
+    name = (name ~= nil and name ~= "" and name) or "short string",
+    description = (description ~= nil and description ~= "" and description) or "a short string",
     type = "string",
     display = "short",
-    required = required or false,
+    required = (required ~= nil) or false,
     group = group or "trigger",
   }
 end
@@ -82,14 +82,14 @@ end
 
 ---@param name? string
 ---@param description? string
-function RPTools.Templating.Parameters.LongString(name, description)
+function RPTools.Templating.Parameters.LongString(name, description, required, group)
   return {
     name = (name ~= nil and name ~= "" and name) or "Long string",
     description = (description ~= nil and description ~= "" and description) or "No desc",
     type = "string",
     display = "long",
-    required = true,
-    group = "action",
+    required = (required ~= nil) or true,
+    group = group or "action",
   }
 end
 
