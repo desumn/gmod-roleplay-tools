@@ -1,0 +1,97 @@
+= The Game Master Guide
+
+Hi! This guide will help you learn about RPTools main features and how they can be useful to you as a game master or administrator.
+
+The most basic unit of this addon interactivity model is the node.
+
+== What is a node?
+
+Basically, a node is a point on the map that reacts to players actions and can affect them or the environement, it allows you to easily add interactivity to your server, without writing a lua script or modifying the map.
+
+Currently the only way to create nodes is by using templates.
+
+== And what is a template?
+
+Templates are pre-fabricated Lua scripts that allows for easy creation of nodes. Nodes are quite technical at their core, and templates allows you to ignore this technicality and easily create new nodes. 
+
+Before talking about templates and node creation in greater details, let's shortly talk about flags and counters.
+
+== Flag and counters?
+
+They allow you to add infos to a player, flags are true/false values - for instance "russian speaker", "medic", "seen the anomaly" -, counters are number values - for instance "sanity" = -2, "clues" = 4, "properties in Monaco" = 0 -, these systems are essential for working with nodes as they allow you to express powerful dependencies.
+
+== When do we start using nodes?
+
+Now!
+
+I'll show you a simple example that uses flags and the clue template to show an information to only some players.
+
+Your players find a book with secret informations, sadly for them everything is written in Arabic, fortunately for them there's one character in the group that can read arabic and get the information.
+
+This is a very simple scenario that uses only two nodes and a flag.
+
+=== Flagging the players
+
+First thing you'll want to do is add a flag to your player, thanks to the `rptools_flag [name] [flag_name]` console commands, here's it's: `rptools_flag desumn arabic`
+
+You can easily list any players flag later thanks to the `rptools_listflags [name]` command.
+
+=== Placing the nodes
+
+Suppose you have your book as a props, on a table. To add a new node, you can open the props menu and look on the right for the "Node Spawner" tools, in the RPTools category, in the tools tab.
+
+CAUTION: Currently nodes are placed in an absolute position, they'll not follow any props! In the future, they'll be able to follow props and entities.
+
+You'll be greeted with a list of templates and their description, you'll want to click on the "Clue" template, it'll open a form to complete.
+
+Let's break it down:
+
+.Trigger:
+* *Distance*: a condition, the player must be X units close to the center of the node for it to activate
+* *Angle*: another condition, the player must look at the center of the node at a maximum X degrees angle for it to activate.
+* *Check sight*: the player must look at the node center directly for it to activate
+* *Invert flag and input flag*: these are very important conditions: the must player (or must not) have the flag X set to true for the node to activate
+
+.Action:
+* *Message*: the message that'll be printed to the player
+* *Use HUD*: if checked, will instead send the message through a custom HUD
+* *Output flag*: if specified, this flag will be set to true upon activation
+
+You'll also want to take a look at the HUD Options if USE Hud is true
+
+.HUD Options:
+* *Duration*: sets how long the message will be printed on the player screen
+* *Send to chat*: if checked, will also send the message to chat
+
+All in all, this isn't very hard.
+
+For our setup, we'll need two nodes.
+
+.What's common to the nodes:
+* *Distance, angle, check_sight*: these define how long your player must look at the props for the condition to activate, distance = 50, angle = 15, checksight checked seems like a good default for reading a couple lines.
+* *Input flag*: set it to arabic
+* *Use HUD*: both node will use HUD messages, and as the messages might be long, will send text to chat.
+* *Output flag*: empty, no need for this
+
+.What differs:
+* *Invert flag*: for the non-arabic readers, check this, it'll make it so the node only activate for them
+* *Message*: This will depend on what you want to tell your players!
+* *Duration, send to chat*: This will depend on the message, if the message is long you might want to increase the duration and send it to chat for players to reread it later.
+
+Once these conditions are set, you can use the tool gun to place them in your world! A ui will appears that show you their position in world - you can change the distance there - and to the right will be all conditions and actions of each node. You can cycle between two nodes that are close by pressing R.
+
+If one of the node isn't configured properly, you can remove it using a right click.
+
+And that's it! Activate the coordinator with `rptools_toggle` and test this setup.
+
+== What now?
+
+You can take a look at link:docs/templates.adoc[the available templates] and link:docs/commands.adoc[commands] to see what the addon is capable of, and have some fun!
+
+CAUTION: Again, this addon is in pre-release and lack a lot of features, especially in the QOL department.
+
+
+
+
+
+
