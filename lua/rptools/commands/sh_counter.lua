@@ -80,7 +80,7 @@ concommand.Add("rptools_listcounters", function(ply, cmd, args, argStr)
 
     RPTools.Commands.PrintToPlayer(ply, ply:Nick() .. " counters:")
     for flag, value in pairs(flags) do
-      local flagName = RPTools.Blackboard.Key.ExtractName(flag, RPTools.Blackboard.Key.Counter())
+      local flagName = RPTools.Blackboard.ExtractName(flag, RPTools.Blackboard.Key.Counter())
       RPTools.Commands.PrintToPlayer(ply, flagName .. " = " .. tostring(value))
     end
   end

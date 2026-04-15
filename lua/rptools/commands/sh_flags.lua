@@ -76,7 +76,7 @@ concommand.Add("rptools_listflags", function(ply, cmd, args, argStr)
 
     RPTools.Commands.PrintToPlayer(ply, target:Nick() .. " flags:")
     for flag, value in pairs(flags) do
-      local flagName = RPTools.Blackboard.Key.ExtractName(flag, RPTools.Blackboard.Key.Flag())
+      local flagName = RPTools.Blackboard.ExtractName(flag, RPTools.Blackboard.Key.Flag())
       RPTools.Commands.PrintToPlayer(ply, flagName .. " = " .. tostring(value))
     end
   end
