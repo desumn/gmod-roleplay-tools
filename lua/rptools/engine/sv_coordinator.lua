@@ -67,23 +67,6 @@ local function createEvaluationContexts(plys, nodes)
   return evaluationContexts
 end
 
-local function filterByGlobalState(evaluationContext)
-  local runningState = RPTools.Coordinator.GetNodeRunningState(evaluationContext.nodeId)
-  if runningState == RPTools.Coordinator.NODE_STATE.RUNNING then
-    return true
-  elseif runningState == RPTools.Coordinator.NODE_STATE.PAUSED then
-    return false
-  elseif runningState == RPTools.Coordinator.NODE_STATE.ERROR then
-    return false
-  else
-    RPTools.Logs.log(
-      RPTools.Logs.LEVEL.WARNING,
-      logModuleName,
-      "Unknown running state for " .. evaluationContext.nodeId
-    )
-    return false
-  end
-end
 
 local function filterByPolicy(evaluationContext, time)
   local policy = evaluationContext.node.triggerPolicy
@@ -111,10 +94,6 @@ local function filter(evaluationContexts, time)
       continue
     end
 
-    if not filterByGlobalState(evaluationContext) then
-      evaluationContext.filtered = true
-      continue
-    end
     if not filterByPolicy(evaluationContext, time) then
       evaluationContext.filtered = true
       continue
@@ -285,12 +264,23 @@ end
 
 local lastTime = CurTime()
 
+local function isRunning(node)
+  return RPTools.Coordinator.GetNodeRunningState(node.id) == RPTools.Coordinator.NODE_STATE.RUNNING
+end
+
 local function mainLoop()
   local time = CurTime()
   local deltaTime = time - lastTime
   lastTime = time
 
   local nodes = RPTools.NodeRegister.GetAllNodes()
+  local runningNodes = {}
+  for _, node in ipairs(nodes) do
+    if isRunning(node) then
+      table.insert(runningNodes, node)
+    end
+  end
+
   local plys = {}
   for _, ply in player.Iterator() do
     if not ply:IsAdmin() or not ply:GetNW2Bool("rptools_vanish", false) then
