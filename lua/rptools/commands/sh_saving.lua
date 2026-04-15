@@ -24,6 +24,19 @@ concommand.Add("rptools_save", function(ply, _, args, _)
   end
 end)
 
+
+
+local function completeSaves(cmd, term)
+    local candidates = {}
+    local saves = RPTools.Save.ListSaves()
+    for _, savename in pairs(saves) do
+      if term == nil or string.StartsWith(savename, term) then
+        table.insert(candidates, cmd .. " " .. string.sub(savename, 1, -6))
+      end
+    end
+    return candidates
+end
+
 concommand.Add("rptools_load", function(ply, _, args, _)
   if CLIENT then
     return
@@ -47,7 +60,13 @@ concommand.Add("rptools_load", function(ply, _, args, _)
       printToPlayer(ply, "Successfully loaded save " .. name)
     end
   end
+end, function (cmd, argStr , args)
+  local lastChar = string.sub(argStr, -1)
+  if (args[1] and not args[2] and lastChar ~= " ") or (not args[1] and lastChar == " ") then
+    return completeSaves(cmd, args[1])
+  end
 end)
+
 
 concommand.Add("rptools_saves", function(ply, _, args, _)
   if CLIENT then
@@ -88,5 +107,10 @@ concommand.Add("rptools_delete_save", function(ply, _, args, _)
     else
       printToPlayer(ply, "Successfully deleted save " .. name)
     end
+  end
+end, function (cmd, argStr , args)
+  local lastChar = string.sub(argStr, -1)
+  if (args[1] and not args[2] and lastChar ~= " ") or (not args[1] and lastChar == " ") then
+    return completeSaves(cmd, args[1])
   end
 end)
