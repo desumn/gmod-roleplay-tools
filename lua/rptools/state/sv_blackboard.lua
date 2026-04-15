@@ -196,3 +196,7 @@ end
 function RPTools.Blackboard.ExtractName(name, type)
   return string.sub(name, string.len(type) + 2)
 end
+
+function RPTools.Blackboard.ExtractKeyType(name)
+  return string.Explode("_", name)[1]
+end
