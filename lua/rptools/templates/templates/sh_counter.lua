@@ -22,7 +22,6 @@ RPTools.Templating.RegisterTemplate({
       RPTools.Condition.AddToSet(conditions, flag_cond)
     end
 
-    print(args.outCounter)
     local action = RPTools.Actions.Server.Create("increment", { key = args.outCounter, value = args.step })
 
     local actions = RPTools.Actions.Server.EmptyActionSet()
