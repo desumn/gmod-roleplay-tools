@@ -116,17 +116,3 @@ function RPTools.Dependencies.ListRessourceKeys(keyType)
   end
   return keys
 end
-
-concommand.Add("debug_depgraph", function(ply, cmd, args, argStr)
-  print("Graph: ")
-  PrintTable(dependencyGraph)
-  print("IOs: ")
-  PrintTable(nodeIO)
-end)
-
-concommand.Add("debug_listkeys", function(ply, cmd, args, argStr)
-  print("keys: ")
-  PrintTable(RPTools.Dependencies.ListRessourceKeys(RPTools.Blackboard.Key.Flag()))
-  print("counters: ")
-  PrintTable(RPTools.Dependencies.ListRessourceKeys(RPTools.Blackboard.Key.Counter()))
-end)
