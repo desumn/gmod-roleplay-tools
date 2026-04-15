@@ -43,6 +43,31 @@ hook.Add("PlayerDisconnected", "rptools_coordinator_clean_player_state", functio
   end
 end)
 
+
+local function evaluateConditions(node, ply)
+  local conditionsMet = true
+  for _, condition in ipairs(node.conditions) do
+    local source = condition.source
+    local param = condition.sourceParameter
+    local operator = condition.operator
+    local value = condition.value
+    local sourceValue = RPTools.Sources.Server.GetFunction(source)(ply, node, param)
+    
+    if not RPTools.Operators.GetFunction(operator)(sourceValue, value) then
+      conditionsMet = false
+      break
+    end
+  end
+  return conditionsMet
+end
+
+local function executeActions(node, ply)
+  for _, action in ipairs(node.actions) do
+    local actionFunc = RPTools.Actions.Server.GetFunction(action.actionType)
+    actionFunc(ply, node, action.params)
+  end
+end
+
 local function mainLoop()
   local time = CurTime()
   local deltaTime = time - lastTime
@@ -69,25 +94,11 @@ local function mainLoop()
     for _, ply in ipairs(plys) do
       activeNodes[node.id][ply:SteamID64()] = activeNodes[node.id][ply:SteamID64()] or false
       
-      local conditionsMet = true
-      local conditionSuccess, conditionsError = pcall(function() 
-        for _, condition in ipairs(node.conditions) do
-          local source = condition.source
-          local param = condition.sourceParameter
-          local operator = condition.operator
-          local value = condition.value
-          local sourceValue = RPTools.Sources.Server.GetFunction(source)(ply, node, param)
-          
-          if not RPTools.Operators.GetFunction(operator)(sourceValue, value) then
-            conditionsMet = false
-            break
-          end
-        end
-      end)
-
+      local conditionSuccess, conditionsMet = pcall(evaluateConditions, node, ply)
+      
       if not conditionSuccess then
         RPTools.Coordinator.SetNodeRunningState(node.id, RPTools.Coordinator.NODE_STATE.ERROR)
-        RPTools.Logs.log(RPTools.Logs.LEVEL.ERROR, logModuleName, node.id .. " condition evaluation failed: " .. conditionsError)
+        RPTools.Logs.log(RPTools.Logs.LEVEL.ERROR, logModuleName, node.id .. " condition evaluation failed: " .. conditionsMet)
         continue
       end
       
@@ -96,15 +107,10 @@ local function mainLoop()
         continue
       end
       
-      if activeNodes[node.id][ply:SteamID64()] then continue   end
+      if activeNodes[node.id][ply:SteamID64()] then continue end
       activeNodes[node.id][ply:SteamID64()] = true
-      local actionSuccess, actionsError = pcall(function ()
-        for _, action in ipairs(node.actions) do
-          local actionFunc = RPTools.Actions.Server.GetFunction(action.actionType)
-          actionFunc(ply, node, action.params)
-        end
-      end)
-
+      local actionSuccess, actionsError = pcall(executeActions, node, ply)
+      
       if not actionSuccess then
         RPTools.Coordinator.SetNodeRunningState(node.id, RPTools.Coordinator.NODE_STATE.ERROR)
         RPTools.Logs.log(RPTools.Logs.LEVEL.ERROR, logModuleName, node.id .. " action evaluation failed: " .. actionsError)
