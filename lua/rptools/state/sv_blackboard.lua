@@ -192,3 +192,7 @@ end
 function RPTools.Blackboard.Key.Counter(key)
   return (key ~= nil and key ~= "" and ("counter_" .. key)) or "counter"
 end
+
+function RPTools.Blackboard.ExtractName(name, type)
+  return string.sub(name, string.len(type) + 2)
+end
