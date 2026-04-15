@@ -1,7 +1,7 @@
 local param = RPTools.Templating.Parameters
 
 RPTools.Templating.RegisterTemplate({
-  name = "clue",
+  name = "message",
   description = "send a message to the player, potentially mark him",
   parameters = {
     message = param.LongString("message", "message to send to the player"),
