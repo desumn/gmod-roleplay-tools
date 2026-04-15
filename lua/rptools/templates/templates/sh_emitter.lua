@@ -35,7 +35,8 @@ RPTools.Templating.RegisterTemplate({
 
     local soundActionType = "play_sound"
 
-    local soundAction = RPTools.Actions.Server.Create(soundActionType, { sound = args.sound, volume = args.volume, pitch = args.pitch })
+    local soundAction =
+      RPTools.Actions.Server.Create(soundActionType, { sound = args.sound, volume = args.volume, pitch = args.pitch })
 
     local actions = RPTools.Actions.Server.EmptyActionSet()
     RPTools.Actions.Server.AddToSet(actions, soundAction)
