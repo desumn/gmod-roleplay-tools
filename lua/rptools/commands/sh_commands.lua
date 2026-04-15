@@ -92,34 +92,16 @@ function RPTools.Commands.CompletePlayers(cmd, name)
   return foundPlayers
 end
 
-function RPTools.Commands.CompleteBlackboardByPrefix(name, prefix)
-  local target = nil
+function RPTools.Commands.CompleteBlackboardByKey(cmd, prefix, term)
+  local candidates = {}
+  local keys = RPTools.Dependencies.ListRessourceKeys(prefix)
 
-  local foundPlayers = {}
-  for _, ply in player.Iterator() do
-    local lowerName = string.lower(ply:Nick())
-    local lowerTargetName = string.lower(name)
-
-    if lowerName == lowerTargetName then
-      target = ply
-      break
-    end
-
-    if string.find(lowerName, lowerTargetName, 1, true) then
-      table.insert(foundPlayers, ply)
+  for _, key in ipairs(keys) do
+    if not term or term == "" or string.StartsWith(key, term) then
+      table.insert(candidates, cmd .. " " .. key)
     end
   end
-
-  if #foundPlayers == 0 then
-    return {}
-  end
-
-  if #foundPlayers > 1 then
-    return {}
-  end
-
-  local flags = RPTools.Blackboard.FindByPrefix(target, prefix)
-  return (flags ~= nil and not table.IsEmpty(flags) and table.GetKeys(flags)) or {}
+  return candidates
 end
 
 if CLIENT then

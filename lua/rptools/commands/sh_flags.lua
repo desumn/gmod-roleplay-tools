@@ -19,9 +19,13 @@ concommand.Add("rptools_flag", function(ply, cmd, args, argStr)
     RPTools.Blackboard.Write(target, RPTools.Blackboard.Key.Flag(flagName), true)
     RPTools.Commands.PrintToPlayer(ply, "Set flag " .. flagName .. " for player " .. target:Nick())
   end
-end, function(cmd, _, args)
-  if args[1] and not args[2] then
+end, function(cmd, argStr, args)
+  local lastChar = string.sub(argStr, -1)
+  if args[1] and not args[2] and lastChar ~= " " then
     return RPTools.Commands.CompletePlayers(cmd, args[1])
+  end
+  if (args[1] and args[2] and not args[3] and lastChar ~= " ") or (args[1] and not args[2] and lastChar == " ") then
+    return RPTools.Commands.CompleteBlackboardByKey(cmd .. " " .. args[1], RPTools.Blackboard.Key.Flag(), args[2])
   end
   return {}
 end)
@@ -47,9 +51,13 @@ concommand.Add("rptools_unflag", function(ply, cmd, args, argStr)
     RPTools.Blackboard.Write(target, RPTools.Blackboard.Key.Flag(flagName), false)
     RPTools.Commands.PrintToPlayer(ply, "Unset flag " .. flagName .. " for player " .. target:Nick())
   end
-end, function(cmd, _, args)
-  if args[1] and not args[2] then
+end, function(cmd, argStr, args)
+  local lastChar = string.sub(argStr, -1)
+  if args[1] and not args[2] and lastChar ~= " " then
     return RPTools.Commands.CompletePlayers(cmd, args[1])
+  end
+  if (args[1] and args[2] and not args[3] and lastChar ~= " ") or (args[1] and not args[2] and lastChar == " ") then
+    return RPTools.Commands.CompleteBlackboardByKey(cmd .. " " .. args[1], RPTools.Blackboard.Key.Flag(), args[2])
   end
   return {}
 end)
