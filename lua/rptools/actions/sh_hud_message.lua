@@ -7,6 +7,31 @@ if SERVER then
 end
 
 if CLIENT then
+  local function wrapText(text, font, maxWidth)
+    surface.SetFont(font)
+    local words = string.Explode(" ", text)
+    local lines = {}
+    local currentLine = ""
+
+    for _, word in ipairs(words) do
+      local testLine = currentLine == "" and word or (currentLine .. " " .. word)
+      local testWidth = surface.GetTextSize(testLine)
+
+      if testWidth > maxWidth and currentLine ~= "" then
+        table.insert(lines, currentLine)
+        currentLine = word
+      else
+        currentLine = testLine
+      end
+    end
+
+    if currentLine ~= "" then
+      table.insert(lines, currentLine)
+    end
+
+    return lines
+  end
+
   local messages = {}
   RPTools.Actions.Client.RegisterAction("hud_message", function(params)
     table.insert(messages, { duration = params.duration, text = params.message })
@@ -44,7 +69,6 @@ if CLIENT then
     local timeElapsed = time - message.startTime
     local timeLeft = message.stopTime - time
 
-    local color = color_black
     local alpha = 255
 
     if timeElapsed <= fadeDuration then
@@ -53,15 +77,26 @@ if CLIENT then
       alpha = math.Clamp((timeLeft / fadeDuration) * 255, 0, 255)
     end
 
-    surface.SetFont("RPToolsHUDMessageFont")
-    local textWidth, textHeight = surface.GetTextSize(message.text)
-
     local paddingX = 20
     local paddingY = 12
     local bandWidth = 6
 
-    local boxWidth = textWidth + (paddingX * 2) + bandWidth
-    local boxHeight = textHeight + (paddingY * 2)
+    local maxTextWidth = ScrW() * 0.7
+    local lines = wrapText(message.text, "RPToolsHUDMessageFont", maxTextWidth)
+
+    surface.SetFont("RPToolsHUDMessageFont")
+    local _, lineHeight = surface.GetTextSize("A")
+
+    local longestWidth = 0
+    for _, line in ipairs(lines) do
+      local w = surface.GetTextSize(line)
+      if w > longestWidth then
+        longestWidth = w
+      end
+    end
+
+    local boxWidth = longestWidth + (paddingX * 2) + bandWidth
+    local boxHeight = (#lines * lineHeight) + (paddingY * 2)
 
     local boxX = (ScrW() / 2) - (boxWidth / 2)
     local boxY = ScrH() - boxHeight - 40
@@ -76,25 +111,29 @@ if CLIENT then
     local textX = boxX + bandWidth + paddingX
     local textY = boxY + paddingY
 
-    draw.SimpleText(
-      message.text,
-      "RPToolsHUDMessageFont",
-      textX + 2,
-      textY + 2,
-      Color(0, 0, 0, alpha * 0.8),
-      TEXT_ALIGN_LEFT,
-      TEXT_ALIGN_TOP
-    )
-
     local couleurTexte = Color(240, 235, 230)
-    draw.SimpleText(
-      message.text,
-      "RPToolsHUDMessageFont",
-      textX,
-      textY,
-      ColorAlpha(couleurTexte, alpha),
-      TEXT_ALIGN_LEFT,
-      TEXT_ALIGN_TOP
-    )
+    for i, line in ipairs(lines) do
+      local lineY = textY + (i - 1) * lineHeight
+
+      draw.SimpleText(
+        line,
+        "RPToolsHUDMessageFont",
+        textX + 2,
+        lineY + 2,
+        Color(0, 0, 0, alpha * 0.8),
+        TEXT_ALIGN_LEFT,
+        TEXT_ALIGN_TOP
+      )
+
+      draw.SimpleText(
+        line,
+        "RPToolsHUDMessageFont",
+        textX,
+        lineY,
+        ColorAlpha(couleurTexte, alpha),
+        TEXT_ALIGN_LEFT,
+        TEXT_ALIGN_TOP
+      )
+    end
   end)
 end
