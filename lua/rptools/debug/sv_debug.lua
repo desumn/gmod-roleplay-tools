@@ -8,7 +8,8 @@ function RPTools.Debug.WriteDebugNode(node)
   local id = RPTools.Node.GetId(node)
   local anchor = table.Copy(node.anchor)
   if anchor.type == "entity" then
-    anchor.entityId = RPTools.Entities.Get(anchor.entityId):EntIndex() or nil
+    local ent = RPTools.Entities.Get(anchor.entityId)
+    anchor.entityId = (ent and ent:EntIndex()) or nil
   end
   PrintTable(anchor)
   local conditions = RPTools.Node.GetConditions(node)
