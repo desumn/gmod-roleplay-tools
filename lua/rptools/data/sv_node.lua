@@ -76,15 +76,13 @@ end
 ---@param _anchor table
 ---@param _conditions RPToolsCondition[]
 ---@param _actions RPToolsAction[]
----@param _cooldownDuration? number
 ---@return RPToolsNode|nil, string|nil
-function RPTools.Node.Create(_anchor, _conditions, _actions, _cooldownDuration)
+function RPTools.Node.Create(_anchor, _conditions, _actions)
   local node = {
     id = generateId(),
     anchor = _anchor or { type = "static", position = Vector(0, 0, 0)},
     conditions = _conditions or RPTools.Condition.EmptyConditionSet(),
     actions = _actions or RPTools.Actions.Server.EmptyActionSet(),
-    cooldownDuration = _cooldownDuration or 0,
   }
 
   local isValid, errorMessage = RPTools.Node.ValidateNode(node)
@@ -124,12 +122,6 @@ end
 ---@return RPToolsAction[]
 function RPTools.Node.GetActions(node)
   return node.actions
-end
-
----@param node RPToolsNode
----@return integer
-function RPTools.Node.GetCooldownDuration(node)
-  return node.cooldownDuration
 end
 
 ---@param node RPToolsNode

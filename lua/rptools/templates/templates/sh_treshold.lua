@@ -23,7 +23,7 @@ RPTools.Templating.RegisterTemplate({
     local actions = RPTools.Actions.Server.EmptyActionSet()
     RPTools.Actions.Server.AddToSet(actions, action)
 
-    local node = RPTools.Node.Create(context.position, conditions, actions, 0)
+    local node = RPTools.Node.Create(context.position, conditions, actions)
     return { node }
   end or nil,
 })

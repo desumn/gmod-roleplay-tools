@@ -44,11 +44,7 @@ RPTools.Templating.RegisterTemplate({
     local node = RPTools.Node.Create(
       context.position,
       conditions,
-      0,
-      actions,
-      RPTools.Node.TRIGGER_POLICY.ONE_SHOT,
-      RPTools.Node.SCOPE.SINGLE_PLAYER,
-      0
+      actions
     )
     return { node }
   end or nil,
