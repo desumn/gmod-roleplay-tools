@@ -21,6 +21,8 @@ function RPTools.Coordinator.SetNodeRunningState(nodeId, state)
 end
 
 local activeNodes = {}
+local candidates = {}
+
 
 local lastTime = CurTime()
 
@@ -30,19 +32,32 @@ end
 
 hook.Add("RPTools_NodeCreated", "rptools_coordinator_initial_state", function (id, node)
   RPTools.Coordinator.SetNodeRunningState(id, RPTools.Coordinator.NODE_STATE.RUNNING)
+  candidates[id] = {}
 end)
 
 hook.Add("RPTools_NodeRemoved", "rptools_coordinator_clean_node_state", function (id)
   RPTools.Coordinator.SetNodeRunningState(id, nil)
   activeNodes[id] = nil
+  candidates[id] = nil
 end)
 
 hook.Add("PlayerDisconnected", "rptools_coordinator_clean_player_state", function (ply)
   for id, state in pairs(activeNodes) do
     state[ply:SteamID64()] = nil
   end
+  for id, state in pairs(candidates) do
+    state[ply:SteamID64()] = nil
+  end
 end)
 
+hook.Add("RPTools_ZoneEntered", "rptools_coordinator_zone_enter", function (id, ply)
+  candidates[id][ply:SteamID64()] = true
+end)
+
+hook.Add("RPTools_ZoneExited", "rptools_coordinator_zone_exit", function (id, ply)
+  candidates[id][ply:SteamID64()] = nil
+  activeNodes[id][ply:SteamID64()] = false
+end)
 
 local function evaluateConditions(node, ply)
   local conditionsMet = true
@@ -50,6 +65,11 @@ local function evaluateConditions(node, ply)
     local source = condition.source
     local param = condition.sourceParameter
     local operator = condition.operator
+
+    if source == "distance" and (operator == "lt" or operator == "le") then
+      continue
+    end
+
     local value = condition.value
     local sourceValue = RPTools.Sources.Server.GetFunction(source)(ply, node, param)
     
@@ -92,6 +112,7 @@ local function mainLoop()
   for _, node in ipairs(runningNodes) do
     activeNodes[node.id] = activeNodes[node.id] or {}
     for _, ply in ipairs(plys) do
+      if not candidates[node.id][ply:SteamID64()] then continue end
       activeNodes[node.id][ply:SteamID64()] = activeNodes[node.id][ply:SteamID64()] or false
       
       local conditionSuccess, conditionsMet = pcall(evaluateConditions, node, ply)
