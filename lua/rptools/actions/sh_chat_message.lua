@@ -3,6 +3,8 @@ if SERVER then
     return istable(params) and isstring(params.message)
   end, function(params)
     return "chat message: " .. params.message
+  end, function(plys, _, _)
+    return plys
   end)
 end
 

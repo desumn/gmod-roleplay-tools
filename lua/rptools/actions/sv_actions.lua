@@ -21,8 +21,8 @@ function RPTools.Actions.Server.RegisterClientAction(name, validator, formatter,
   validators[name] = validator
   formatters[name] = formatter
 
-  local safeTarget = target or function(ply, _, _)
-    return { ply }
+  local safeTarget = target or function(plys, _, _)
+    return plys
   end
   serverFunction[name] = function(ply, node, params)
     RPTools.Network.SendToClients(safeTarget(ply, node, params), RPTools.Network.MSG_TYPE.CLIENT_ACTION, function()

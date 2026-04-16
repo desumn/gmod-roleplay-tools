@@ -3,6 +3,8 @@ if SERVER then
     return istable(params) and isstring(params.message) and RPTools.Utilities.IsNumber(params.duration)
   end, function(params)
     return "hud message: " .. params.message .. "(duration: " .. params.duration .. ")"
+  end, function(plys, _, _)
+    return plys
   end)
 end
 
