@@ -86,10 +86,13 @@ local function evaluateConditions(node, ply)
   return conditionsMet
 end
 
-local function executeActions(node, ply)
+local function executeActions(node, plys)
+  if table.IsEmpty(plys) then
+    return
+  end
   for _, action in ipairs(node.actions) do
     local actionFunc = RPTools.Actions.Server.GetFunction(action.actionType)
-    actionFunc(ply, node, action.params)
+    actionFunc(plys, node, action.params)
   end
 end
 
@@ -115,6 +118,7 @@ local function mainLoop()
   end
 
   for _, node in ipairs(runningNodes) do
+    local activations = {}
     activeNodes[node.id] = activeNodes[node.id] or {}
     for _, ply in ipairs(plys) do
       if not candidates[node.id][ply:SteamID64()] then
@@ -142,18 +146,22 @@ local function mainLoop()
       if activeNodes[node.id][ply:SteamID64()] then
         continue
       end
-      activeNodes[node.id][ply:SteamID64()] = true
-      local actionSuccess, actionsError = pcall(executeActions, node, ply)
 
-      if not actionSuccess then
-        RPTools.Coordinator.SetNodeRunningState(node.id, RPTools.Coordinator.NODE_STATE.ERROR)
-        RPTools.Logs.log(
-          RPTools.Logs.LEVEL.ERROR,
-          logModuleName,
-          node.id .. " action evaluation failed: " .. actionsError
-        )
-        continue
-      end
+      activeNodes[node.id][ply:SteamID64()] = true
+
+      table.insert(activations, ply)
+    end
+
+    local actionSuccess, actionsError = pcall(executeActions, node, activations)
+
+    if not actionSuccess then
+      RPTools.Coordinator.SetNodeRunningState(node.id, RPTools.Coordinator.NODE_STATE.ERROR)
+      RPTools.Logs.log(
+        RPTools.Logs.LEVEL.ERROR,
+        logModuleName,
+        node.id .. " action evaluation failed: " .. actionsError
+      )
+      continue
     end
   end
 end
