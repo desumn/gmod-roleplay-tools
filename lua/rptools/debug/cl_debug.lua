@@ -72,6 +72,11 @@ function RPTools.Debug.ResolvePosition(node)
 end
 
 RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_ADD, function()
+  local reset = net.ReadBool()
+  if reset then
+    nodes = {}
+    nodeNormal = {}
+  end
   local nodeCount = net.ReadUInt(12)
   for i = 1, nodeCount do
     local node = RPTools.Debug.ReadDebugNode()
@@ -85,6 +90,7 @@ end)
 RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_REMOVE, function()
   local nodeId = net.ReadString()
 
+  print("removing")
   local idxToRemove = nil
   for idx, node in ipairs(nodes) do
     if node.id == nodeId then
@@ -114,6 +120,9 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
 
   for _, node in ipairs(nodes) do
     local position = RPTools.Debug.ResolvePosition(node)
+    if position == nil then
+      continue
+    end
     local normal = nodeNormal[node.id]
     local offsetVector = normal * 150
 

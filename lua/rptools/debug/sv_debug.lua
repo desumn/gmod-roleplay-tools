@@ -62,6 +62,7 @@ end
 
 hook.Add("RPTools_NodeCreated", "RPTools_DebugNodeCreate", function(id, node)
   RPTools.Network.SendToClients(getDebugPlayers(), RPTools.Network.MSG_TYPE.DEBUG_ADD, function()
+    net.WriteBool(false)
     net.WriteUInt(1, 12)
     RPTools.Debug.WriteDebugNode(node)
   end)
@@ -80,6 +81,7 @@ local function sendAllNodes(target)
   end
 
   RPTools.Network.SendToClients(target, RPTools.Network.MSG_TYPE.DEBUG_ADD, function()
+    net.WriteBool(true)
     net.WriteUInt(#nodes, 12)
     for _, node in ipairs(nodes) do
       RPTools.Debug.WriteDebugNode(node)

@@ -34,6 +34,10 @@ if CLIENT then
     local visibleNodes = {}
 
     for _, node in ipairs(nodes) do
+      local position = RPTools.Debug.ResolvePosition(node)
+      if position == nil then
+        continue
+      end
       local nodeEyeVector = RPTools.Debug.ResolvePosition(node) - eyePos
       if nodeEyeVector:Dot(direction) <= 0 then
         continue
