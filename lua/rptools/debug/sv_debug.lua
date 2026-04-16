@@ -11,7 +11,6 @@ function RPTools.Debug.WriteDebugNode(node)
     local ent = RPTools.Entities.Get(anchor.entityId)
     anchor.entityId = (ent and ent:EntIndex()) or nil
   end
-  PrintTable(anchor)
   local conditions = RPTools.Node.GetConditions(node)
 
   local distances = {}
