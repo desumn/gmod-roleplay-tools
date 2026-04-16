@@ -1,6 +1,6 @@
 if SERVER then
   RPTools.Sources.Server.RegisterSource("distance", function(ply, node, param)
-    return ply:GetPos():Distance(node.position)
+    return ply:GetPos():Distance(RPTools.Node.GetPosition(node))
   end, function(param)
     return param == nil
   end, function(_)

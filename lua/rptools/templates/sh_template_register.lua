@@ -50,8 +50,22 @@ if SERVER then
     local name = net.ReadString()
     local arguments = net.ReadTable()
     local pos = net.ReadVector()
+    local hitEntity = net.ReadBool()
+    local ent = nil
+    if hitEntity then
+      ent = net.ReadEntity()
+    end
 
-    local context = { position = pos }
+    if ent ~= nil and ent:IsWorld() then
+      ent = nil
+    elseif ent ~= nil and not IsValid(ent) then
+      RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Tried to create a template on an invalid entity")
+      return
+    end
+
+    local entityId = RPTools.Entities.Register(ent)
+
+    local context = { position = pos, entityId = entityId }
 
     local template = RPTools.Templating.GetTemplateByName(name)
 

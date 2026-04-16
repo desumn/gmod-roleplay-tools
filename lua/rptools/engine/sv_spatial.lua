@@ -24,11 +24,12 @@ hook.Add("RPTools_NodeCreated", "rptools_create_zone", function(id, node)
     return
   end
 
-  local position = RPTools.Node.GetPosition(node)
   local radius = math.max(unpack(distances))
 
   zones[id] = {
-    position = position,
+    getPosition = function()
+      return RPTools.Node.GetPosition(node)
+    end,
     radius = radius,
   }
 end)
@@ -53,7 +54,7 @@ local function calculateIntersections()
     local currentIntersections = {}
 
     for nodeId, zone in pairs(zones) do
-      if plyPosition:DistToSqr(zone.position) <= zone.radius * zone.radius then
+      if plyPosition:DistToSqr(zone.getPosition()) <= zone.radius * zone.radius then
         currentIntersections[nodeId] = true
       end
     end

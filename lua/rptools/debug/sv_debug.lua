@@ -6,8 +6,11 @@ local debugMode = {}
 ---@param node RPToolsNode
 function RPTools.Debug.WriteDebugNode(node)
   local id = RPTools.Node.GetId(node)
-  local position = RPTools.Node.GetPosition(node)
-
+  local anchor = table.Copy(node.anchor)
+  if anchor.type == "entity" then
+    anchor.entityId = RPTools.Entities.Get(anchor.entityId):EntIndex() or nil
+  end
+  PrintTable(anchor)
   local conditions = RPTools.Node.GetConditions(node)
 
   local distances = {}
@@ -39,7 +42,7 @@ function RPTools.Debug.WriteDebugNode(node)
   end
 
   net.WriteString(id)
-  net.WriteVector(position)
+  net.WriteTable(anchor)
   net.WriteUInt((table.IsEmpty(distances) and 0) or math.max(unpack(distances)), 16)
   net.WriteUInt(state or 1, 3)
   net.WriteTable(conditionsDesc, true)

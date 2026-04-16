@@ -41,11 +41,12 @@ RPTools.Templating.RegisterTemplate({
     local actions = RPTools.Actions.Server.EmptyActionSet()
     RPTools.Actions.Server.AddToSet(actions, soundAction)
 
-    local node = RPTools.Node.Create(
-      context.position,
-      conditions,
-      actions
-    )
+    local anchor = { type = "static", position = context.position }
+    if context.entityId then
+      anchor = { type = "entity", entityId = context.entityId }
+    end
+
+    local node = RPTools.Node.Create(anchor, conditions, actions)
     return { node }
   end or nil,
 })

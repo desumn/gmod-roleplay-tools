@@ -103,9 +103,9 @@ RPTools.Network.OnClientMessage(RPTools.Network.MSG_TYPE.DELETE_NODE, function(p
 end)
 
 hook.Add("RPTools_TrackedEntityRemoved", "rptools_remove_anchored_nodes", function(id, entity)
-  for _, node in RPTools.NodeRegister.GetAllNodes() do
+  for _, node in ipairs(RPTools.NodeRegister.GetAllNodes()) do
     if node.anchor.type == "entity" and node.anchor.entityId == id then
       RPTools.NodeRegister.UnregisterNode(node.id)
     end
   end
-)
+end)

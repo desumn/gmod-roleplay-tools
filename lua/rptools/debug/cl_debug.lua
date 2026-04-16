@@ -15,7 +15,7 @@ local drawDebug = false
 
 function RPTools.Debug.ReadDebugNode()
   local id = net.ReadString()
-  local position = net.ReadVector()
+  local anchor = net.ReadTable()
   local distance = net.ReadUInt(16)
   local state = net.ReadUInt(3)
   local conditionsDesc = net.ReadTable(true)
@@ -23,7 +23,7 @@ function RPTools.Debug.ReadDebugNode()
 
   local node = {
     id = id,
-    position = position,
+    anchor = anchor,
     distance = distance,
     state = state,
     conditionsDesc = conditionsDesc,
@@ -61,13 +61,23 @@ end
 
 local nodeNormal = {}
 
+function RPTools.Debug.ResolvePosition(node)
+  local anchor = node.anchor
+  if anchor.type == "static" then
+    return anchor.position
+  elseif anchor.type == "entity" then
+    local ent = Entity(anchor.entityId)
+    return (IsValid(ent) and ent:GetPos()) or nil
+  end
+end
+
 RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.DEBUG_ADD, function()
   local nodeCount = net.ReadUInt(12)
   for i = 1, nodeCount do
     local node = RPTools.Debug.ReadDebugNode()
     table.insert(nodes, node)
     if not nodeNormal[node.id] then
-      nodeNormal[node.id] = inferNormal(node.position)
+      nodeNormal[node.id] = inferNormal(RPTools.Debug.ResolvePosition(node))
     end
   end
 end)
@@ -103,7 +113,7 @@ hook.Add("PostDrawTranslucentRenderables", "rptools_drawDebug", function()
   end
 
   for _, node in ipairs(nodes) do
-    local position = node.position
+    local position = RPTools.Debug.ResolvePosition(node)
     local normal = nodeNormal[node.id]
     local offsetVector = normal * 150
 

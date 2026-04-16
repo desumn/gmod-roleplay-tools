@@ -34,7 +34,7 @@ if CLIENT then
     local visibleNodes = {}
 
     for _, node in ipairs(nodes) do
-      local nodeEyeVector = node.position - eyePos
+      local nodeEyeVector = RPTools.Debug.ResolvePosition(node) - eyePos
       if nodeEyeVector:Dot(direction) <= 0 then
         continue
       end
@@ -284,6 +284,10 @@ function TOOL:LeftClick(tr)
       net.WriteString(name)
       net.WriteTable(params)
       net.WriteVector(tr.HitPos)
+      net.WriteBool(tr.Entity ~= nil)
+      if tr.Entity ~= nil then
+        net.WriteEntity(tr.Entity)
+      end
     end)
     return true
   end

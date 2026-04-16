@@ -32,9 +32,7 @@ local function validatePosition(vector)
 end
 
 local function validateEntID(entid)
-  return RPTools.Utilities.MakeError(isstring(entid),
-    "Invalid entity id: " .. tostring(entid)
-  )
+  return RPTools.Utilities.MakeError(isstring(entid), "Invalid entity id: " .. tostring(entid))
 end
 
 local function validateAnchor(anchor)
@@ -43,10 +41,9 @@ local function validateAnchor(anchor)
   elseif anchor.type == "entity" then
     return validateEntID(anchor.entityId)
   else
-    return false, "Invalid anchor type: " .. tostring(anchor.type) ..  " expected static or entity"
+    return false, "Invalid anchor type: " .. tostring(anchor.type) .. " expected static or entity"
   end
 end
-
 
 local fieldValidations = {
   id = validateId,
@@ -80,7 +77,7 @@ end
 function RPTools.Node.Create(_anchor, _conditions, _actions)
   local node = {
     id = generateId(),
-    anchor = _anchor or { type = "static", position = Vector(0, 0, 0)},
+    anchor = _anchor or { type = "static", position = Vector(0, 0, 0) },
     conditions = _conditions or RPTools.Condition.EmptyConditionSet(),
     actions = _actions or RPTools.Actions.Server.EmptyActionSet(),
   }
@@ -107,7 +104,9 @@ function RPTools.Node.GetPosition(node)
     return node.anchor.position
   else
     local entity = RPTools.Entities.Get(node.anchor.entityId)
-    if entity == nil then return end
+    if entity == nil then
+      return
+    end
     return entity:GetPos()
   end
 end
