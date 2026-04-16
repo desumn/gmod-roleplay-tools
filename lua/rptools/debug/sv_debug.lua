@@ -6,8 +6,6 @@ local debugMode = {}
 ---@param node RPToolsNode
 function RPTools.Debug.WriteDebugNode(node)
   local id = RPTools.Node.GetId(node)
-  local policy = RPTools.Node.GetTriggerPolicy(node)
-  local policyText = RPTools.Node.FormatPolicy(policy)
   local position = RPTools.Node.GetPosition(node)
 
   local conditions = RPTools.Node.GetConditions(node)
@@ -41,8 +39,6 @@ function RPTools.Debug.WriteDebugNode(node)
   end
 
   net.WriteString(id)
-  net.WriteUInt(policy, 3)
-  net.WriteString(policyText)
   net.WriteVector(position)
   net.WriteUInt((table.IsEmpty(distances) and 0) or math.max(unpack(distances)), 16)
   net.WriteUInt(state or 1, 3)

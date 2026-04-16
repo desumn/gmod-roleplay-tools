@@ -145,7 +145,6 @@ if CLIENT then
 
     local height = padding
       + headerHeight -- id/state
-      + headerHeight -- policy
       + separatorHeight
       + lineHeight -- titre conditions
       + #conditions * lineHeight
@@ -171,9 +170,6 @@ if CLIENT then
       RPTools.Coordinator.stateColor[node.state],
       TEXT_ALIGN_RIGHT
     )
-    cursorY = cursorY + headerHeight
-
-    draw.SimpleText(node.triggerPolicyText or "unknown", "DermaDefault", x + padding, cursorY, Color(150, 155, 160))
     cursorY = cursorY + headerHeight
 
     cursorY = cursorY + 5

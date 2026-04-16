@@ -57,15 +57,7 @@ RPTools.Templating.RegisterTemplate({
 
     RPTools.Actions.Server.AddToSet(actions, messageAction)
 
-    local node = RPTools.Node.Create(
-      context.position,
-      conditions,
-      0,
-      actions,
-      RPTools.Node.TRIGGER_POLICY.ONE_SHOT,
-      RPTools.Node.SCOPE.SINGLE_PLAYER,
-      0
-    )
+    local node = RPTools.Node.Create(context.position, conditions, actions, 0)
     return { node }
   end or nil,
 })

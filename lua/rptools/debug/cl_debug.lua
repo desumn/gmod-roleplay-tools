@@ -15,8 +15,6 @@ local drawDebug = false
 
 function RPTools.Debug.ReadDebugNode()
   local id = net.ReadString()
-  local policy = net.ReadUInt(3)
-  local policyText = net.ReadString()
   local position = net.ReadVector()
   local distance = net.ReadUInt(16)
   local state = net.ReadUInt(3)
@@ -25,8 +23,6 @@ function RPTools.Debug.ReadDebugNode()
 
   local node = {
     id = id,
-    triggerPolicy = policy,
-    triggerPolicyText = policyText,
     position = position,
     distance = distance,
     state = state,
