@@ -31,9 +31,26 @@ local function validatePosition(vector)
   )
 end
 
+local function validateEntID(entid)
+  return RPTools.Utilities.MakeError(isstring(entid),
+    "Invalid entity id: " .. tostring(entid)
+  )
+end
+
+local function validateAnchor(anchor)
+  if anchor.type == "static" then
+    return validatePosition(anchor.position)
+  elseif anchor.type == "entity" then
+    return validateEntID(anchor.entityId)
+  else
+    return false, "Invalid anchor type: " .. tostring(anchor.type) ..  " expected static or entity"
+  end
+end
+
+
 local fieldValidations = {
   id = validateId,
-  position = validatePosition,
+  anchor = validateAnchor,
   conditions = RPTools.Condition.ValidateConditionSet,
   actions = RPTools.Actions.Server.ValidateActionsSet,
 }
@@ -56,15 +73,15 @@ function RPTools.Node.ValidateNode(node)
   return finalResult, accumulatedError
 end
 
----@param _position Vector
+---@param _anchor table
 ---@param _conditions RPToolsCondition[]
 ---@param _actions RPToolsAction[]
 ---@param _cooldownDuration? number
 ---@return RPToolsNode|nil, string|nil
-function RPTools.Node.Create(_position, _conditions, _actions, _cooldownDuration)
+function RPTools.Node.Create(_anchor, _conditions, _actions, _cooldownDuration)
   local node = {
     id = generateId(),
-    position = _position or Vector(0, 0, 0),
+    anchor = _anchor or { type = "static", position = Vector(0, 0, 0)},
     conditions = _conditions or RPTools.Condition.EmptyConditionSet(),
     actions = _actions or RPTools.Actions.Server.EmptyActionSet(),
     cooldownDuration = _cooldownDuration or 0,
@@ -86,9 +103,15 @@ function RPTools.Node.GetId(node)
 end
 
 ---@param node RPToolsNode
----@return Vector
+---@return Vector|nil
 function RPTools.Node.GetPosition(node)
-  return node.position
+  if node.anchor.type == "static" then
+    return node.anchor.position
+  else
+    local entity = RPTools.Entities.Get(node.anchor.entityId)
+    if entity == nil then return end
+    return entity:GetPos()
+  end
 end
 
 ---@param node RPToolsNode
