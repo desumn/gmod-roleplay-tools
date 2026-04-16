@@ -122,8 +122,10 @@ end
 
 function RPTools.Coordinator.Start()
   timer.Create("RPTools_Coordinator", 0.1, 0, mainLoop)
+  hook.Run("RPTools_CoordinatorStarted")
 end
 
 function RPTools.Coordinator.Stop()
   timer.Remove("RPTools_Coordinator")
+  hook.Run("RPTools_CoordinatorStopped")
 end
