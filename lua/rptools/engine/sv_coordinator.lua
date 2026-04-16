@@ -54,7 +54,9 @@ hook.Add("RPTools_ZoneEntered", "rptools_coordinator_zone_enter", function(id, p
 end)
 
 hook.Add("RPTools_ZoneExited", "rptools_coordinator_zone_exit", function(id, ply)
+  if not candidates[id] then return end
   candidates[id][ply:SteamID64()] = nil
+  if not activeNodes[id] then return end
   activeNodes[id][ply:SteamID64()] = false
 end)
 
