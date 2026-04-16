@@ -86,16 +86,6 @@ local function evaluateConditions(node, ply)
   return conditionsMet
 end
 
-local function executeActions(node, plys)
-  if table.IsEmpty(plys) then
-    return
-  end
-  for _, action in ipairs(node.actions) do
-    local actionFunc = RPTools.Actions.Server.GetFunction(action.actionType)
-    actionFunc(plys, node, action.params)
-  end
-end
-
 local function mainLoop()
   local time = CurTime()
   local deltaTime = time - lastTime
@@ -152,17 +142,7 @@ local function mainLoop()
       table.insert(activations, ply)
     end
 
-    local actionSuccess, actionsError = pcall(executeActions, node, activations)
-
-    if not actionSuccess then
-      RPTools.Coordinator.SetNodeRunningState(node.id, RPTools.Coordinator.NODE_STATE.ERROR)
-      RPTools.Logs.log(
-        RPTools.Logs.LEVEL.ERROR,
-        logModuleName,
-        node.id .. " action evaluation failed: " .. actionsError
-      )
-      continue
-    end
+    hook.Run("RPTools_NodeActivated", node.id, node, activations)
   end
 end
 
