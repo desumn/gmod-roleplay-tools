@@ -34,8 +34,14 @@ hook.Add("RPTools_NodeCreated", "rptools_create_zone", function(id, node)
   }
 end)
 
+local intersections = {}
+
 hook.Add("RPTools_NodeRemoved", "rptools_remove_zone", function(id)
   zones[id] = nil
+  noZones[id] = nil
+  for steamId, nodeSet in pairs(intersections) do
+    nodeSet[id] = nil
+  end
 end)
 
 hook.Add("PlayerInitialSpawn", "rptools_zone_spawn", function(ply)
@@ -43,8 +49,6 @@ hook.Add("PlayerInitialSpawn", "rptools_zone_spawn", function(ply)
     hook.Run("RPTools_ZoneEntered", nodeId, ply)
   end
 end)
-
-local intersections = {}
 
 local function calculateIntersections()
   for _, ply in ipairs(player.GetAll()) do
