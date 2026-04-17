@@ -5,6 +5,7 @@
 ---@field activePlayers table<string, boolean>
 ---@field radius number
 ---@field activeSounds string[]
+---@field shouldEvaluate boolean
 ---@field CountActives fun(self : RPToolsNodeEntity) : number
 
 AddCSLuaFile()
@@ -55,6 +56,7 @@ if SERVER then
     ---@cast ent Player
     self.playersInZone[ent:SteamID64()] = ent
     self:NextThink(CurTime() + 0.2)
+    self.shouldEvaluate = true
   end
 
   ---@param self RPToolsNodeEntity
@@ -79,6 +81,7 @@ if SERVER then
 
   ---@param self RPToolsNodeEntity
   function ENT:Think()
+    if not self.shouldEvaluate then return end
     local oldActives = self:CountActives()
 
     ---@type Player[]
@@ -115,12 +118,13 @@ if SERVER then
       hook.Run("RPTools_PlayersDeactivations", self, deactivations)
     end
 
-    if not table.IsEmpty(self.playersInZone) then
-      self:NextThink(CurTime() + 0.2)
-      return true
-    else
-      return false
+
+      if table.IsEmpty(self.playersInZone) then
+        self.shouldThink = false
+        return
     end
+    self:NextThink(CurTime() + 0.2)
+    return true
   end
 end
 
