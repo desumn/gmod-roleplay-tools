@@ -69,11 +69,13 @@ end
 local function executeWorldAction(action, node)
   if action.action == "play_sound" then
     node:EmitSound(action.sound, action.level or 75, action.pitch or 100, action.volume or 1)
+    node.activeSounds = node.activeSounds or {}
+    table.insert(node.activeSounds, action.sound)    
   elseif action.action == "loop_sound" then
     local ent = ents.Create("ent_rptools_loop_sound")
     ent:SetPos(node:GetPos())
     ent:SetParent(node)
-
+    ---@cast ent RPToolsLoopSoundEntity
     ent.play_sound = {
       iteration = action.iterations,
       sound = action.sound,
@@ -81,7 +83,6 @@ local function executeWorldAction(action, node)
       volume = action.volume or 1,
       level = action.level or 75,
     }
-
     ent:Spawn()
   end
 end
@@ -147,7 +148,14 @@ local function execute(actions, players, node)
   end
 end
 
+---@param node RPToolsNodeEntity
 local function stopContinuous(node)
+  if node.activeSounds then
+    for _, sound in ipairs(node.activeSounds) do
+      node:StopSound(sound)
+    end
+    node.activeSounds = {}
+  end
   for _, child in ipairs(node:GetChildren()) do
     if IsValid(child) then
       child:Remove()

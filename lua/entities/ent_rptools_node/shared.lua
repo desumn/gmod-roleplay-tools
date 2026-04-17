@@ -4,6 +4,7 @@
 ---@field playersInZone table<string, Player>
 ---@field activePlayers table<string, boolean>
 ---@field radius number
+---@field activeSounds string[]
 ---@field CountActives fun(self : RPToolsNodeEntity) : number
 
 AddCSLuaFile()
