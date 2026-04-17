@@ -1,3 +1,5 @@
+---@class RPToolsNodeEntity : Entity
+
 AddCSLuaFile()
 
 ENT.Type = "anim"
