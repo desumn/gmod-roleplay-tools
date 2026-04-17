@@ -3,6 +3,7 @@ AddCSLuaFile("autorun/sh_rptools_init.lua")
 
 if SERVER then
     include("rptools/state/sv_state.lua")
+    include("rptools/conditions/sv_conditions.lua")
 end
 
 concommand.Add("rptools_test_spawn", function(ply)
