@@ -11,7 +11,7 @@
 ---@field shouldEvaluate boolean
 ---@field CountActives fun(self : RPToolsNodeEntity) : number
 ---@field ReevaluateState fun(self : RPToolsNodeEntity) : nil
-
+---@field debug { hitNormal : Vector }
 
 AddCSLuaFile()
 
@@ -33,14 +33,14 @@ if SERVER then
       self.playersWithNewState[ply:SteamID64()] = ply
     end
   end
-  
-  
   ---@param self RPToolsNodeEntity
   function ENT:Initialize()
     self.playersInZone = {}
     self.playersWithNewState = {}
     self.activePlayers = {}
     self.activeSounds = {}
+    
+    if self.debug.hitNormal then self:SetNW2Vector("rptools_normal", self.debug.hitNormal) end
     
     local distances = {}
     for _, condition in ipairs(self.conditions) do
@@ -150,9 +150,11 @@ if SERVER then
     
     local newActives = self:CountActives()
     
+    self:SetNW2Bool("rptools_active", newActives > 0)
+    
+    
     if oldActives == 0 and newActives > 0 then
       hook.Run("RPTools_NodeActivated", self, activations)
-      self:SetNW2Bool("rptools_isactive", true)
     end
     if oldActives > 0 and newActives == 0 then
       hook.Run("RPTools_NodeDeactivated", self)
@@ -162,7 +164,6 @@ if SERVER then
     end
     if newActives > 0 and #deactivations > 0 then
       hook.Run("RPTools_PlayersDeactivations", self, deactivations)
-      self:SetNW2Bool("rptools_isactive", false)
     end
     
     if table.IsEmpty(self.playersInZone) then
@@ -182,8 +183,10 @@ end
 if CLIENT then
   local spriteMat = Material("sprites/light_glow02_add")
   
+  local beamMat = Material("sprites/light_glow02_add")
+  
   local activeColor = Color(0, 230, 255)
-  local inactiveColor = Color(255, 100, 50)
+  local inactiveColor = Color(255, 180, 50)
   
   function ENT:Draw()
     if not LocalPlayer():GetNW2Bool("rptools_debug", false) then return end
@@ -199,5 +202,18 @@ if CLIENT then
     if maxs.x > 0 then
       render.DrawWireframeBox(pos, Angle(0, 0, 0), mins, maxs, color, false)
     end
+    
+    render.SetMaterial(Material("sprites/sent_ball"))
+    render.DrawSprite(pos, 24, 24, ColorAlpha(color_black, 180))
+    render.SetMaterial(spriteMat)
+    render.DrawSprite(pos, 48, 48, color)
+    
+    local beamLength = 150
+    local normal = self:GetNW2Vector("rptools_normal", Vector(0, 0, 1))
+    local beamEnd = pos + normal * beamLength
+    
+    render.SetMaterial(beamMat)
+    render.DrawBeam(pos, beamEnd, 12, 0, 1, ColorAlpha(color, 100))
+    
   end
 end

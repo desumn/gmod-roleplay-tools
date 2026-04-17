@@ -36,6 +36,8 @@ concommand.Add("rptools_test_node", function(ply)
   ent.actions = {
     { target = "player", action = "send_message", message = "Je mange des fruits rouges." },
   }
+  ent.debug = {}
+  ent.debug.hitNormal = tr.HitNormal
   ent:SetPos(tr.HitPos)
   ent:Spawn()
 end)
