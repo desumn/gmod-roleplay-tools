@@ -1,11 +1,11 @@
+RPTools = RPTools or {}
+
 ---@class RPToolsComparison<T>
 ---@field equals? T
 ---@field notEquals? T
 ---@field min? T
 ---@field max? T
 ---@field exclusive { min? : boolean, max? : boolean }
-
-
 
 ---@generic T
 ---@param value T
@@ -129,7 +129,7 @@ end
 ---@param ply Player
 ---@param node RPToolsNodeEntity
 ---@return boolean
-function RPTools.Conditions.Evaluate(conditions, ply, node)
+local function evaluate(conditions, ply, node)
 
     for _, condition in ipairs(conditions) do
         if condition.type == "spatial" then
@@ -145,3 +145,7 @@ function RPTools.Conditions.Evaluate(conditions, ply, node)
 
     return true
 end
+
+RPTools.Conditions = {
+    Evaluate = evaluate
+}
