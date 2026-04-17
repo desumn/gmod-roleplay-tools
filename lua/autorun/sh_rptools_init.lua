@@ -59,6 +59,21 @@ concommand.Add("rptools_test_flag", function (ply, cmd, args, argStr)
   RPTools.State.Set(RPTools.State.SCOPE.PLAYER, "tomate", true, ply)
 end)
 
+concommand.Add("rptools_test_reactive", function(ply)
+    local tr = ply:GetEyeTrace()
+    local ent = ents.Create("ent_rptools_node")
+    ---@cast ent RPToolsNodeEntity
+    ent.conditions = {
+        { type = "state", scope = RPTools.State.SCOPE.PLAYER, key = "tomate", equals = true },
+    }
+    ent.actions = {
+        { target = "player", action = "send_message", message = "Tu es une tomate" },
+    }
+    ent:SetPos(tr.HitPos)
+    ent:Spawn()
+end)
+
+
 concommand.Add("rptools_test_sound", function(ply)
     local tr = ply:GetEyeTrace()
     local ent = ents.Create("ent_rptools_node")
@@ -71,4 +86,8 @@ concommand.Add("rptools_test_sound", function(ply)
     }
     ent:SetPos(tr.HitPos)
     ent:Spawn()
+end)
+
+concommand.Add("rptools_debug", function(ply)
+    ply:SetNW2Bool("rptools_debug", not ply:GetNW2Bool("rptools_debug", false))
 end)

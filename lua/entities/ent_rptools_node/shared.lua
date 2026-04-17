@@ -26,7 +26,7 @@ if SERVER then
   function ENT:CountActives()
     return table.Count(self.activePlayers)
   end
-
+  
   ---@param self RPToolsNodeEntity
   function ENT:ReevaluateState()
     for _, ply in ipairs(player.GetAll()) do
@@ -152,6 +152,7 @@ if SERVER then
     
     if oldActives == 0 and newActives > 0 then
       hook.Run("RPTools_NodeActivated", self, activations)
+      self:SetNW2Bool("rptools_isactive", true)
     end
     if oldActives > 0 and newActives == 0 then
       hook.Run("RPTools_NodeDeactivated", self)
@@ -161,6 +162,7 @@ if SERVER then
     end
     if newActives > 0 and #deactivations > 0 then
       hook.Run("RPTools_PlayersDeactivations", self, deactivations)
+      self:SetNW2Bool("rptools_isactive", false)
     end
     
     if table.IsEmpty(self.playersInZone) then
@@ -179,25 +181,23 @@ end
 
 if CLIENT then
   local spriteMat = Material("sprites/light_glow02_add")
-  local beamMat = Material("trails/laser")
+  
+  local activeColor = Color(0, 230, 255)
+  local inactiveColor = Color(255, 100, 50)
   
   function ENT:Draw()
+    if not LocalPlayer():GetNW2Bool("rptools_debug", false) then return end
+    
     local pos = self:GetPos()
-    local radius = 200
-    local color = Color(0, 230, 255)
+    local isActive = self:GetNW2Bool("rptools_active", false)
+    local color = isActive and activeColor or inactiveColor
     
     render.SetMaterial(spriteMat)
     render.DrawSprite(pos, 48, 48, color)
     
-    local mins = pos + Vector(-radius, -radius, -radius)
-    local maxs = pos + Vector(radius, radius, radius)
-    render.DrawWireframeBox(
-    pos,
-    Angle(0, 0, 0),
-    Vector(-radius, -radius, -radius),
-    Vector(radius, radius, radius),
-    color,
-    false
-  )
-end
+    local mins, maxs = self:GetCollisionBounds()
+    if maxs.x > 0 then
+      render.DrawWireframeBox(pos, Angle(0, 0, 0), mins, maxs, color, false)
+    end
+  end
 end
