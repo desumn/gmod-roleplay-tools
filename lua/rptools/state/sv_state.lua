@@ -114,7 +114,7 @@ end
 ---@param name string
 ---@param callback fun(scope: RPToolsStateScope, key:string, context:Player?, oldValue: any, newValue: any)
 local function onChange(name, callback)
-  hook.Add("RPTools_StateValueChanged", "rptools_state_" .. name, callback)
+  hook.Add("RPTools_StateValueChanged", name, callback)
 end
 
 RPTools.State = {
