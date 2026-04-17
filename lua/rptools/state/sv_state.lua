@@ -21,6 +21,7 @@ local function get(scope, key, context)
         if not IsValid(context) then return nil, "Invalid player" end
         return (stateTable.players[key] and stateTable.players[key].values[context:SteamID64()]) or nil
     end
+    return nil, "Invalid scope"
 end
 
 ---@param scope RPToolsStateScope
@@ -42,6 +43,7 @@ local function remove(scope, key, context)
         end
         return true
     end
+    return false, "Invalid scope"
 end
 
 local function createTimer(duration, scope, key, context)
@@ -89,6 +91,7 @@ local function set(scope, key, value, context, duration)
             return false, "Invalid type for value"
         end
     end
+    return false, "Invalid scope"
 end
 
 ---@param name string
