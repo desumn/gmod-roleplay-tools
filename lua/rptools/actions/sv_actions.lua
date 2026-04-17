@@ -158,6 +158,7 @@ local function stopContinuous(node)
     end
 end
 
+RPTools.Actions = {}
 RPTools.Actions.Server = {
     Execute = execute,
     StopContinuous = stopContinuous

@@ -5,7 +5,7 @@ RPTools = RPTools or {}
 ---@field notEquals? T
 ---@field min? T
 ---@field max? T
----@field exclusive { min? : boolean, max? : boolean }
+---@field exclusive? { min? : boolean, max? : boolean }
 
 ---@generic T
 ---@param value T
