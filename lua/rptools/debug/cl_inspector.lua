@@ -1,4 +1,7 @@
+RPTools = RPTools or {}
+
 local selectedIndex = 1
+local selectedENTIndex = nil
 local lastFirstCandidate = nil
 local lastCandidatesCount = 0
 
@@ -284,7 +287,7 @@ hook.Add("HUDPaint", "rptools_inspector_paint", function()
         selectedIndex = math.min(selectedIndex, #candidates)
     end
     
-    
+    selectedENTIndex = candidates[selectedIndex].entIndex
     drawPanel(candidates, selectedIndex)
 end)
 
@@ -300,3 +303,13 @@ hook.Add("PlayerButtonDown", "rptools_inspector_controls", function (ply, button
         selectedIndex = ((selectedIndex - 2) % total) + 1
     end
 end)
+
+---@param node Entity
+---@return boolean
+local function isSelected(node)
+    return node:EntIndex() == selectedENTIndex
+end
+
+RPTools.Inspector = {
+    IsSelected = isSelected
+}
