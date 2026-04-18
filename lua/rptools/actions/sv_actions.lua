@@ -70,7 +70,7 @@ local function executeWorldAction(action, node)
   if action.action == "play_sound" then
     node:EmitSound(action.sound, action.level or 75, action.pitch or 100, action.volume or 1)
     node.activeSounds = node.activeSounds or {}
-    table.insert(node.activeSounds, action.sound)    
+    table.insert(node.activeSounds, action.sound)
   elseif action.action == "loop_sound" then
     local ent = ents.Create("ent_rptools_loop_sound")
     ent:SetPos(node:GetPos())

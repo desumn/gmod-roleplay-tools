@@ -3,8 +3,6 @@ AddCSLuaFile("rptools/actions/cl_actions.lua")
 AddCSLuaFile("rptools/debug/cl_debug_sync.lua")
 AddCSLuaFile("rptools/debug/cl_inspector.lua")
 
-
-
 RPTools = RPTools or {}
 
 if SERVER then
@@ -68,7 +66,7 @@ concommand.Add("rptools_test_node_flag", function(ply)
   ent:Spawn()
 end)
 
-concommand.Add("rptools_test_flag", function (ply, cmd, args, argStr)
+concommand.Add("rptools_test_flag", function(ply, cmd, args, argStr)
   RPTools.State.Set(RPTools.State.SCOPE.PLAYER, "tomate", true, ply)
 end)
 
@@ -86,7 +84,6 @@ concommand.Add("rptools_test_reactive", function(ply)
   ent:Spawn()
 end)
 
-
 concommand.Add("rptools_test_sound", function(ply)
   local tr = ply:GetEyeTrace()
   local ent = ents.Create("ent_rptools_node")
@@ -102,20 +99,22 @@ concommand.Add("rptools_test_sound", function(ply)
 end)
 
 concommand.Add("rptools_debug", function(ply)
-  if not ply:IsAdmin() then return end
+  if not ply:IsAdmin() then
+    return
+  end
   ply:SetNW2Bool("rptools_debug", not ply:GetNW2Bool("rptools_debug", false))
-  
+
   local debugActive = ply:GetNW2Bool("rptools_debug")
-  
+
   if debugActive then
     for _, ent in ipairs(ents.FindByClass("ent_rptools_node")) do
       ---@cast ent RPToolsNodeEntity
-      RPTools.Sync.Sync({ply}, ent)
+      RPTools.Sync.Sync({ ply }, ent)
     end
   else
     for _, ent in ipairs(ents.FindByClass("ent_rptools_node")) do
       ---@cast ent RPToolsNodeEntity
-      RPTools.Sync.RemoveSync({ply}, ent:EntIndex())
+      RPTools.Sync.RemoveSync({ ply }, ent:EntIndex())
     end
   end
 end)
