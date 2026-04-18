@@ -12,6 +12,7 @@
 ---@field CountActives fun(self : RPToolsNodeEntity) : number
 ---@field ReevaluateState fun(self : RPToolsNodeEntity) : nil
 ---@field debug { hitNormal : Vector }
+---@field state { paused : boolean, errorMessage : string}
 
 AddCSLuaFile()
 
@@ -39,6 +40,8 @@ if SERVER then
     self.playersWithNewState = {}
     self.activePlayers = {}
     self.activeSounds = {}
+    self.debug = self.debug or {}
+    self.state = { paused = true, errorMessage = "" }
     
     if self.debug.hitNormal then self:SetNW2Vector("rptools_normal", self.debug.hitNormal) end
     
@@ -122,7 +125,7 @@ if SERVER then
   
   ---@param self RPToolsNodeEntity
   function ENT:Think()
-    if not self.shouldEvaluate then return end
+    if self.state.paused or not self.shouldEvaluate then return end
     local oldActives = self:CountActives()
     
     local players = (self.isSpatial and self.playersInZone) or self.playersWithNewState
@@ -135,6 +138,8 @@ if SERVER then
       local steamid = ply:SteamID64()
       local conditionsSuccess, conditionsMet = pcall(RPTools.Conditions.Evaluate, self.conditions, ply, self)
       if not conditionsSuccess then
+        self.state.paused = true
+        self.state.errorMessage = tostring(conditionsMet)
         continue
       end
       if conditionsMet and self.activePlayers[steamid] == nil then
