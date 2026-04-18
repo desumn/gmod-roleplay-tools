@@ -106,6 +106,10 @@ local function formatCondition(condition)
     if condition.test == "distance" then
       return "Distance " .. formatComparison(condition) .. "u"
     elseif condition.test == "view_angle" then
+      if condition.min ~= nil then
+        local angleDeg = math.floor(math.deg(math.acos(condition.min)))
+        return "View angle ≤ " .. angleDeg .. "°"
+      end
       return "View angle " .. formatComparison(condition)
     elseif condition.test == "line_of_sight" then
       return "Line of sight " .. formatComparison(condition)
