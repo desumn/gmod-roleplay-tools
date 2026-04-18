@@ -1,5 +1,5 @@
 TOOL.Category = "RPTools"
-TOOL.Name = "Place a node"
+TOOL.Name = "Node Placer"
 TOOL.Command = nil
 TOOL.ConfigName = ""
 
@@ -39,4 +39,22 @@ function TOOL:RightClick(trace)
     end
   end
   return false
+end
+
+function TOOL:Holster()
+  if CLIENT then
+    if self.debugActive then
+      LocalPlayer():ConCommand("rptools_debug")
+      self.debugActive = false
+    end
+  end
+end
+
+function TOOL:Think()
+  if CLIENT then
+    if not self.debugActive then
+      LocalPlayer():ConCommand("rptools_debug")
+      self.debugActive = true
+    end
+  end
 end

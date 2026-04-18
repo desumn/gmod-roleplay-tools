@@ -563,6 +563,11 @@ local function isSelected(node)
   return node:EntIndex() == selectedENTIndex
 end
 
+local function getSelectedEntIndex()
+  return selectedENTIndex
+end
+
 RPTools.Inspector = {
   IsSelected = isSelected,
+  GetSelectedEntIndex = getSelectedEntIndex,
 }

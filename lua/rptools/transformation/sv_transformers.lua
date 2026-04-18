@@ -22,6 +22,38 @@ local function copyNode(oldNode)
 end
 
 ---@param node RPToolsNodeEntity
+---@param index integer
+---@return RPToolsNodeEntity?
+local function removeCondition(node, index)
+  if index < 1 or index > #node.conditions then
+    return nil
+  end
+
+  local newNode = copyNode(node)
+  table.remove(newNode.conditions, index)
+
+  newNode:Spawn()
+  node:Remove()
+
+  return newNode
+end
+
+---@param node RPToolsNodeEntity
+---@param index integer
+---@return RPToolsNodeEntity?
+local function removeAction(node, index)
+  if index < 1 or index > #node.actions then
+    return nil
+  end
+
+  table.remove(node.actions, index)
+
+  hook.Run("RPTools_NodeEdited", node)
+
+  return node
+end
+
+---@param node RPToolsNodeEntity
 ---@param min? number
 ---@param max? number
 ---@return RPToolsNodeEntity?
@@ -69,6 +101,12 @@ local function addViewAngle(node, maxAngleDegrees)
     return nil
   end
 
+  for _, condition in ipairs(node.conditions) do
+    if condition.test == "view_angle" then
+      return nil
+    end
+  end
+
   table.insert(node.conditions, angleCondition)
 
   hook.Run("RPTools_NodeEdited", node)
@@ -80,7 +118,7 @@ end
 ---@return RPToolsNodeEntity?
 local function addLineOfSight(node, shouldLineOfSight)
   ---@type RPToolsSpatialCondition
-  local angleCondition = { type = "spatial", test = "line_of_sight", equals = shouldLineOfSight }
+  local losCondition = { type = "spatial", test = "line_of_sight", equals = shouldLineOfSight }
 
   local hasDistance = false
   for _, condition in ipairs(node.conditions) do
@@ -93,7 +131,13 @@ local function addLineOfSight(node, shouldLineOfSight)
     return nil
   end
 
-  table.insert(node.conditions, angleCondition)
+  for _, condition in ipairs(node.conditions) do
+    if condition.test == "line_of_sight" then
+      return nil
+    end
+  end
+
+  table.insert(node.conditions, losCondition)
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -121,6 +165,12 @@ local function addStateCondition(node, scope, key, equals, notEquals)
   local stateCondition = { type = "state", scope = scope, key = key, equals = equals, notEquals = notEquals }
 
   local newNode = copyNode(node)
+
+  for _, condition in ipairs(node.conditions) do
+    if condition.scope == scope and condition.key == key then
+      return nil
+    end
+  end
 
   table.insert(newNode.conditions, stateCondition)
 
@@ -325,4 +375,6 @@ RPTools.Transformers = {
   AddBroadCastMessage = addBroadcastMessage,
   AddStateSet = addStateSet,
   AddStateRemove = addStateRemove,
+  RemoveCondition = removeCondition,
+  RemoveAction = removeAction,
 }

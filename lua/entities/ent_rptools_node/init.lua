@@ -74,6 +74,7 @@ local function extractDistances(self)
       table.insert(distances, condition.max)
     end
   end
+  return distances
 end
 
 ---@param self RPToolsNodeEntity

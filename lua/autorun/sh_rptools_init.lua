@@ -10,7 +10,7 @@ if SERVER then
   include("rptools/conditions/sv_conditions.lua")
   include("rptools/actions/sv_actions.lua")
   include("rptools/engine/sv_node.lua")
-  include("rptools/transformation/sv_transformers")
+  include("rptools/transformation/sv_transformers.lua")
   include("rptools/engine/sv_dispatcher.lua")
   include("rptools/debug/sv_debug_sync.lua")
 end
