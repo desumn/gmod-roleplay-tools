@@ -10,6 +10,7 @@
 ---@field activeSounds string[]
 ---@field shouldEvaluate boolean
 ---@field CountActives fun(self : RPToolsNodeEntity) : number
+---@field CountInZone fun(self : RPToolsNodeEntity) : number
 ---@field ReevaluateState fun(self : RPToolsNodeEntity) : nil
 ---@field debug { hitNormal : Vector }
 ---@field state { paused : boolean, errorMessage : string}
@@ -23,12 +24,14 @@ ENT.Base = "base_anim"
 
 
 if SERVER then
-  ---@param self RPToolsNodeEntity
   function ENT:CountActives()
     return table.Count(self.activePlayers)
   end
   
-  ---@param self RPToolsNodeEntity
+  function ENT:CountInZone()
+    return table.Count(self.playersInZone)
+  end
+
   function ENT:ReevaluateState()
     for _, ply in ipairs(player.GetAll()) do
       self.playersWithNewState[ply:SteamID64()] = ply
@@ -90,6 +93,8 @@ if SERVER then
     end
     self:SetMoveType(MOVETYPE_NONE)
     self:SetNotSolid(true)
+
+    hook.Run("RPTools_NodeCreated", self)
   end
   
   ---@param self RPToolsNodeEntity
@@ -180,6 +185,7 @@ if SERVER then
   end
   
   function ENT:OnRemove()
+    hook.Run("RPTools_NodeRemoved", self:EntIndex())
     hook.Remove("RPTools_StateValueChanged", "rptools_node_" .. self:EntIndex())
   end
   
