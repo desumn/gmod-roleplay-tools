@@ -52,6 +52,13 @@ local function onStateChanged(name, callback)
     hook.Add("RPTools_NodeStateChanged", name, callback)
 end
 
+---@param name string
+---@param callback fun(node : RPToolsNodeEntity)
+local function onEdited(name, callback)
+    hook.Add("RPTools_NodeEdited", name, callback)
+end
+
+
 
 RPTools.Node = {
     Activate = activate,
@@ -62,5 +69,6 @@ RPTools.Node = {
     OnActivation = onActivated,
     OnDeactivation = onDeactivated,
     OnPlayersActivation = onPlayersActivation,
-    OnPlayersDeactivation = onPlayersDeactivation
+    OnPlayersDeactivation = onPlayersDeactivation,
+    OnEdited = onEdited,
 }

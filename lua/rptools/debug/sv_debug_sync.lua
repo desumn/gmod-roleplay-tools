@@ -74,6 +74,10 @@ RPTools.Node.OnRemove("rptools_sync_on_remove", function (entIndex)
     removeSync(listTargets(), entIndex)
 end)
 
+RPTools.Node.OnEdited("rptools_sync_on_edit", function (node)
+    sync(listTargets(), node)
+end)
+
 RPTools.Sync = {
     Sync = sync,
     RemoveSync = removeSync
