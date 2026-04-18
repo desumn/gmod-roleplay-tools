@@ -1,6 +1,9 @@
 AddCSLuaFile("autorun/sh_rptools_init.lua")
 AddCSLuaFile("rptools/actions/cl_actions.lua")
 AddCSLuaFile("rptools/debug/cl_debug_sync.lua")
+AddCSLuaFile("rptools/debug/cl_inspector.lua")
+
+
 
 RPTools = RPTools or {}
 
@@ -16,6 +19,7 @@ end
 if CLIENT then
   include("rptools/actions/cl_actions.lua")
   include("rptools/debug/cl_debug_sync.lua")
+  include("rptools/debug/cl_inspector.lua")
 end
 
 concommand.Add("rptools_test_spawn", function(ply)

@@ -21,6 +21,8 @@ end
 ---@field conditions RPToolsCondition[]
 ---@field actions RPToolsAction[]
 ---@field state { paused : boolean, errorMessage : string }
+---@field activePlayers number
+---@field playersInZone number
 
 ---@param targets Player[]
 ---@param node RPToolsNodeEntity
