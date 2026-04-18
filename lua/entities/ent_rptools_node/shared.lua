@@ -15,7 +15,6 @@
 ---@field debug { hitNormal : Vector }
 ---@field state { paused : boolean, errorMessage : string}
 
-
 RPTools = RPTools or {}
 
 ENT.Type = "anim"
