@@ -4,6 +4,7 @@ local selectedIndex = 1
 local selectedENTIndex = nil
 local lastFirstCandidate = nil
 local lastCandidatesCount = 0
+local isDetailed = false
 
 surface.CreateFont("RPToolsInspectorFont", {
     font = "Roboto",
@@ -18,6 +19,14 @@ surface.CreateFont("RPToolsInspectorTitleFont", {
     extended = true,
     size = 24,
     weight = 700,
+    antialias = true,
+})
+
+surface.CreateFont("RPToolsInspectorSmallFont", {
+    font = "Roboto",
+    extended = true,
+    size = 16,
+    weight = 500,
     antialias = true,
 })
 
@@ -38,26 +47,34 @@ local targetNames = {
     state = "✎",
 }
 
--- Constantes visuelles
-local PANEL_WIDTH = 280
-local PANEL_HEIGHT = 400
+local PANEL_WIDTH_NORMAL = 280
+local PANEL_WIDTH_DETAILED = 450
 local MARGIN_X = 20
 local PADDING = 12
 local BAND_WIDTH = 4
 local LINE_HEIGHT = 22
+local DETAIL_LINE_HEIGHT = 20
 local INDENT = 10
+local DETAIL_INDENT = 20
+local HEADER_TITLE_GAP = 30
+local HEADER_STATE_GAP = 30
+local SECTION_GAP = 10
+local ITEM_GAP = 4
+local FOOTER_HEIGHT = 30
+local FOOTER_MARGIN = 12
 
 local COLOR_BG = Color(12, 12, 16, 230)
 local COLOR_BAND = Color(0, 230, 255, 200)
 local COLOR_TEXT = Color(240, 235, 230)
+local COLOR_DETAIL = Color(180, 180, 190)
 local COLOR_LABEL = Color(120, 120, 120)
 local COLOR_MUTED = Color(100, 100, 100)
 local COLOR_ACTIVE = Color(0, 230, 255)
 local COLOR_PAUSED = Color(255, 180, 50)
 local COLOR_ERROR = Color(255, 80, 80)
 local COLOR_INACTIVE = Color(180, 180, 180)
-
--- Formatters
+local COLOR_SHORTCUT_KEY = Color(200, 200, 210)
+local COLOR_SHORTCUT_DESC = Color(130, 130, 140)
 
 ---@param comparison RPToolsComparison
 local function formatComparison(comparison)
@@ -67,10 +84,10 @@ local function formatComparison(comparison)
     if comparison.notEquals ~= nil then
         return "≠ " .. tostring(comparison.notEquals)
     end
-    
+
     local parts = {}
     local exclusive = comparison.exclusive or {}
-    
+
     if comparison.min ~= nil then
         local op = exclusive.min and ">" or "≥"
         table.insert(parts, op .. " " .. tostring(comparison.min))
@@ -79,7 +96,7 @@ local function formatComparison(comparison)
         local op = exclusive.max and "<" or "≤"
         table.insert(parts, op .. " " .. tostring(comparison.max))
     end
-    
+
     return table.concat(parts, " and ")
 end
 
@@ -103,21 +120,21 @@ end
 ---@param action RPToolsAction
 local function formatAction(action)
     local prefix = targetNames[action.target] or "?"
-    
+
     if action.target == "player" or action.target == "broadcast" then
         if action.action == "send_message" then
-            return prefix .. " Message: \"" .. (action.message or "") .. "\""
+            return prefix .. " Message"
         elseif action.action == "hud_message" then
-            return prefix .. " HUD: \"" .. (action.message or "") .. "\" (" .. (action.duration or 0) .. "s)"
+            return prefix .. " HUD message (" .. (action.duration or 0) .. "s)"
         elseif action.action == "play_sound" then
-            return prefix .. " Sound: " .. (action.sound or "?")
+            return prefix .. " Sound"
         end
     elseif action.target == "world" then
         if action.action == "play_sound" then
-            return prefix .. " Spatial sound: " .. (action.sound or "?")
+            return prefix .. " Spatial sound"
         elseif action.action == "loop_sound" then
             local iter = action.iterations and action.iterations > 0 and (" x" .. action.iterations) or " ∞"
-            return prefix .. " Loop: " .. (action.sound or "?") .. iter
+            return prefix .. " Loop" .. iter
         end
     elseif action.target == "state" then
         local scope = scopeNames[action.scope] or "?"
@@ -127,19 +144,41 @@ local function formatAction(action)
             return prefix .. " remove " .. scope .. "." .. action.key
         end
     end
-    
+
     return prefix .. " ?"
 end
 
--- Utilitaires
+---@param action RPToolsAction
+---@return string[]
+local function actionDetails(action)
+    local details = {}
+
+    if action.message then
+        table.insert(details, "\"" .. action.message .. "\"")
+    end
+    if action.sound then
+        table.insert(details, action.sound)
+    end
+    if action.volume then
+        table.insert(details, "vol " .. action.volume)
+    end
+    if action.pitch then
+        table.insert(details, "pitch " .. action.pitch)
+    end
+    if action.level then
+        table.insert(details, "level " .. action.level)
+    end
+
+    return details
+end
 
 local function truncate(text, maxWidth, font)
     surface.SetFont(font)
-    
+
     if surface.GetTextSize(text) <= maxWidth then
         return text
     end
-    
+
     local ellipsis = "..."
     local lo, hi = 1, #text
     while lo < hi do
@@ -151,8 +190,31 @@ local function truncate(text, maxWidth, font)
             hi = mid - 1
         end
     end
-    
+
     return string.sub(text, 1, lo) .. ellipsis
+end
+
+local function wrapText(text, maxWidth, font)
+    surface.SetFont(font)
+    local words = string.Explode(" ", text)
+    local lines = {}
+    local currentLine = ""
+
+    for _, word in ipairs(words) do
+        local testLine = currentLine == "" and word or (currentLine .. " " .. word)
+        if surface.GetTextSize(testLine) > maxWidth and currentLine ~= "" then
+            table.insert(lines, currentLine)
+            currentLine = word
+        else
+            currentLine = testLine
+        end
+    end
+
+    if currentLine ~= "" then
+        table.insert(lines, currentLine)
+    end
+
+    return lines
 end
 
 ---@param trace TraceResult
@@ -160,7 +222,7 @@ end
 local function findCandidates(trace)
     local candidates = ents.FindInSphere(trace.HitPos, 10)
     local result = {}
-    
+
     for _, candidate in ipairs(candidates) do
         if not IsValid(candidate) or candidate:GetClass() ~= "ent_rptools_node" then
             continue
@@ -173,7 +235,7 @@ local function findCandidates(trace)
             table.insert(result, infos)
         end
     end
-    
+
     return result
 end
 
@@ -190,6 +252,73 @@ local function getStateDisplay(node)
     return "Inactive", COLOR_INACTIVE
 end
 
+-- Mesure
+
+---@param total number
+---@return number
+local function measureHeader(total)
+    local h = HEADER_TITLE_GAP
+    if total > 1 then
+        h = h + LINE_HEIGHT
+    end
+    h = h + HEADER_STATE_GAP
+    return h
+end
+
+---@param items any[]
+---@return number
+local function measureCompactItems(items)
+    if #items == 0 then
+        return LINE_HEIGHT
+    end
+    return #items * LINE_HEIGHT
+end
+
+---@param actions RPToolsAction[]
+---@param maxWidth number
+---@return number
+local function measureDetailedActions(actions, maxWidth)
+    if #actions == 0 then
+        return LINE_HEIGHT
+    end
+
+    local h = 0
+    for i, action in ipairs(actions) do
+        if i > 1 then h = h + ITEM_GAP end
+        h = h + LINE_HEIGHT
+
+        local details = actionDetails(action)
+        local detailMaxWidth = maxWidth - DETAIL_INDENT
+        for _, detail in ipairs(details) do
+            local wrapped = wrapText(detail, detailMaxWidth, "RPToolsInspectorFont")
+            h = h + #wrapped * DETAIL_LINE_HEIGHT
+        end
+    end
+
+    return h
+end
+
+---@param node RPToolsDebugNodeInfos
+---@param total number
+---@param maxWidth number
+---@return number
+local function measurePanelContent(node, total, maxWidth)
+    local h = PADDING
+    h = h + measureHeader(total)
+    h = h + LINE_HEIGHT -- label Conditions
+    h = h + measureCompactItems(node.conditions)
+    h = h + SECTION_GAP
+    h = h + LINE_HEIGHT -- label Actions
+    if isDetailed then
+        h = h + measureDetailedActions(node.actions, maxWidth)
+    else
+        h = h + measureCompactItems(node.actions)
+    end
+    h = h + FOOTER_MARGIN
+    h = h + FOOTER_HEIGHT
+    return h
+end
+
 -- Dessin
 
 ---@param x number
@@ -200,103 +329,194 @@ end
 ---@return number newY
 local function drawHeader(x, y, node, index, total)
     draw.SimpleText("Inspector", "RPToolsInspectorTitleFont",
-    x, y, COLOR_TEXT, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
-    y = y + 30
-    
+        x, y, COLOR_TEXT, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+    y = y + HEADER_TITLE_GAP
+
     if total > 1 then
         draw.SimpleText("Node " .. index .. "/" .. total, "RPToolsInspectorFont",
-        x, y, COLOR_INACTIVE, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+            x, y, COLOR_INACTIVE, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
         y = y + LINE_HEIGHT
     end
-    
+
     local stateText, stateColor = getStateDisplay(node)
     draw.SimpleText(stateText, "RPToolsInspectorFont",
-    x, y, stateColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
-    y = y + 30
-    
+        x, y, stateColor, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+    y = y + HEADER_STATE_GAP
+
     return y
 end
 
 ---@param x number
 ---@param y number
 ---@param label string
+---@return number newY
+local function drawLabel(x, y, label)
+    draw.SimpleText(label, "RPToolsInspectorFont",
+        x, y, COLOR_LABEL, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+    return y + LINE_HEIGHT
+end
+
+---@param x number
+---@param y number
 ---@param items any[]
 ---@param formatter fun(item:any):string
 ---@param emptyText string
 ---@param maxWidth number
 ---@return number newY
-local function drawSection(x, y, label, items, formatter, emptyText, maxWidth)
-    draw.SimpleText(label, "RPToolsInspectorFont",
-    x, y, COLOR_LABEL, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
-    y = y + LINE_HEIGHT
-    
+local function drawCompactItems(x, y, items, formatter, emptyText, maxWidth)
     if #items == 0 then
         draw.SimpleText(emptyText, "RPToolsInspectorFont",
-        x + INDENT, y, COLOR_MUTED, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+            x + INDENT, y, COLOR_MUTED, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
         return y + LINE_HEIGHT
     end
-    
+
     for _, item in ipairs(items) do
         local displayText = truncate(formatter(item), maxWidth, "RPToolsInspectorFont")
         draw.SimpleText(displayText, "RPToolsInspectorFont",
-        x + INDENT, y, COLOR_TEXT, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+            x + INDENT, y, COLOR_TEXT, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
         y = y + LINE_HEIGHT
     end
-    
+
     return y
+end
+
+---@param x number
+---@param y number
+---@param actions RPToolsAction[]
+---@param maxWidth number
+---@return number newY
+local function drawDetailedActions(x, y, actions, maxWidth)
+    if #actions == 0 then
+        draw.SimpleText("No action", "RPToolsInspectorFont",
+            x + INDENT, y, COLOR_MUTED, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+        return y + LINE_HEIGHT
+    end
+
+    for i, action in ipairs(actions) do
+        if i > 1 then y = y + ITEM_GAP end
+
+        local shortText = truncate(formatAction(action), maxWidth, "RPToolsInspectorFont")
+        draw.SimpleText(shortText, "RPToolsInspectorFont",
+            x + INDENT, y, COLOR_TEXT, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+        y = y + LINE_HEIGHT
+
+        local details = actionDetails(action)
+        local detailMaxWidth = maxWidth - DETAIL_INDENT
+        for _, detail in ipairs(details) do
+            local wrapped = wrapText(detail, detailMaxWidth, "RPToolsInspectorFont")
+            for _, line in ipairs(wrapped) do
+                draw.SimpleText(line, "RPToolsInspectorFont",
+                    x + DETAIL_INDENT, y, COLOR_DETAIL, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+                y = y + DETAIL_LINE_HEIGHT
+            end
+        end
+    end
+
+    return y
+end
+
+---@param x number
+---@param y number
+---@param panelWidth number
+---@param hasMultiple boolean
+local function drawFooter(x, y, panelWidth, hasMultiple)
+    local textX = x + BAND_WIDTH + PADDING
+
+    surface.SetFont("RPToolsInspectorSmallFont")
+
+    local shortcuts = {}
+    if hasMultiple then
+        table.insert(shortcuts, { key = "↑/↓", desc = "navigate" })
+    end
+    table.insert(shortcuts, { key = "Caps", desc = isDetailed and "compact" or "details" })
+
+    local currentX = textX
+    for i, s in ipairs(shortcuts) do
+        if i > 1 then
+            currentX = currentX + 8
+        end
+
+        draw.SimpleText(s.key, "RPToolsInspectorSmallFont",
+            currentX, y, COLOR_SHORTCUT_KEY, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+        local keyWidth = surface.GetTextSize(s.key)
+        currentX = currentX + keyWidth + 4
+
+        draw.SimpleText(s.desc, "RPToolsInspectorSmallFont",
+            currentX, y, COLOR_SHORTCUT_DESC, TEXT_ALIGN_LEFT, TEXT_ALIGN_TOP)
+        local descWidth = surface.GetTextSize(s.desc)
+        currentX = currentX + descWidth
+    end
 end
 
 ---@param candidates RPToolsDebugNodeInfos[]
 ---@param selectedIndex number
 local function drawPanel(candidates, selectedIndex)
     local node = candidates[selectedIndex]
-    
-    local x = ScrW() - PANEL_WIDTH - MARGIN_X
-    local y = (ScrH() - PANEL_HEIGHT) / 2
-    
+
+    local panelWidth = isDetailed and PANEL_WIDTH_DETAILED or PANEL_WIDTH_NORMAL
+    local maxTextWidth = panelWidth - BAND_WIDTH - (PADDING * 2) - INDENT
+    local panelHeight = measurePanelContent(node, #candidates, maxTextWidth)
+
+    local x = ScrW() - panelWidth - MARGIN_X
+    local y = (ScrH() - panelHeight) / 2
+
     surface.SetDrawColor(COLOR_BG)
-    surface.DrawRect(x, y, PANEL_WIDTH, PANEL_HEIGHT)
-    
+    surface.DrawRect(x, y, panelWidth, panelHeight)
+
     surface.SetDrawColor(COLOR_BAND)
-    surface.DrawRect(x, y, BAND_WIDTH, PANEL_HEIGHT)
-    
+    surface.DrawRect(x, y, BAND_WIDTH, panelHeight)
+
     local textX = x + BAND_WIDTH + PADDING
     local textY = y + PADDING
-    local maxTextWidth = PANEL_WIDTH - BAND_WIDTH - (PADDING * 2) - INDENT
-    
+
     textY = drawHeader(textX, textY, node, selectedIndex, #candidates)
-    textY = drawSection(textX, textY, "Conditions", node.conditions, formatCondition, "No condition", maxTextWidth)
-    textY = textY + 10
-    textY = drawSection(textX, textY, "Actions", node.actions, formatAction, "No action", maxTextWidth)
+
+    textY = drawLabel(textX, textY, "Conditions")
+    textY = drawCompactItems(textX, textY, node.conditions, formatCondition, "No condition", maxTextWidth)
+
+    textY = textY + SECTION_GAP
+
+    textY = drawLabel(textX, textY, "Actions")
+    if isDetailed then
+        textY = drawDetailedActions(textX, textY, node.actions, maxTextWidth)
+    else
+        textY = drawCompactItems(textX, textY, node.actions, formatAction, "No action", maxTextWidth)
+    end
+
+    drawFooter(x, y + panelHeight - FOOTER_HEIGHT, panelWidth, #candidates > 1)
 end
 
 hook.Add("HUDPaint", "rptools_inspector_paint", function()
     if not LocalPlayer():GetNW2Bool("rptools_debug", false) then return end
-    
+
     local trace = LocalPlayer():GetEyeTrace()
     local candidates = findCandidates(trace)
-    
 
     lastCandidatesCount = #candidates
     if lastCandidatesCount == 0 then return end
-    
+
     if lastFirstCandidate ~= candidates[1].entIndex then
         selectedIndex = 1
         lastFirstCandidate = candidates[1].entIndex
     else
         selectedIndex = math.min(selectedIndex, #candidates)
     end
-    
+
     selectedENTIndex = candidates[selectedIndex].entIndex
     drawPanel(candidates, selectedIndex)
 end)
 
-hook.Add("PlayerButtonDown", "rptools_inspector_controls", function (ply, button)
+hook.Add("PlayerButtonDown", "rptools_inspector_controls", function(ply, button)
     if ply ~= LocalPlayer() then return end
-    
+
+    if button == KEY_CAPSLOCK then
+        isDetailed = not isDetailed
+        return
+    end
+
     local total = lastCandidatesCount
     if total == 0 then return end
-    
+
     if button == KEY_DOWN then
         selectedIndex = (selectedIndex % total) + 1
     elseif button == KEY_UP then
