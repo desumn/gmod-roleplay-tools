@@ -11,7 +11,7 @@ TOOL.ClientConVar = {
 
 if SERVER then
   util.AddNetworkString("rptools_tool_message")
-  
+
   net.Receive("rptools_tool_message", function(_, ply)
     local entIndex = net.ReadUInt(16)
     local add = net.ReadBool()
@@ -21,7 +21,7 @@ if SERVER then
     if not ply:IsAdmin() then
       return
     end
-    
+
     local ent = Entity(entIndex)
     if ent:GetClass() == "ent_rptools_node" then
       ---@cast ent RPToolsNodeEntity
@@ -40,7 +40,7 @@ if SERVER then
             break
           end
         end
-        
+
         if messageIndex then
           RPTools.Transformers.RemoveAction(ent, messageIndex)
         end
@@ -113,86 +113,86 @@ if CLIENT then
   function TOOL:DrawToolScreen(width, height)
     surface.SetDrawColor(20, 20, 20, 255)
     surface.DrawRect(0, 0, width, height)
-    
+
     local message = self:GetClientInfo("message")
     local isHud = tobool(self:GetClientNumber("hud", 0))
     local duration = self:GetClientNumber("duration", 5)
-    
+
     local title = isHud and "HUD Message" or "Chat Message"
-    
+
     draw.SimpleText(
-    title,
-    "DermaLarge",
-    width / 2,
-    height * 0.2,
-    Color(180, 180, 180),
-    TEXT_ALIGN_CENTER,
-    TEXT_ALIGN_CENTER
-  )
-  
-  local displayMessage = message
-  if #displayMessage > 30 then
-    displayMessage = string.sub(displayMessage, 1, 30) .. "..."
-  end
-  if displayMessage == "" then
-    displayMessage = "(empty)"
-  end
-  
-  draw.SimpleText(
-  displayMessage,
-  "DermaDefault",
-  width / 2,
-  height * 0.45,
-  Color(240, 235, 230),
-  TEXT_ALIGN_CENTER,
-  TEXT_ALIGN_CENTER
-)
+      title,
+      "DermaLarge",
+      width / 2,
+      height * 0.2,
+      Color(180, 180, 180),
+      TEXT_ALIGN_CENTER,
+      TEXT_ALIGN_CENTER
+    )
 
-if isHud then
-  draw.SimpleText(
-  "Duration: " .. math.floor(duration) .. "s",
-  "DermaDefault",
-  width / 2,
-  height * 0.65,
-  Color(180, 180, 180),
-  TEXT_ALIGN_CENTER,
-  TEXT_ALIGN_CENTER
-)
-end
+    local displayMessage = message
+    if #displayMessage > 30 then
+      displayMessage = string.sub(displayMessage, 1, 30) .. "..."
+    end
+    if displayMessage == "" then
+      displayMessage = "(empty)"
+    end
 
-draw.SimpleText(
-"Configure in menu",
-"DermaDefault",
-width / 2,
-height * 0.85,
-Color(120, 120, 120),
-TEXT_ALIGN_CENTER,
-TEXT_ALIGN_CENTER
-)
-end
+    draw.SimpleText(
+      displayMessage,
+      "DermaDefault",
+      width / 2,
+      height * 0.45,
+      Color(240, 235, 230),
+      TEXT_ALIGN_CENTER,
+      TEXT_ALIGN_CENTER
+    )
 
----@param panel DForm
-function TOOL.BuildCPanel(panel)
-  panel:Help("Add a message action to selected node.")
-  
-  local label = panel:Help("Message:")
-  local messageEntry = vgui.Create("DTextEntry", panel)
-  panel:AddItem(messageEntry)
-  messageEntry:SetConVar("rptools_message_message")
-  messageEntry:SetMultiline(true)
-  messageEntry:SetTall(80)
-  
-  local hudCheckbox = panel:CheckBox("HUD message", "rptools_message_hud")
-  local durationSlider = panel:NumSlider("HUD duration (s)", "rptools_message_duration", 1, 60, 0)
-  
-  local function updateEnabled()
-    durationSlider:SetEnabled(GetConVar("rptools_message_hud"):GetBool())
+    if isHud then
+      draw.SimpleText(
+        "Duration: " .. math.floor(duration) .. "s",
+        "DermaDefault",
+        width / 2,
+        height * 0.65,
+        Color(180, 180, 180),
+        TEXT_ALIGN_CENTER,
+        TEXT_ALIGN_CENTER
+      )
+    end
+
+    draw.SimpleText(
+      "Configure in menu",
+      "DermaDefault",
+      width / 2,
+      height * 0.85,
+      Color(120, 120, 120),
+      TEXT_ALIGN_CENTER,
+      TEXT_ALIGN_CENTER
+    )
   end
-  
-  updateEnabled()
-  
-  hudCheckbox.OnChange = function(_, _)
+
+  ---@param panel DForm
+  function TOOL.BuildCPanel(panel)
+    panel:Help("Add a message action to selected node.")
+
+    local label = panel:Help("Message:")
+    local messageEntry = vgui.Create("DTextEntry", panel)
+    panel:AddItem(messageEntry)
+    messageEntry:SetConVar("rptools_message_message")
+    messageEntry:SetMultiline(true)
+    messageEntry:SetTall(80)
+
+    local hudCheckbox = panel:CheckBox("HUD message", "rptools_message_hud")
+    local durationSlider = panel:NumSlider("HUD duration (s)", "rptools_message_duration", 1, 60, 0)
+
+    local function updateEnabled()
+      durationSlider:SetEnabled(GetConVar("rptools_message_hud"):GetBool())
+    end
+
     updateEnabled()
+
+    hudCheckbox.OnChange = function(_, _)
+      updateEnabled()
+    end
   end
-end
 end

@@ -120,7 +120,9 @@ concommand.Add("rptools_debug", function(ply)
 end)
 
 hook.Add("CanTool", "rptools_tool_check_admin", function(ply, trace, toolname)
-    if string.StartsWith(toolname, "rptools_") then
-        if not ply:IsAdmin() then return false end
+  if string.StartsWith(toolname, "rptools_") then
+    if not ply:IsAdmin() then
+      return false
     end
+  end
 end)

@@ -42,11 +42,11 @@ function TOOL:RightClick(trace)
 end
 
 function TOOL:Reload(_)
-    if CLIENT then
-        -- vide la sélection via une API de l'inspecteur
-        RPTools.Inspector.ClearSelection()
-        return false
-    end
+  if CLIENT then
+    -- vide la sélection via une API de l'inspecteur
+    RPTools.Inspector.ClearSelection()
+    return false
+  end
 end
 
 function TOOL:Holster()

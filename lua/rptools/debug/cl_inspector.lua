@@ -535,7 +535,7 @@ hook.Add("HUDPaint", "rptools_inspector_paint", function()
     drawPanel(candidates, selectedIndex)
   else
     if selectedENTIndex ~= nil and IsValid(Entity(selectedENTIndex)) then
-      drawPanel({RPTools.Node.Client.GetNode(selectedENTIndex)}, 1)
+      drawPanel({ RPTools.Node.Client.GetNode(selectedENTIndex) }, 1)
     end
   end
 end)
@@ -580,5 +580,5 @@ end
 RPTools.Inspector = {
   IsSelected = isSelected,
   GetSelectedEntIndex = getSelectedEntIndex,
-  ClearSelection = clearSelection
+  ClearSelection = clearSelection,
 }
