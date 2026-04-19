@@ -97,7 +97,6 @@ local function removeParent(node)
 end
 
 
-
 ---@param node RPToolsNodeEntity
 ---@param min? number
 ---@param max? number
@@ -115,7 +114,18 @@ local function addDistance(node, min, max)
 
   local newNode = copyNode(node)
 
-  table.insert(newNode.conditions, distanceCondition)
+  local replaced = false
+  for i, condition in ipairs(newNode.conditions) do
+    if condition.type == "spatial" and condition.test == "distance" then
+      newNode.conditions[i] = distanceCondition
+      replaced = true
+      break
+    end
+  end
+
+  if not replaced then
+    table.insert(newNode.conditions, distanceCondition)
+  end
 
   newNode:Spawn()
   node:Remove()
@@ -139,6 +149,7 @@ local function addViewAngle(node, maxAngleDegrees)
   for _, condition in ipairs(node.conditions) do
     if condition.test == "distance" then
       hasDistance = true
+      break = true
     end
   end
 
@@ -146,13 +157,18 @@ local function addViewAngle(node, maxAngleDegrees)
     return nil
   end
 
-  for _, condition in ipairs(node.conditions) do
-    if condition.test == "view_angle" then
-      return nil
+  local replaced = false
+  for i, condition in ipairs(node.conditions) do
+    if condition.type == "spatial" and condition.test == "view_angle" then
+      node.conditions[i] = angleCondition
+      replaced = true
+      break = true
     end
   end
 
-  table.insert(node.conditions, angleCondition)
+  if not replaced then
+    table.insert(node.conditions, angleCondition)
+  end
 
   hook.Run("RPTools_NodeEdited", node)
   return node
@@ -176,13 +192,17 @@ local function addLineOfSight(node, shouldLineOfSight)
     return nil
   end
 
-  for _, condition in ipairs(node.conditions) do
+  local replaced = false
+  for i, condition in ipairs(node.conditions) do
     if condition.test == "line_of_sight" then
-      return nil
+      node.conditions[i] = losCondition
+      replaced = true
     end
   end
 
-  table.insert(node.conditions, losCondition)
+  if not replaced then
+    table.insert(node.conditions, losCondition)
+  end
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -198,7 +218,6 @@ local function addFlagCondition(node, scope, key, invert)
     return nil
   end
 
-  local safeInvert = invert or false
   local equality = invert and "notEquals" or "equals"
 
   ---@type RPToolsStateCondition
@@ -206,13 +225,18 @@ local function addFlagCondition(node, scope, key, invert)
 
   local newNode = copyNode(node)
 
-  for _, condition in ipairs(node.conditions) do
-    if condition.scope == scope and condition.key == key then
-      return nil
+  local replaced = false
+  for i, condition in ipairs(newNode.conditions) do
+    if condition.type == "state" and condition.scope == scope and condition.key == key then
+      newNode.conditions[i] = stateCondition
+      replaced = true
+      break
     end
   end
 
-  table.insert(newNode.conditions, stateCondition)
+  if not replaced then
+    table.insert(newNode.conditions, stateCondition)
+  end
 
   newNode:Spawn()
   node:Remove()
@@ -240,13 +264,18 @@ local function addNumberCondition(node, scope, key, min, max, exclusive)
 
   local newNode = copyNode(node)
 
-  for _, condition in ipairs(node.conditions) do
-    if condition.scope == scope and condition.key == key then
-      return nil
+  local replaced = false
+  for i, condition in ipairs(newNode.conditions) do
+    if condition.type == "state" and condition.scope == scope and condition.key == key then
+      newNode.conditions[i] = stateCondition
+      replaced = true
+      break
     end
   end
 
-  table.insert(newNode.conditions, stateCondition)
+  if not replaced then
+    table.insert(newNode.conditions, stateCondition)
+  end
 
   newNode:Spawn()
   node:Remove()
@@ -268,7 +297,6 @@ local function addStringCondition(node, scope, key, value, invert)
     return
   end
 
-  local safeInvert = invert or false
   local equality = invert and "notEquals" or "equals"
 
   ---@type RPToolsStateCondition
@@ -276,13 +304,18 @@ local function addStringCondition(node, scope, key, value, invert)
 
   local newNode = copyNode(node)
 
-  for _, condition in ipairs(node.conditions) do
-    if condition.scope == scope and condition.key == key then
-      return nil
+  local replaced = false
+  for i, condition in ipairs(newNode.conditions) do
+    if condition.type == "state" and condition.scope == scope and condition.key == key then
+      newNode.conditions[i] = stateCondition
+      replaced = true
+      break
     end
   end
 
-  table.insert(newNode.conditions, stateCondition)
+  if not replaced then
+    table.insert(newNode.conditions, stateCondition)
+  end
 
   newNode:Spawn()
   node:Remove()
@@ -438,7 +471,19 @@ local function addStateSet(node, scope, key, value, duration)
   ---@type RPToolsStateAction
   local stateAction = { target = "state", action = "set", scope = scope, key = key, value = value, duration = duration }
 
-  table.insert(node.actions, stateAction)
+
+  local replaced = false
+  for i, action in ipairs(node.actions) do
+    if action.target == "state" and action.scope == scope and action.key == key then
+      node.actions[i] = stateAction
+      replaced = true
+      break
+    end
+  end
+
+  if not replaced then
+    table.insert(node.actions, stateAction)
+  end
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -457,7 +502,18 @@ local function addStateRemove(node, scope, key)
   ---@type RPToolsStateAction
   local stateAction = { target = "state", action = "remove", scope = scope, key = key }
 
-  table.insert(node.actions, stateAction)
+  local replaced = false
+  for i, action in ipairs(node.actions) do
+    if action.target == "state" and action.scope == scope and action.key == key then
+      node.actions[i] = stateAction
+      replaced = true
+      break
+    end
+  end
+
+  if not replaced then
+    table.insert(node.actions, stateAction)
+  end
 
   hook.Run("RPTools_NodeEdited", node)
 
