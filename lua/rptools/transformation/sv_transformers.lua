@@ -195,7 +195,6 @@ local function addFlagCondition(node, scope, key, invert)
   return newNode
 end
 
-
 ---@param node RPToolsNodeEntity
 ---@param scope RPToolsStateScope
 ---@param key string
@@ -265,7 +264,6 @@ local function addStringCondition(node, scope, key, value, invert)
 
   return newNode
 end
-
 
 ---@param node RPToolsNodeEntity
 ---@param message string
