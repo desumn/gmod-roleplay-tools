@@ -523,20 +523,21 @@ hook.Add("HUDPaint", "rptools_inspector_paint", function()
   local trace = LocalPlayer():GetEyeTrace()
   local candidates = findCandidates(trace)
 
-  lastCandidatesCount = #candidates
-  if lastCandidatesCount == 0 then
-    return
-  end
-
-  if lastFirstCandidate ~= candidates[1].entIndex then
+  if not table.IsEmpty(candidates) and lastFirstCandidate ~= candidates[1].entIndex then
     selectedIndex = 1
     lastFirstCandidate = candidates[1].entIndex
-  else
+  elseif not table.IsEmpty(candidates) then
     selectedIndex = math.min(selectedIndex, #candidates)
   end
 
-  selectedENTIndex = candidates[selectedIndex].entIndex
-  drawPanel(candidates, selectedIndex)
+  if not table.IsEmpty(candidates) then
+    selectedENTIndex = candidates[selectedIndex].entIndex
+    drawPanel(candidates, selectedIndex)
+  else
+    if selectedENTIndex ~= nil and IsValid(Entity(selectedENTIndex)) then
+      drawPanel({RPTools.Node.Client.GetNode(selectedENTIndex)}, 1)
+    end
+  end
 end)
 
 hook.Add("PlayerButtonDown", "rptools_inspector_controls", function(ply, button)
@@ -567,11 +568,17 @@ local function isSelected(node)
   return node:EntIndex() == selectedENTIndex
 end
 
+---@return number|nil
 local function getSelectedEntIndex()
   return selectedENTIndex
+end
+
+local function clearSelection()
+  selectedENTIndex = nil
 end
 
 RPTools.Inspector = {
   IsSelected = isSelected,
   GetSelectedEntIndex = getSelectedEntIndex,
+  ClearSelection = clearSelection
 }
