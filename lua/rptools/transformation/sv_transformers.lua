@@ -306,9 +306,6 @@ local function addPlayPlayerSound(node, sound, volume, pitch)
   if pitch ~= nil and (pitch < 0 or pitch > 255) then
     return nil
   end
-  if not file.Exists("sound/" .. sound, "GAME") then
-    return nil
-  end
 
   ---@type RPToolsPlayerAction
   local playSoundAction = { target = "player", action = "play_sound", sound = sound, volume = volume, pitch = pitch }
@@ -334,9 +331,6 @@ local function addPlayWorldSound(node, sound, volume, pitch, level)
     return nil
   end
   if level ~= nil and level and (level < 0 or level > 511) then
-    return nil
-  end
-  if not file.Exists("sound/" .. sound, "GAME") then
     return nil
   end
 
@@ -368,9 +362,7 @@ local function addLoopSound(node, sound, iterations, volume, pitch, level)
   if level ~= nil and level and (level < 0 or level > 511) then
     return nil
   end
-  if not file.Exists("sound/" .. sound, "GAME") then
-    return nil
-  end
+
   if iterations ~= nil and iterations < 0 then
     return nil
   end
