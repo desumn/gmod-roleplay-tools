@@ -149,7 +149,7 @@ local function addViewAngle(node, maxAngleDegrees)
   for _, condition in ipairs(node.conditions) do
     if condition.test == "distance" then
       hasDistance = true
-      break = true
+      break
     end
   end
 
@@ -162,7 +162,7 @@ local function addViewAngle(node, maxAngleDegrees)
     if condition.type == "spatial" and condition.test == "view_angle" then
       node.conditions[i] = angleCondition
       replaced = true
-      break = true
+      break
     end
   end
 
