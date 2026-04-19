@@ -70,11 +70,9 @@ function TOOL:Reload(_)
     if CLIENT then
         -- vide la sélection via une API de l'inspecteur
         RPTools.Inspector.ClearSelection()
-        return true
+        return false
     end
 end
-
-
 
 function TOOL:Holster()
     if CLIENT then
