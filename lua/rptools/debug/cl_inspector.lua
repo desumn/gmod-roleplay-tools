@@ -522,6 +522,7 @@ hook.Add("HUDPaint", "rptools_inspector_paint", function()
 
   local trace = LocalPlayer():GetEyeTrace()
   local candidates = findCandidates(trace)
+  lastCandidatesCount = #candidates
 
   if not table.IsEmpty(candidates) and lastFirstCandidate ~= candidates[1].entIndex then
     selectedIndex = 1
