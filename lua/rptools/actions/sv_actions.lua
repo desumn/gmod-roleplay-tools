@@ -77,7 +77,7 @@ local function executeWorldAction(action, node)
     ent:SetParent(node)
     ---@cast ent RPToolsLoopSoundEntity
     ent.play_sound = {
-      iteration = action.iterations,
+      iterations = action.iterations,
       sound = action.sound,
       pitch = action.pitch or 100,
       volume = action.volume or 1,
