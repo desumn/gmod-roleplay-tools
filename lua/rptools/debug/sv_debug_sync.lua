@@ -22,6 +22,7 @@ end
 ---@field state { paused : boolean, errorMessage : string }
 ---@field activePlayers number
 ---@field playersInZone number
+---@field normal Vector
 
 ---@param targets Player[]
 ---@param node RPToolsNodeEntity
@@ -34,6 +35,7 @@ local function sync(targets, node)
     state = node.state,
     activePlayers = node:CountActives(),
     playersInZone = node:CountInZone(),
+    normal = node.debug.hitNormal
   }
 
   net.Start("rptools_sync_debug")

@@ -17,7 +17,7 @@ function ENT:Draw()
   end
 
   local pos = self:GetPos()
-  local isActive = self:GetNW2Bool("rptools_active", false)
+  local isActive = RPTools.Node.Client.GetNode(self:EntIndex()).activePlayers > 0
   local color = isActive and activeColor or inactiveColor
 
   local ringColor = ColorAlpha(color_black, 180)
@@ -36,7 +36,7 @@ function ENT:Draw()
   render.SetMaterial(spriteMat)
   render.DrawSprite(pos, SPRITE_SIZE, SPRITE_SIZE, color)
 
-  local normal = self:GetNW2Vector("rptools_normal", Vector(0, 0, 1))
+  local normal = RPTools.Node.Client.GetNode(self:EntIndex()).normal
   local beamEnd = pos + normal * BEAM_LENGTH
 
   render.SetMaterial(beamMat)

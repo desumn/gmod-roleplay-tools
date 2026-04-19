@@ -86,10 +86,6 @@ function ENT:Initialize()
   self.debug = self.debug or {}
   self.state = { paused = true, errorMessage = "" }
 
-  if self.debug.hitNormal then
-    self:SetNW2Vector("rptools_normal", self.debug.hitNormal)
-  end
-
   local distances = extractDistances(self)
 
   self:SetModel("models/hunter/plates/plate.mdl")
@@ -193,8 +189,6 @@ function ENT:Think()
   self.playersWithNewState = {}
 
   local newActives = self:CountActives()
-
-  self:SetNW2Bool("rptools_active", newActives > 0)
 
   emitLifecycleHooks(self, oldActives, newActives, activations, deactivations)
 
