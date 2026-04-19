@@ -166,22 +166,18 @@ end
 ---@param node RPToolsNodeEntity
 ---@param scope RPToolsStateScope
 ---@param key string
----@param equals? any
----@param notEquals? any
+---@param expected boolean
 ---@return RPToolsNodeEntity?
-local function addStateCondition(node, scope, key, equals, notEquals)
+local function addFlagCondition(node, scope, key, invert)
   if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
     return nil
   end
-  if equals == nil and notEquals == nil then
-    return
-  end
-  if equals ~= nil and notEquals ~= nil then
-    return nil
-  end
+
+  local safeInvert = invert or false
+  local equality = invert and "notEquals" or "equals"
 
   ---@type RPToolsStateCondition
-  local stateCondition = { type = "state", scope = scope, key = key, equals = equals, notEquals = notEquals }
+  local stateCondition = { type = "state", scope = scope, key = key, [equality] = true }
 
   local newNode = copyNode(node)
 
@@ -198,6 +194,78 @@ local function addStateCondition(node, scope, key, equals, notEquals)
 
   return newNode
 end
+
+
+---@param node RPToolsNodeEntity
+---@param scope RPToolsStateScope
+---@param key string
+---@param min? number
+---@param max? number
+---@param exclusive? { min : boolean, max : boolean}
+---@return RPToolsNodeEntity?
+local function addNumberCondition(node, scope, key, min, max, exclusive)
+  if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
+    return nil
+  end
+  if min == nil and max == nil then
+    return
+  end
+
+  ---@type RPToolsStateCondition
+  local stateCondition = { type = "state", scope = scope, key = key, min = min, max = max, exclusive = exclusive }
+
+  local newNode = copyNode(node)
+
+  for _, condition in ipairs(node.conditions) do
+    if condition.scope == scope and condition.key == key then
+      return nil
+    end
+  end
+
+  table.insert(newNode.conditions, stateCondition)
+
+  newNode:Spawn()
+  node:Remove()
+
+  return newNode
+end
+
+---@param node RPToolsNodeEntity
+---@param scope RPToolsStateScope
+---@param key string
+---@param value? string
+---@param invert? boolean
+---@return RPToolsNodeEntity?
+local function addStringCondition(node, scope, key, value, invert)
+  if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
+    return nil
+  end
+  if value == nil or value == "" then
+    return
+  end
+
+  local safeInvert = invert or false
+  local equality = invert and "notEquals" or "equals"
+
+  ---@type RPToolsStateCondition
+  local stateCondition = { type = "state", scope = scope, key = key, [equality] = value }
+
+  local newNode = copyNode(node)
+
+  for _, condition in ipairs(node.conditions) do
+    if condition.scope == scope and condition.key == key then
+      return nil
+    end
+  end
+
+  table.insert(newNode.conditions, stateCondition)
+
+  newNode:Spawn()
+  node:Remove()
+
+  return newNode
+end
+
 
 ---@param node RPToolsNodeEntity
 ---@param message string
@@ -385,7 +453,9 @@ RPTools.Transformers = {
   AddDistance = addDistance,
   AddViewAngle = addViewAngle,
   AddLineOfSight = addLineOfSight,
-  AddStateCondition = addStateCondition,
+  AddFlagCondition = addFlagCondition,
+  AddNumberCondition = addNumberCondition,
+  AddStringCondition = addStringCondition,
   AddMessage = addMessage,
   AddHUDMessage = addHUDMessage,
   AddPlayPlayerSound = addPlayPlayerSound,
