@@ -115,7 +115,7 @@ if CLIENT then
     )
 
     draw.SimpleText(
-      "Scroll to adjust",
+      "Configure in Props or Contextual menu",
       "DermaDefault",
       width / 2,
       height * 0.85,
