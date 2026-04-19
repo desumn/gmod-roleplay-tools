@@ -1,29 +1,21 @@
 local logModuleName = "Dispatcher"
 
-hook.Add("RPTools_NodeActivated", "rptools_dispatch_activated", function(nodeId, node, players)
-  local actionsSuccess, actionsError = pcall(function()
-    for _, action in ipairs(node.actions) do
-      local actionFunc = RPTools.Actions.Server.GetFunction(action.actionType)
-      actionFunc(players, node, action.params)
-    end
-  end)
+RPTools = RPTools or {}
 
-  if not actionsSuccess then
-    RPTools.Coordinator.SetNodeRunningState(nodeId, RPTools.Coordinator.NODE_STATE.ERROR)
-    RPTools.Logs.log(RPTools.Logs.LEVEL.ERROR, logModuleName, node.id .. " action evaluation failed: " .. actionsError)
+hook.Add("RPTools_NodeActivated", "rptools_dispatch_actions", function(node, players)
+  local success, err = pcall(RPTools.Actions.Server.Execute, node.actions, players, node)
+  if not success then
   end
 end)
 
-hook.Add("RPTools_PlayersActivation", "rptools_dispatch_activated", function(nodeId, node, players)
-  local actionsSuccess, actionsError = pcall(function()
-    for _, action in ipairs(node.actions) do
-      local actionFunc = RPTools.Actions.Server.GetFunction(action.actionType)
-      actionFunc(players, node, action.params)
-    end
-  end)
+hook.Add("RPTools_PlayersActivation", "rptools_dispatch_actions_join", function(node, players)
+  local success, err = pcall(RPTools.Actions.Server.Execute, node.actions, players, node)
+  if not success then
+  end
+end)
 
-  if not actionsSuccess then
-    RPTools.Coordinator.SetNodeRunningState(nodeId, RPTools.Coordinator.NODE_STATE.ERROR)
-    RPTools.Logs.log(RPTools.Logs.LEVEL.ERROR, logModuleName, node.id .. " action evaluation failed: " .. actionsError)
+hook.Add("RPTools_NodeDeactivated", "rptools_dispatch_stop", function(node)
+  local success, err = pcall(RPTools.Actions.Server.StopContinuous, node)
+  if not success then
   end
 end)

@@ -1,129 +1,170 @@
 RPTools = RPTools or {}
-RPTools.Actions = RPTools.Actions or {}
-RPTools.Actions.Server = RPTools.Actions.Server or {}
 
-local logModuleName = "Action:Server"
+---@class RPToolsPlayerAction
+---@field target "player"
+---@field action "send_message"|"hud_message"|"play_sound"
+---@field message? string
+---@field duration? number
+---@field sound? string
+---@field volume? number
+---@field pitch? number
 
-local serverFunction = {}
+local Client = {}
 
-local validators = {}
+util.AddNetworkString("RPTools_MessageAction")
+util.AddNetworkString("RPTools_HUDMessageAction")
+util.AddNetworkString("RPTools_PlaySoundAction")
 
-local formatters = {}
-
-function RPTools.Actions.Server.RegisterAction(name, func, validator, formatter)
-  serverFunction[name] = func
-  validators[name] = validator
-  formatters[name] = formatter
-  RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Registered action " .. name .. " on the server")
+---@param action RPToolsPlayerAction|RPToolsBroadcastAction
+---@param ply Player
+function Client.sendMessage(action, ply)
+  net.Start("RPTools_MessageAction")
+  net.WriteString(action.message)
+  net.Send(ply)
 end
 
-function RPTools.Actions.Server.RegisterClientAction(name, validator, formatter, target)
-  validators[name] = validator
-  formatters[name] = formatter
+---@param action RPToolsPlayerAction
+---@param ply Player
+function Client.sendHUDMessage(action, ply)
+  net.Start("RPTools_HUDMessageAction")
+  net.WriteString(action.message)
+  net.WriteUInt(action.duration, 8)
+  net.Send(ply)
+end
 
-  local safeTarget = target or function(plys, _, _)
-    return plys
+---@param action RPToolsPlayerAction
+---@param ply Player
+function Client.sendPlaySound(action, ply)
+  net.Start("RPTools_PlaySoundAction")
+  net.WriteString(action.sound)
+  net.WriteFloat(action.volume)
+  net.WriteUInt(action.pitch, 8)
+  net.Send(ply)
+end
+
+---@param action RPToolsPlayerAction
+---@param ply Player
+---@param node RPToolsNodeEntity
+local function executePlayerAction(action, ply, node)
+  if action.action == "send_message" then
+    Client.sendMessage(action, ply)
+  elseif action.action == "hud_message" then
+    Client.sendHUDMessage(action, ply)
+  elseif action.action == "play_sound" then
+    Client.sendPlaySound(action, ply)
   end
-  serverFunction[name] = function(ply, node, params)
-    RPTools.Network.SendToClients(safeTarget(ply, node, params), RPTools.Network.MSG_TYPE.CLIENT_ACTION, function()
-      net.WriteString(name)
-      net.WriteTable(params)
-    end)
-    return true
+end
+
+---@class RPToolsWorldAction
+---@field target "world"
+---@field action "play_sound"|"loop_sound"
+---@field sound? string
+---@field iterations? integer
+---@field volume? number
+---@field pitch? number
+---@field level? number
+
+---@param action RPToolsWorldAction
+---@param node RPToolsNodeEntity
+local function executeWorldAction(action, node)
+  if action.action == "play_sound" then
+    node:EmitSound(action.sound, action.level or 75, action.pitch or 100, action.volume or 1)
+    node.activeSounds = node.activeSounds or {}
+    table.insert(node.activeSounds, action.sound)
+  elseif action.action == "loop_sound" then
+    local ent = ents.Create("ent_rptools_loop_sound")
+    ent:SetPos(node:GetPos())
+    ent:SetParent(node)
+    ---@cast ent RPToolsLoopSoundEntity
+    ent.play_sound = {
+      iteration = action.iterations,
+      sound = action.sound,
+      pitch = action.pitch or 100,
+      volume = action.volume or 1,
+      level = action.level or 75,
+    }
+    ent:Spawn()
   end
-  RPTools.Logs.log(RPTools.Logs.LEVEL.INFO, logModuleName, "Registered client-side action " .. name .. " on the server")
 end
 
-function RPTools.Actions.Server.GetFunction(name)
-  return serverFunction[name]
-end
+---@class RPToolsBroadcastAction
+---@field target "broadcast"
+---@field action "send_message"
+---@field message string
 
-function RPTools.Actions.Server.GetFormatter(name)
-  return formatters[name]
-end
-
----@param action RPToolsAction
----@return boolean, string|nil
-function RPTools.Actions.Server.ValidateAction(action)
-  local func = serverFunction[action.actionType]
-  local validator = validators[action.actionType]
-
-  local isValid = true
-  local errorMessage = ""
-
-  if not func or not isfunction(func) then
-    isValid = false
-    errorMessage = "Invalid function for action: " .. action.actionType .. " " .. errorMessage
-  end
-
-  if not validator or not isfunction(validator) then
-    isValid = false
-    errorMessage = "Invalid validator for action: " .. action.actionType .. " " .. errorMessage
-  else
-    local paramsValid, paramsError = validator(action.params)
-
-    if not paramsValid then
-      isValid = false
-      errorMessage = (paramsError or "") .. action.actionType .. " " .. errorMessage
+---@param action RPToolsBroadcastAction
+---@param node RPToolsNodeEntity
+local function executeBroadcastAction(action, node)
+  for _, ply in ipairs(player.GetAll()) do
+    if action.action == "send_message" then
+      Client.sendMessage(action, ply)
     end
   end
-  return isValid, errorMessage
 end
 
----@param actionType string
----@param params table
----@return RPToolsAction|nil, string|nil
-function RPTools.Actions.Server.Create(actionType, params)
-  local action = { actionType = actionType, params = params }
-  local actionValid, errorMessage = RPTools.Actions.Server.ValidateAction(action)
+---@class RPToolsStateAction
+---@field target "state"
+---@field action "set"|"remove"
+---@field scope RPToolsStateScope
+---@field key string
+---@field value? any
+---@field duration? number
 
-  if actionValid then
-    return action, nil
-  else
-    return nil, errorMessage
+---@param action RPToolsStateAction
+---@param ply? Player
+---@param node RPToolsNodeEntity
+local function executeStateAction(action, ply, node)
+  if action.action == "set" then
+    RPTools.State.Set(action.scope, action.key, action.value, ply, action.duration)
+  elseif action.action == "remove" then
+    RPTools.State.Remove(action.scope, action.key, ply)
   end
 end
 
----@return RPToolsAction[]
-function RPTools.Actions.Server.EmptyActionSet()
-  return {}
-end
-
----@param set RPToolsAction[]
----@param action RPToolsAction
-function RPTools.Actions.Server.AddToSet(set, action)
-  table.insert(set, action)
-end
-
----@param action RPToolsAction
----@return string
-function RPTools.Actions.Server.GetActionType(action)
-  return action.actionType
-end
-
----@param action RPToolsAction
----@return table
-function RPTools.Actions.Server.GetParams(action)
-  return table.Copy(action.params)
-end
+---@alias RPToolsAction RPToolsPlayerAction | RPToolsWorldAction | RPToolsBroadcastAction | RPToolsStateAction
 
 ---@param actions RPToolsAction[]
----@return boolean, string|nil
-function RPTools.Actions.Server.ValidateActionsSet(actions)
-  local allActionsValid = true
-  local accumulatedErrorMessage = ""
-
+---@param players Player[]
+---@param node RPToolsNodeEntity
+local function execute(actions, players, node)
   for _, action in ipairs(actions) do
-    local actionValid, conditionErrorMessage = RPTools.Actions.Server.ValidateAction(action)
-    allActionsValid = actionValid and allActionsValid
-    if not actionValid then
-      accumulatedErrorMessage = conditionErrorMessage .. ", " .. accumulatedErrorMessage
+    if action.target == "player" then
+      for _, ply in ipairs(players) do
+        executePlayerAction(action, ply, node)
+      end
+    elseif action.target == "world" then
+      executeWorldAction(action, node)
+    elseif action.target == "broadcast" then
+      executeBroadcastAction(action, node)
+    elseif action.target == "state" then
+      if action.scope == RPTools.State.SCOPE.GLOBAL then
+        executeStateAction(action, nil, node)
+      else
+        for _, ply in ipairs(players) do
+          executeStateAction(action, ply, node)
+        end
+      end
     end
   end
+end
 
-  if not allActionsValid then
-    return false, accumulatedErrorMessage
-  else
-    return true, nil
+---@param node RPToolsNodeEntity
+local function stopContinuous(node)
+  if node.activeSounds then
+    for _, sound in ipairs(node.activeSounds) do
+      node:StopSound(sound)
+    end
+    node.activeSounds = {}
+  end
+  for _, child in ipairs(node:GetChildren()) do
+    if IsValid(child) then
+      child:Remove()
+    end
   end
 end
+
+RPTools.Actions = {}
+RPTools.Actions.Server = {
+  Execute = execute,
+  StopContinuous = stopContinuous,
+}

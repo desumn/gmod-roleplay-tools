@@ -1,31 +1,144 @@
 RPTools = RPTools or {}
-RPTools.Actions = RPTools.Actions or {}
-RPTools.Actions.Client = RPTools.Actions.Client or {}
 
-local logModuleName = "Action:Client"
+net.Receive("RPTools_MessageAction", function()
+  local message = net.ReadString()
+  chat.AddText(Color(185, 180, 200), message)
+end)
 
-local clientFunctions = {}
+local function wrapText(text, font, maxWidth)
+  surface.SetFont(font)
+  local words = string.Explode(" ", text)
+  local lines = {}
+  local currentLine = ""
 
-function RPTools.Actions.Client.RegisterAction(name, func)
-  clientFunctions[name] = func
+  for _, word in ipairs(words) do
+    local testLine = currentLine == "" and word or (currentLine .. " " .. word)
+    local testWidth = surface.GetTextSize(testLine)
+
+    if testWidth > maxWidth and currentLine ~= "" then
+      table.insert(lines, currentLine)
+      currentLine = word
+    else
+      currentLine = testLine
+    end
+  end
+
+  if currentLine ~= "" then
+    table.insert(lines, currentLine)
+  end
+
+  return lines
 end
 
-RPTools.Network.OnServerMessage(RPTools.Network.MSG_TYPE.CLIENT_ACTION, function()
-  local name = net.ReadString()
-  local params = net.ReadTable()
+local messages = {}
+local fadeDuration = 0.5
 
-  local func = clientFunctions[name]
+surface.CreateFont("RPToolsHUDMessageFont", {
+  font = "Roboto",
+  extended = true,
+  size = 28,
+  weight = 700,
+  antialias = true,
+})
 
-  if not func or not isfunction(func) then
-    RPTools.Logs.log(RPTools.Logs.LEVEL.WARNING, logModuleName, "Invalid client action: " .. name)
+net.Receive("RPTools_HUDMessageAction", function()
+  local message = net.ReadString()
+  local duration = net.ReadUInt(8)
+  table.insert(messages, { duration = duration, text = message })
+end)
+
+hook.Add("HUDPaint", "RPTools_HUD_Message", function()
+  if table.IsEmpty(messages) then
+    return
+  end
+  local message = messages[1]
+
+  local time = CurTime()
+
+  if not message.startTime then
+    message.startTime = time
+    message.stopTime = time + message.duration
+  end
+
+  if time > message.stopTime then
+    table.remove(messages, 1)
     return
   end
 
-  local success, error = pcall(func, params)
+  local timeElapsed = time - message.startTime
+  local timeLeft = message.stopTime - time
 
-  if success then
-    return
-  else
-    RPTools.Logs.log(RPTools.Logs.LEVEL.ERROR, logModuleName, "Action " .. name .. " crashed: " .. error)
+  local alpha = 255
+
+  if timeElapsed <= fadeDuration then
+    alpha = math.Clamp((timeElapsed / fadeDuration) * 255, 0, 255)
+  elseif timeLeft <= fadeDuration then
+    alpha = math.Clamp((timeLeft / fadeDuration) * 255, 0, 255)
   end
+
+  local paddingX = 20
+  local paddingY = 12
+  local bandWidth = 6
+
+  local maxTextWidth = ScrW() * 0.7
+  local lines = wrapText(message.text, "RPToolsHUDMessageFont", maxTextWidth)
+
+  surface.SetFont("RPToolsHUDMessageFont")
+  local _, lineHeight = surface.GetTextSize("A")
+
+  local longestWidth = 0
+  for _, line in ipairs(lines) do
+    local w = surface.GetTextSize(line)
+    if w > longestWidth then
+      longestWidth = w
+    end
+  end
+
+  local boxWidth = longestWidth + (paddingX * 2) + bandWidth
+  local boxHeight = (#lines * lineHeight) + (paddingY * 2)
+
+  local boxX = (ScrW() / 2) - (boxWidth / 2)
+  local boxY = ScrH() - boxHeight - 40
+
+  surface.SetDrawColor(12, 12, 16, alpha * 0.95)
+  surface.DrawRect(boxX, boxY, boxWidth, boxHeight)
+
+  local bandColor = Color(0, 230, 255)
+  surface.SetDrawColor(bandColor.r, bandColor.g, bandColor.b, alpha)
+  surface.DrawRect(boxX, boxY, bandWidth, boxHeight)
+
+  local textX = boxX + bandWidth + paddingX
+  local textY = boxY + paddingY
+
+  local couleurTexte = Color(240, 235, 230)
+  for i, line in ipairs(lines) do
+    local lineY = textY + (i - 1) * lineHeight
+
+    draw.SimpleText(
+      line,
+      "RPToolsHUDMessageFont",
+      textX + 2,
+      lineY + 2,
+      Color(0, 0, 0, alpha * 0.8),
+      TEXT_ALIGN_LEFT,
+      TEXT_ALIGN_TOP
+    )
+
+    draw.SimpleText(
+      line,
+      "RPToolsHUDMessageFont",
+      textX,
+      lineY,
+      ColorAlpha(couleurTexte, alpha),
+      TEXT_ALIGN_LEFT,
+      TEXT_ALIGN_TOP
+    )
+  end
+end)
+
+net.Receive("RPTools_PlaySoundAction", function()
+  local sound = net.ReadString()
+  local volume = net.ReadFloat()
+  local pitch = net.ReadUInt(8)
+  LocalPlayer():EmitSound(sound, 0, pitch, volume)
 end)
