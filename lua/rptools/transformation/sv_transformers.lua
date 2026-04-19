@@ -73,6 +73,32 @@ local function removeAction(node, index)
 end
 
 ---@param node RPToolsNodeEntity
+---@param parent Entity
+---@return RPToolsNodeEntity?
+local function setParent(node, parent)
+  if not IsValid(parent) then return end
+
+  node:SetParent(parent)
+  node:SetLocalPos(Vector(0, 0, 0))
+
+  hook.Run("RPTools_NodeEdited", node)
+
+  return node
+end
+
+---@param node RPToolsNodeEntity
+---@return RPToolsNodeEntity?
+local function removeParent(node)
+  node:SetParent(nil)
+
+  hook.Run("RPTools_NodeEdited", node)
+
+  return node
+end
+
+
+
+---@param node RPToolsNodeEntity
 ---@param min? number
 ---@param max? number
 ---@return RPToolsNodeEntity?
@@ -166,7 +192,6 @@ end
 ---@param node RPToolsNodeEntity
 ---@param scope RPToolsStateScope
 ---@param key string
----@param expected boolean
 ---@return RPToolsNodeEntity?
 local function addFlagCondition(node, scope, key, invert)
   if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
@@ -440,6 +465,8 @@ local function addStateRemove(node, scope, key)
 end
 
 RPTools.Transformers = {
+  SetParent = setParent, 
+  RemoveParent = removeParent,
   AddDistance = addDistance,
   AddViewAngle = addViewAngle,
   AddLineOfSight = addLineOfSight,
