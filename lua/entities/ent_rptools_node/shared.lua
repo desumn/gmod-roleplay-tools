@@ -1,4 +1,5 @@
 ---@class RPToolsNodeEntity : Entity
+---@field ReInitialize fun(self : RPToolsNodeEntity)
 ---@field conditions RPToolsCondition[]
 ---@field actions RPToolsAction[]
 ---@field playersInZone table<string, Player>
