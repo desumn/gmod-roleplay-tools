@@ -125,7 +125,7 @@ function ENT:Initialize()
   self.activePlayers = {}
   self.activeSounds = {}
   self.debug = self.debug or {}
-  self.state = { paused = true, errorMessage = "" }
+  self.state = { paused = false, errorMessage = "" }
   
   self:SetModel("models/hunter/plates/plate.mdl")
   self:SetMoveType(MOVETYPE_NONE)
