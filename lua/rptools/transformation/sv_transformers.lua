@@ -1,26 +1,5 @@
 RPTools = RPTools or {}
 
----@param oldNode RPToolsNodeEntity
----@return RPToolsNodeEntity
-local function copyNode(oldNode)
-  local node = ents.Create("ent_rptools_node")
-  ---@cast node RPToolsNodeEntity
-
-  node.conditions = table.Copy(oldNode.conditions)
-  node.actions = table.Copy(oldNode.actions)
-
-  node.state = table.Copy(oldNode.state)
-
-  node.debug = table.Copy(oldNode.debug)
-
-  node:SetPos(oldNode:GetPos())
-  if IsValid(oldNode:GetParent()) then
-    node:SetParent(oldNode:GetParent())
-  end
-
-  return node
-end
-
 ---@param node RPToolsNodeEntity
 ---@param index integer
 ---@return RPToolsNodeEntity?
@@ -29,32 +8,30 @@ local function removeCondition(node, index)
     return nil
   end
 
-  local newNode = copyNode(node)
-  table.remove(newNode.conditions, index)
+  table.remove(node.conditions, index)
 
-  newNode:Spawn()
-  node:Remove()
+  node:ReInitialize()
+  hook.Run("RPTools_NodeEdited", node)
 
-  return newNode
+  return node
 end
 
 ---@param node RPToolsNodeEntity
 ---@param indexes integer[]
 ---@return RPToolsNodeEntity?
 local function removeConditions(node, indexes)
-  local newNode = copyNode(node)
   for offset, index in ipairs(indexes) do
     if index < 1 or index > #node.conditions then
       return nil
     end
 
-    table.remove(newNode.conditions, index - (offset - 1))
+    table.remove(node.conditions, index - (offset - 1))
   end
 
-  newNode:Spawn()
-  node:Remove()
+  node:ReInitialize()
+  hook.Run("RPTools_NodeEdited", node)
 
-  return newNode
+  return node
 end
 
 ---@param node RPToolsNodeEntity
@@ -76,10 +53,16 @@ end
 ---@param parent Entity
 ---@return RPToolsNodeEntity?
 local function setParent(node, parent)
-  if not IsValid(parent) then return end
+  if not IsValid(parent) then
+    return
+  end
 
   node:SetParent(parent)
   node:SetLocalPos(Vector(0, 0, 0))
+
+  if node.isSpatial then
+    node:ReInitialize()
+  end
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -91,11 +74,64 @@ end
 local function removeParent(node)
   node:SetParent(nil)
 
+
+  if node.isSpatial then
+    node:ReInitialize()
+  end
+
   hook.Run("RPTools_NodeEdited", node)
 
   return node
 end
 
+---@param node RPToolsNodeEntity
+---@param condition RPToolsCondition
+local function insertOrUpdateCondition(node, condition)
+  local updated = false
+  for i, oldCondition in ipairs(node.conditions) do
+    if oldCondition.type == condition.type and condition.type == "spatial" and condition.test == oldCondition.test then
+      node.conditions[i] = condition
+      updated = true
+      break
+    elseif
+      oldCondition.type == condition.type
+      and condition.type == "state"
+      and oldCondition.scope == condition.scope
+      and oldCondition.key == condition.key
+    then
+      node.conditions[i] = condition
+      updated = true
+      break
+    end
+  end
+
+  if not updated then
+    table.insert(node.conditions, condition)
+  end
+end
+
+
+---@param node RPToolsNodeEntity
+---@param action RPToolsAction
+local function insertOrUpdateAction(node, action)
+  local updated = false
+  for i, oldAction in ipairs(node.actions) do
+    if
+      oldAction.target == action.target
+      and action.target == "state"
+      and oldAction.scope == action.scope
+      and oldAction.key == action.key
+    then
+      node.actions[i] = action
+      updated = true
+      break
+    end
+  end
+
+  if not updated then
+    table.insert(node.actions, action)
+  end
+end
 
 ---@param node RPToolsNodeEntity
 ---@param min? number
@@ -112,25 +148,13 @@ local function addDistance(node, min, max)
   ---@type RPToolsSpatialCondition
   local distanceCondition = { type = "spatial", test = "distance", min = min, max = max }
 
-  local newNode = copyNode(node)
+  insertOrUpdateCondition(node, distanceCondition)
+  node:ReInitialize()
 
-  local replaced = false
-  for i, condition in ipairs(newNode.conditions) do
-    if condition.type == "spatial" and condition.test == "distance" then
-      newNode.conditions[i] = distanceCondition
-      replaced = true
-      break
-    end
-  end
+  hook.Run("RPTools_NodeEdited", node)
 
-  if not replaced then
-    table.insert(newNode.conditions, distanceCondition)
-  end
 
-  newNode:Spawn()
-  node:Remove()
-
-  return newNode
+  return node
 end
 
 ---@param node RPToolsNodeEntity
@@ -140,10 +164,6 @@ local function addViewAngle(node, maxAngleDegrees)
   if maxAngleDegrees < 0 or maxAngleDegrees > 180 then
     return nil
   end
-  local minDotProduct = math.cos(math.rad(maxAngleDegrees))
-
-  ---@type RPToolsSpatialCondition
-  local angleCondition = { type = "spatial", test = "view_angle", min = minDotProduct }
 
   local hasDistance = false
   for _, condition in ipairs(node.conditions) do
@@ -157,18 +177,13 @@ local function addViewAngle(node, maxAngleDegrees)
     return nil
   end
 
-  local replaced = false
-  for i, condition in ipairs(node.conditions) do
-    if condition.type == "spatial" and condition.test == "view_angle" then
-      node.conditions[i] = angleCondition
-      replaced = true
-      break
-    end
-  end
+  local minDotProduct = math.cos(math.rad(maxAngleDegrees))
 
-  if not replaced then
-    table.insert(node.conditions, angleCondition)
-  end
+  ---@type RPToolsSpatialCondition
+  local angleCondition = { type = "spatial", test = "view_angle", min = minDotProduct }
+
+  insertOrUpdateCondition(node, angleCondition)
+  node:ReInitialize()
 
   hook.Run("RPTools_NodeEdited", node)
   return node
@@ -178,13 +193,11 @@ end
 ---@param shouldLineOfSight boolean
 ---@return RPToolsNodeEntity?
 local function addLineOfSight(node, shouldLineOfSight)
-  ---@type RPToolsSpatialCondition
-  local losCondition = { type = "spatial", test = "line_of_sight", equals = shouldLineOfSight }
-
   local hasDistance = false
   for _, condition in ipairs(node.conditions) do
     if condition.test == "distance" then
       hasDistance = true
+      break
     end
   end
 
@@ -192,17 +205,11 @@ local function addLineOfSight(node, shouldLineOfSight)
     return nil
   end
 
-  local replaced = false
-  for i, condition in ipairs(node.conditions) do
-    if condition.test == "line_of_sight" then
-      node.conditions[i] = losCondition
-      replaced = true
-    end
-  end
+  ---@type RPToolsSpatialCondition
+  local losCondition = { type = "spatial", test = "line_of_sight", equals = shouldLineOfSight }
 
-  if not replaced then
-    table.insert(node.conditions, losCondition)
-  end
+  insertOrUpdateCondition(node, losCondition)
+  node:ReInitialize()
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -223,25 +230,12 @@ local function addFlagCondition(node, scope, key, invert)
   ---@type RPToolsStateCondition
   local stateCondition = { type = "state", scope = scope, key = key, [equality] = true }
 
-  local newNode = copyNode(node)
+  insertOrUpdateCondition(node, stateCondition)
+  node:ReInitialize()
 
-  local replaced = false
-  for i, condition in ipairs(newNode.conditions) do
-    if condition.type == "state" and condition.scope == scope and condition.key == key then
-      newNode.conditions[i] = stateCondition
-      replaced = true
-      break
-    end
-  end
+  hook.Run("RPTools_NodeEdited", node)
 
-  if not replaced then
-    table.insert(newNode.conditions, stateCondition)
-  end
-
-  newNode:Spawn()
-  node:Remove()
-
-  return newNode
+  return node
 end
 
 ---@param node RPToolsNodeEntity
@@ -256,31 +250,18 @@ local function addNumberCondition(node, scope, key, min, max, exclusive)
     return nil
   end
   if min == nil and max == nil then
-    return
+    return nil
   end
 
   ---@type RPToolsStateCondition
   local stateCondition = { type = "state", scope = scope, key = key, min = min, max = max, exclusive = exclusive }
 
-  local newNode = copyNode(node)
+  insertOrUpdateCondition(node, stateCondition)
+  node:ReInitialize()
 
-  local replaced = false
-  for i, condition in ipairs(newNode.conditions) do
-    if condition.type == "state" and condition.scope == scope and condition.key == key then
-      newNode.conditions[i] = stateCondition
-      replaced = true
-      break
-    end
-  end
+  hook.Run("RPTools_NodeEdited", node)
 
-  if not replaced then
-    table.insert(newNode.conditions, stateCondition)
-  end
-
-  newNode:Spawn()
-  node:Remove()
-
-  return newNode
+  return node
 end
 
 ---@param node RPToolsNodeEntity
@@ -294,7 +275,7 @@ local function addStringCondition(node, scope, key, value, invert)
     return nil
   end
   if value == nil or value == "" then
-    return
+    return nil
   end
 
   local equality = invert and "notEquals" or "equals"
@@ -302,25 +283,12 @@ local function addStringCondition(node, scope, key, value, invert)
   ---@type RPToolsStateCondition
   local stateCondition = { type = "state", scope = scope, key = key, [equality] = value }
 
-  local newNode = copyNode(node)
+  insertOrUpdateCondition(node, stateCondition)
+  node:ReInitialize()
 
-  local replaced = false
-  for i, condition in ipairs(newNode.conditions) do
-    if condition.type == "state" and condition.scope == scope and condition.key == key then
-      newNode.conditions[i] = stateCondition
-      replaced = true
-      break
-    end
-  end
+  hook.Run("RPTools_NodeEdited", node)
 
-  if not replaced then
-    table.insert(newNode.conditions, stateCondition)
-  end
-
-  newNode:Spawn()
-  node:Remove()
-
-  return newNode
+  return node
 end
 
 ---@param node RPToolsNodeEntity
@@ -330,7 +298,7 @@ local function addMessage(node, message)
   ---@type RPToolsPlayerAction
   local messageAction = { target = "player", action = "send_message", message = message }
 
-  table.insert(node.actions, messageAction)
+  insertOrUpdateAction(node, messageAction)
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -345,7 +313,7 @@ local function addHUDMessage(node, message, duration)
   ---@type RPToolsPlayerAction
   local HUDMessageAction = { target = "player", action = "hud_message", message = message, duration = duration }
 
-  table.insert(node.actions, HUDMessageAction)
+  insertOrUpdateAction(node, HUDMessageAction)
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -368,7 +336,7 @@ local function addPlayPlayerSound(node, sound, volume, pitch)
   ---@type RPToolsPlayerAction
   local playSoundAction = { target = "player", action = "play_sound", sound = sound, volume = volume, pitch = pitch }
 
-  table.insert(node.actions, playSoundAction)
+  insertOrUpdateAction(node, playSoundAction)
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -396,8 +364,8 @@ local function addPlayWorldSound(node, sound, volume, pitch, level)
   local playSoundAction =
     { target = "world", action = "play_sound", sound = sound, volume = volume, pitch = pitch, level = level }
 
-  table.insert(node.actions, playSoundAction)
-
+  insertOrUpdateAction(node, playSoundAction)
+  
   hook.Run("RPTools_NodeEdited", node)
 
   return node
@@ -436,7 +404,7 @@ local function addLoopSound(node, sound, iterations, volume, pitch, level)
     level = level,
   }
 
-  table.insert(node.actions, playSoundAction)
+  insertOrUpdateAction(node, playSoundAction)
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -450,7 +418,7 @@ local function addBroadcastMessage(node, message)
   ---@type RPToolsBroadcastAction
   local messageAction = { target = "broadcast", action = "send_message", message = message }
 
-  table.insert(node.actions, messageAction)
+  insertOrUpdateAction(node, messageAction)
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -461,7 +429,7 @@ end
 ---@param scope RPToolsStateScope
 ---@param key string
 ---@param value any
----@pram duration number
+---@param duration number
 ---@return RPToolsNodeEntity?
 local function addStateSet(node, scope, key, value, duration)
   if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
@@ -471,19 +439,7 @@ local function addStateSet(node, scope, key, value, duration)
   ---@type RPToolsStateAction
   local stateAction = { target = "state", action = "set", scope = scope, key = key, value = value, duration = duration }
 
-
-  local replaced = false
-  for i, action in ipairs(node.actions) do
-    if action.target == "state" and action.scope == scope and action.key == key then
-      node.actions[i] = stateAction
-      replaced = true
-      break
-    end
-  end
-
-  if not replaced then
-    table.insert(node.actions, stateAction)
-  end
+  insertOrUpdateAction(node, stateAction)
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -502,18 +458,7 @@ local function addStateRemove(node, scope, key)
   ---@type RPToolsStateAction
   local stateAction = { target = "state", action = "remove", scope = scope, key = key }
 
-  local replaced = false
-  for i, action in ipairs(node.actions) do
-    if action.target == "state" and action.scope == scope and action.key == key then
-      node.actions[i] = stateAction
-      replaced = true
-      break
-    end
-  end
-
-  if not replaced then
-    table.insert(node.actions, stateAction)
-  end
+  insertOrUpdateAction(node, stateAction)
 
   hook.Run("RPTools_NodeEdited", node)
 
@@ -521,7 +466,7 @@ local function addStateRemove(node, scope, key)
 end
 
 RPTools.Transformers = {
-  SetParent = setParent, 
+  SetParent = setParent,
   RemoveParent = removeParent,
   AddDistance = addDistance,
   AddViewAngle = addViewAngle,
@@ -534,7 +479,7 @@ RPTools.Transformers = {
   AddPlayPlayerSound = addPlayPlayerSound,
   AddPlayWorldSound = addPlayWorldSound,
   AddLoopSound = addLoopSound,
-  AddBroadCastMessage = addBroadcastMessage,
+  AddBroadcastMessage = addBroadcastMessage,
   AddStateSet = addStateSet,
   AddStateRemove = addStateRemove,
   RemoveCondition = removeCondition,
