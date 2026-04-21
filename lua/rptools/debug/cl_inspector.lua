@@ -30,10 +30,7 @@ surface.CreateFont("RPToolsInspectorSmallFont", {
   antialias = true,
 })
 
-local SCOPE = {
-  PLAYER = 1,
-  GLOBAL = 2,
-}
+local SCOPE = RPTools.State.Shared.SCOPE
 
 local scopeNames = {
   [SCOPE.PLAYER] = "player",
