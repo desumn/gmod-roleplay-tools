@@ -26,7 +26,7 @@ local function initSpatial(self, distances)
   self:SetCollisionBounds(boxMins, boxMaxs)
   self:SetSolid(SOLID_BBOX)
   self:SetTrigger(true)
-  
+
   local newInZone = {}
   local newActivePlayers = {}
   for _, ply in ipairs(ents.FindInBox(boxMins, boxMaxs)) do
@@ -39,7 +39,6 @@ local function initSpatial(self, distances)
   end
   self.playersInZone = newInZone
   self.activePlayers = newActivePlayers
-  
 end
 
 local function extractKeys(self)
@@ -53,20 +52,20 @@ end
 
 local function subscribeToStateChange(self)
   self.valueChangeEvent = "rptools_node_" .. self:EntIndex()
-  RPTools.State.OnValueChange(self.valueChangeEvent, function(scope, key, context, oldValue, newValue)
+  RPTools.State.Server.OnValueChange(self.valueChangeEvent, function(scope, key, context, oldValue, newValue)
     if self.keys[scope][key] == nil then
       return
     end
-    if scope == RPTools.State.SCOPE.GLOBAL then
+    if scope == RPTools.State.Shared.SCOPE.GLOBAL then
       self:ReevaluateState()
-    elseif scope == RPTools.State.SCOPE.PLAYER then
+    elseif scope == RPTools.State.Shared.SCOPE.PLAYER then
       self.playersWithNewState[context:SteamID64()] = context
     end
     self.shouldEvaluate = true
   end)
 end
 
-local function unSubscribeFromStateChange(self)  
+local function unSubscribeFromStateChange(self)
   if self.valueChangeEvent then
     hook.Remove("RPTools_StateValueChanged", self.valueChangeEvent)
   end
@@ -76,15 +75,15 @@ end
 local function initReactive(self)
   self:SetSolid(SOLID_NONE)
   self.playersInZone = {}
-  
+
   self.keys = {
-    [RPTools.State.SCOPE.GLOBAL] = {},
-    [RPTools.State.SCOPE.PLAYER] = {},
+    [RPTools.State.Shared.SCOPE.GLOBAL] = {},
+    [RPTools.State.Shared.SCOPE.PLAYER] = {},
   }
   extractKeys(self)
   self.playersWithNewState = {}
   self:ReevaluateState()
-  
+
   subscribeToStateChange(self)
 end
 
@@ -107,14 +106,14 @@ function ENT:ReInitialize()
   local distances = extractDistances(self)
   unSubscribeFromStateChange(self)
   self:SetTrigger(false)
-  
+
   self.isSpatial = #distances ~= 0
   if self.isSpatial then
     initSpatial(self, distances)
   else
     initReactive(self)
   end
-  
+
   self.shouldEvaluate = true
 end
 
@@ -126,14 +125,13 @@ function ENT:Initialize()
   self.activeSounds = {}
   self.debug = self.debug or {}
   self.state = { paused = false, errorMessage = "" }
-  
+
   self:SetModel("models/hunter/plates/plate.mdl")
   self:SetMoveType(MOVETYPE_NONE)
   self:SetNotSolid(true)
-  
+
   self:ReInitialize()
-  
-  
+
   hook.Run("RPTools_NodeCreated", self)
 end
 
@@ -158,11 +156,11 @@ function ENT:EndTouch(ent)
   local oldActives = self:CountActives()
   self.activePlayers[ent:SteamID64()] = nil
   local newActives = self:CountActives()
-  
+
   if newActives ~= 0 and oldActives > newActives then
     hook.Run("RPTools_PlayerDisqualified", self, ent)
   end
-  
+
   if oldActives > 0 and newActives == 0 then
     hook.Run("RPTools_NodeDeactivated", self, ent)
   end
@@ -216,17 +214,17 @@ function ENT:Think()
     return
   end
   local oldActives = self:CountActives()
-  
+
   local players = (self.isSpatial and self.playersInZone) or self.playersWithNewState
-  
+
   local activations, deactivations = evaluatePlayersConditions(self, players)
-  
+
   self.playersWithNewState = {}
-  
+
   local newActives = self:CountActives()
-  
+
   emitLifecycleHooks(self, oldActives, newActives, activations, deactivations)
-  
+
   if table.IsEmpty(self.playersInZone) then
     self.shouldEvaluate = false
     return

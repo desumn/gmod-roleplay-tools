@@ -2,10 +2,12 @@ AddCSLuaFile("autorun/sh_rptools_init.lua")
 AddCSLuaFile("rptools/actions/cl_actions.lua")
 AddCSLuaFile("rptools/debug/cl_debug_sync.lua")
 AddCSLuaFile("rptools/debug/cl_inspector.lua")
+AddCSLuaFile("rptools/state/sh_state.lua")
 
 RPTools = RPTools or {}
 
 if SERVER then
+  include("rptools/state/sh_state.lua")
   include("rptools/state/sv_state.lua")
   include("rptools/conditions/sv_conditions.lua")
   include("rptools/actions/sv_actions.lua")
@@ -16,6 +18,7 @@ if SERVER then
 end
 
 if CLIENT then
+  include("rptools/state/sh_state.lua")
   include("rptools/actions/cl_actions.lua")
   include("rptools/debug/cl_debug_sync.lua")
   include("rptools/debug/cl_inspector.lua")
@@ -55,7 +58,7 @@ concommand.Add("rptools_test_node_flag", function(ply)
   ---@cast ent RPToolsNodeEntity
   ent.conditions = {
     { type = "spatial", test = "distance", max = 200 },
-    { type = "state", scope = RPTools.State.SCOPE.PLAYER, key = "tomate", equals = true },
+    { type = "state", scope = RPTools.State.Shared.SCOPE.PLAYER, key = "tomate", equals = true },
   }
   ent.actions = {
     { target = "player", action = "send_message", message = "Je suis une tomate" },
@@ -67,7 +70,7 @@ concommand.Add("rptools_test_node_flag", function(ply)
 end)
 
 concommand.Add("rptools_test_flag", function(ply, cmd, args, argStr)
-  RPTools.State.Set(RPTools.State.SCOPE.PLAYER, "tomate", true, ply)
+  RPTools.State.Set(RPTools.State.Shared.SCOPE.PLAYER, "tomate", true, ply)
 end)
 
 concommand.Add("rptools_test_reactive", function(ply)
@@ -75,7 +78,7 @@ concommand.Add("rptools_test_reactive", function(ply)
   local ent = ents.Create("ent_rptools_node")
   ---@cast ent RPToolsNodeEntity
   ent.conditions = {
-    { type = "state", scope = RPTools.State.SCOPE.PLAYER, key = "tomate", equals = true },
+    { type = "state", scope = RPTools.State.Shared.SCOPE.PLAYER, key = "tomate", equals = true },
   }
   ent.actions = {
     { target = "player", action = "send_message", message = "Tu es une tomate" },

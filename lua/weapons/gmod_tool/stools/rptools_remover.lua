@@ -15,7 +15,7 @@ if SERVER then
     local ent = Entity(entIndex)
 
     if ent:GetClass() == "ent_rptools_node" then
-        ent:Remove()
+      ent:Remove()
     end
   end)
 end
@@ -60,18 +60,28 @@ function TOOL:Think()
 end
 
 if CLIENT then
-    function TOOL:DrawToolScreen(width, height)
-        surface.SetDrawColor(20, 20, 20, 255)
-        surface.DrawRect(0, 0, width, height)
+  function TOOL:DrawToolScreen(width, height)
+    surface.SetDrawColor(20, 20, 20, 255)
+    surface.DrawRect(0, 0, width, height)
 
-        draw.SimpleText("Remove", "DermaLarge",
-            width / 2, height * 0.4,
-            Color(255, 100, 100),
-            TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    draw.SimpleText(
+      "Remove",
+      "DermaLarge",
+      width / 2,
+      height * 0.4,
+      Color(255, 100, 100),
+      TEXT_ALIGN_CENTER,
+      TEXT_ALIGN_CENTER
+    )
 
-        draw.SimpleText("Left click to delete", "DermaDefault",
-            width / 2, height * 0.65,
-            Color(180, 180, 180),
-            TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-    end
+    draw.SimpleText(
+      "Left click to delete",
+      "DermaDefault",
+      width / 2,
+      height * 0.65,
+      Color(180, 180, 180),
+      TEXT_ALIGN_CENTER,
+      TEXT_ALIGN_CENTER
+    )
+  end
 end

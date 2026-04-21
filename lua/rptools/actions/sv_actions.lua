@@ -115,9 +115,9 @@ end
 ---@param node RPToolsNodeEntity
 local function executeStateAction(action, ply, node)
   if action.action == "set" then
-    RPTools.State.Set(action.scope, action.key, action.value, ply, action.duration)
+    RPTools.State.Server.Set(action.scope, action.key, action.value, ply, action.duration)
   elseif action.action == "remove" then
-    RPTools.State.Remove(action.scope, action.key, ply)
+    RPTools.State.Server.Remove(action.scope, action.key, ply)
   end
 end
 
@@ -137,7 +137,7 @@ local function execute(actions, players, node)
     elseif action.target == "broadcast" then
       executeBroadcastAction(action, node)
     elseif action.target == "state" then
-      if action.scope == RPTools.State.SCOPE.GLOBAL then
+      if action.scope == RPTools.State.Shared.SCOPE.GLOBAL then
         executeStateAction(action, nil, node)
       else
         for _, ply in ipairs(players) do

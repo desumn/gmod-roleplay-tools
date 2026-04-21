@@ -17,15 +17,17 @@ if SERVER then
     local ent = Entity(entIndex)
     local parent = Entity(parentIndex)
 
-    if not IsValid(parent) then return end
+    if not IsValid(parent) then
+      return
+    end
 
     if ent:GetClass() == "ent_rptools_node" then
-        ---@cast ent RPToolsNodeEntity
-        if makeParent then
-            RPTools.Transformers.SetParent(ent, parent)
-        else
-            RPTools.Transformers.RemoveParent(ent)
-        end
+      ---@cast ent RPToolsNodeEntity
+      if makeParent then
+        RPTools.Transformers.SetParent(ent, parent)
+      else
+        RPTools.Transformers.RemoveParent(ent)
+      end
     end
   end)
 end
@@ -37,7 +39,9 @@ function TOOL:LeftClick(trace)
     if selectedIndex == nil then
       return
     end
-    if not IsValid(trace.Entity) then return end
+    if not IsValid(trace.Entity) then
+      return
+    end
 
     net.Start("rptools_tool_parent")
     net.WriteUInt(selectedIndex, 16)
@@ -92,18 +96,28 @@ function TOOL:Think()
 end
 
 if CLIENT then
-    function TOOL:DrawToolScreen(width, height)
-        surface.SetDrawColor(20, 20, 20, 255)
-        surface.DrawRect(0, 0, width, height)
+  function TOOL:DrawToolScreen(width, height)
+    surface.SetDrawColor(20, 20, 20, 255)
+    surface.DrawRect(0, 0, width, height)
 
-        draw.SimpleText("Parent", "DermaLarge",
-            width / 2, height * 0.4,
-            Color(255, 100, 100),
-            TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
+    draw.SimpleText(
+      "Parent",
+      "DermaLarge",
+      width / 2,
+      height * 0.4,
+      Color(255, 100, 100),
+      TEXT_ALIGN_CENTER,
+      TEXT_ALIGN_CENTER
+    )
 
-        draw.SimpleText("Left click to make parent, right blick to remove parent", "DermaDefault",
-            width / 2, height * 0.65,
-            Color(180, 180, 180),
-            TEXT_ALIGN_CENTER, TEXT_ALIGN_CENTER)
-    end
+    draw.SimpleText(
+      "Left click to make parent, right blick to remove parent",
+      "DermaDefault",
+      width / 2,
+      height * 0.65,
+      Color(180, 180, 180),
+      TEXT_ALIGN_CENTER,
+      TEXT_ALIGN_CENTER
+    )
+  end
 end

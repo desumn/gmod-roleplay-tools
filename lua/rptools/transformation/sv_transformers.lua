@@ -74,7 +74,6 @@ end
 local function removeParent(node)
   node:SetParent(nil)
 
-
   if node.isSpatial then
     node:ReInitialize()
   end
@@ -109,7 +108,6 @@ local function insertOrUpdateCondition(node, condition)
     table.insert(node.conditions, condition)
   end
 end
-
 
 ---@param node RPToolsNodeEntity
 ---@param action RPToolsAction
@@ -152,7 +150,6 @@ local function addDistance(node, min, max)
   node:ReInitialize()
 
   hook.Run("RPTools_NodeEdited", node)
-
 
   return node
 end
@@ -221,7 +218,7 @@ end
 ---@param key string
 ---@return RPToolsNodeEntity?
 local function addFlagCondition(node, scope, key, invert)
-  if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
+  if not (scope == RPTools.State.Shared.SCOPE.GLOBAL or scope == RPTools.State.Shared.SCOPE.PLAYER) then
     return nil
   end
 
@@ -246,7 +243,7 @@ end
 ---@param exclusive? { min : boolean, max : boolean}
 ---@return RPToolsNodeEntity?
 local function addNumberCondition(node, scope, key, min, max, exclusive)
-  if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
+  if not (scope == RPTools.State.Shared.SCOPE.GLOBAL or scope == RPTools.State.Shared.SCOPE.PLAYER) then
     return nil
   end
   if min == nil and max == nil then
@@ -271,7 +268,7 @@ end
 ---@param invert? boolean
 ---@return RPToolsNodeEntity?
 local function addStringCondition(node, scope, key, value, invert)
-  if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
+  if not (scope == RPTools.State.Shared.SCOPE.GLOBAL or scope == RPTools.State.Shared.SCOPE.PLAYER) then
     return nil
   end
   if value == nil or value == "" then
@@ -365,7 +362,7 @@ local function addPlayWorldSound(node, sound, volume, pitch, level)
     { target = "world", action = "play_sound", sound = sound, volume = volume, pitch = pitch, level = level }
 
   insertOrUpdateAction(node, playSoundAction)
-  
+
   hook.Run("RPTools_NodeEdited", node)
 
   return node
@@ -432,7 +429,7 @@ end
 ---@param duration number
 ---@return RPToolsNodeEntity?
 local function addStateSet(node, scope, key, value, duration)
-  if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
+  if not (scope == RPTools.State.Shared.SCOPE.GLOBAL or scope == RPTools.State.Shared.SCOPE.PLAYER) then
     return nil
   end
 
@@ -451,7 +448,7 @@ end
 ---@param key string
 ---@return RPToolsNodeEntity?
 local function addStateRemove(node, scope, key)
-  if not (scope == RPTools.State.SCOPE.GLOBAL or scope == RPTools.State.SCOPE.PLAYER) then
+  if not (scope == RPTools.State.Shared.SCOPE.GLOBAL or scope == RPTools.State.Shared.SCOPE.PLAYER) then
     return nil
   end
 

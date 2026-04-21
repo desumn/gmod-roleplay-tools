@@ -5,11 +5,7 @@ local stateTable = {
   players = {},
 }
 
----@enum RPToolsStateScope
-local SCOPE = {
-  PLAYER = 1,
-  GLOBAL = 2,
-}
+local SCOPE = RPTools.State.Shared.SCOPE
 
 ---@param scope RPToolsStateScope
 ---@param key string
@@ -117,8 +113,7 @@ local function onChange(name, callback)
   hook.Add("RPTools_StateValueChanged", name, callback)
 end
 
-RPTools.State = {
-  SCOPE = SCOPE,
+RPTools.State.Server = {
   Get = get,
   Set = set,
   Remove = remove,
