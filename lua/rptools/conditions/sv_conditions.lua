@@ -120,7 +120,7 @@ end
 ---@param ply? Player
 ---@return boolean
 local function evaluateState(condition, ply)
-  local value = RPTools.State.Shared.Get(condition.scope, condition.key, ply)
+  local value = RPTools.State.Server.Get(condition.scope, condition.key, ply)
   return compare(value, condition)
 end
 
