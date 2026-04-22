@@ -1,20 +1,19 @@
+---@alias SteamID64 string
+
 ---@class RPToolsNodeEntity : Entity
 ---@field ReInitialize fun(self : RPToolsNodeEntity)
 ---@field conditions RPToolsCondition[]
 ---@field actions RPToolsAction[]
----@field playersInZone table<string, Player>
----@field playersWithNewState table<string, Player>
----@field activePlayers table<string, boolean>
----@field isSpatial boolean
----@field radius number
----@field keys table<RPToolsStateScope, table<string, boolean>>
----@field activeSounds string[]
----@field shouldEvaluate boolean
----@field CountActives fun(self : RPToolsNodeEntity) : number
----@field CountInZone fun(self : RPToolsNodeEntity) : number
----@field ReevaluateState fun(self : RPToolsNodeEntity) : nil
----@field debug { hitNormal : Vector }
----@field state { paused : boolean, errorMessage : string}
+---@field private playersInZone table<SteamID64, Player>
+---@field private playersWithNewState table<SteamID64, Player>
+---@field private activePlayers table<SteamID64, boolean>
+---@field private isSpatial boolean
+---@field private keys table<RPToolsStateScope, table<string, boolean>>
+---@field private activeSounds string[]
+---@field private shouldEvaluate boolean
+---@field private valueChangeEvent string
+---@field state { paused : boolean, errorMessage : string }
+---@field debug { hitNormal? : Vector }
 
 RPTools = RPTools or {}
 

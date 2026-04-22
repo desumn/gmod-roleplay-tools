@@ -1,5 +1,6 @@
 RPTools = RPTools or {}
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param index integer
 ---@return RPToolsNodeEntity?
@@ -16,6 +17,7 @@ local function removeCondition(node, index)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param indexes integer[]
 ---@return RPToolsNodeEntity?
@@ -34,6 +36,7 @@ local function removeConditions(node, indexes)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param index integer
 ---@return RPToolsNodeEntity?
@@ -49,6 +52,7 @@ local function removeAction(node, index)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param parent Entity
 ---@return RPToolsNodeEntity?
@@ -69,6 +73,7 @@ local function setParent(node, parent)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@return RPToolsNodeEntity?
 local function removeParent(node)
@@ -131,6 +136,7 @@ local function insertOrUpdateAction(node, action)
   end
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param min? number
 ---@param max? number
@@ -143,7 +149,7 @@ local function addDistance(node, min, max)
     return nil
   end
 
-  ---@type RPToolsSpatialCondition
+  ---@type RPToolsDistanceCondition
   local distanceCondition = { type = "spatial", test = "distance", min = min, max = max }
 
   insertOrUpdateCondition(node, distanceCondition)
@@ -154,6 +160,7 @@ local function addDistance(node, min, max)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param maxAngleDegrees number
 ---@return RPToolsNodeEntity?
@@ -176,7 +183,7 @@ local function addViewAngle(node, maxAngleDegrees)
 
   local minDotProduct = math.cos(math.rad(maxAngleDegrees))
 
-  ---@type RPToolsSpatialCondition
+  ---@type RPToolsViewAngleCondition
   local angleCondition = { type = "spatial", test = "view_angle", min = minDotProduct }
 
   insertOrUpdateCondition(node, angleCondition)
@@ -186,6 +193,7 @@ local function addViewAngle(node, maxAngleDegrees)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param shouldLineOfSight boolean
 ---@return RPToolsNodeEntity?
@@ -202,7 +210,7 @@ local function addLineOfSight(node, shouldLineOfSight)
     return nil
   end
 
-  ---@type RPToolsSpatialCondition
+  ---@type RPToolsLineOfSightCondition
   local losCondition = { type = "spatial", test = "line_of_sight", equals = shouldLineOfSight }
 
   insertOrUpdateCondition(node, losCondition)
@@ -213,6 +221,7 @@ local function addLineOfSight(node, shouldLineOfSight)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param scope RPToolsStateScope
 ---@param key string
@@ -224,8 +233,8 @@ local function addFlagCondition(node, scope, key, invert)
 
   local equality = invert and "notEquals" or "equals"
 
-  ---@type RPToolsStateCondition
-  local stateCondition = { type = "state", scope = scope, key = key, [equality] = true }
+  ---@type RPToolsFlagCondition
+  local stateCondition = { type = "state", scope = scope, key = key, [equality] = true, valueType = "boolean" }
 
   insertOrUpdateCondition(node, stateCondition)
   node:ReInitialize()
@@ -235,6 +244,7 @@ local function addFlagCondition(node, scope, key, invert)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param scope RPToolsStateScope
 ---@param key string
@@ -250,8 +260,8 @@ local function addNumberCondition(node, scope, key, min, max, exclusive)
     return nil
   end
 
-  ---@type RPToolsStateCondition
-  local stateCondition = { type = "state", scope = scope, key = key, min = min, max = max, exclusive = exclusive }
+  ---@type RPToolsNumberCondition
+  local stateCondition = { type = "state", scope = scope, key = key, min = min, max = max, exclusive = exclusive, valueType = "number" }
 
   insertOrUpdateCondition(node, stateCondition)
   node:ReInitialize()
@@ -261,6 +271,7 @@ local function addNumberCondition(node, scope, key, min, max, exclusive)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param scope RPToolsStateScope
 ---@param key string
@@ -277,8 +288,8 @@ local function addStringCondition(node, scope, key, value, invert)
 
   local equality = invert and "notEquals" or "equals"
 
-  ---@type RPToolsStateCondition
-  local stateCondition = { type = "state", scope = scope, key = key, [equality] = value }
+  ---@type RPToolsStringCondition
+  local stateCondition = { type = "state", scope = scope, key = key, [equality] = value, valueType = "string" }
 
   insertOrUpdateCondition(node, stateCondition)
   node:ReInitialize()
@@ -288,11 +299,12 @@ local function addStringCondition(node, scope, key, value, invert)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param message string
 ---@return RPToolsNodeEntity
 local function addMessage(node, message)
-  ---@type RPToolsPlayerAction
+  ---@type RPToolsMessageAction
   local messageAction = { target = "player", action = "send_message", message = message }
 
   insertOrUpdateAction(node, messageAction)
@@ -302,12 +314,13 @@ local function addMessage(node, message)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param message string
 ---@param duration number
 ---@return RPToolsNodeEntity
 local function addHUDMessage(node, message, duration)
-  ---@type RPToolsPlayerAction
+  ---@type RPToolsHUDMessageAction
   local HUDMessageAction = { target = "player", action = "hud_message", message = message, duration = duration }
 
   insertOrUpdateAction(node, HUDMessageAction)
@@ -317,6 +330,7 @@ local function addHUDMessage(node, message, duration)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param sound string
 ---@param pitch? number
@@ -330,7 +344,7 @@ local function addPlayPlayerSound(node, sound, volume, pitch)
     return nil
   end
 
-  ---@type RPToolsPlayerAction
+  ---@type RPToolsPlaySoundAction
   local playSoundAction = { target = "player", action = "play_sound", sound = sound, volume = volume, pitch = pitch }
 
   insertOrUpdateAction(node, playSoundAction)
@@ -340,6 +354,7 @@ local function addPlayPlayerSound(node, sound, volume, pitch)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param sound string
 ---@param pitch? number
@@ -357,7 +372,7 @@ local function addPlayWorldSound(node, sound, volume, pitch, level)
     return nil
   end
 
-  ---@type RPToolsWorldAction
+  ---@type RPToolsPlaySoundWorldAction
   local playSoundAction =
     { target = "world", action = "play_sound", sound = sound, volume = volume, pitch = pitch, level = level }
 
@@ -368,6 +383,7 @@ local function addPlayWorldSound(node, sound, volume, pitch, level)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param sound string
 ---@param iterations? number
@@ -390,7 +406,7 @@ local function addLoopSound(node, sound, iterations, volume, pitch, level)
     return nil
   end
 
-  ---@type RPToolsWorldAction
+  ---@type RPToolsLoopSoundAction
   local playSoundAction = {
     target = "world",
     action = "loop_sound",
@@ -408,11 +424,12 @@ local function addLoopSound(node, sound, iterations, volume, pitch, level)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param message string
 ---@return RPToolsNodeEntity
 local function addBroadcastMessage(node, message)
-  ---@type RPToolsBroadcastAction
+  ---@type RPToolsBroadcastMessageAction
   local messageAction = { target = "broadcast", action = "send_message", message = message }
 
   insertOrUpdateAction(node, messageAction)
@@ -422,6 +439,7 @@ local function addBroadcastMessage(node, message)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param scope RPToolsStateScope
 ---@param key string
@@ -433,8 +451,20 @@ local function addStateSet(node, scope, key, value, duration)
     return nil
   end
 
-  ---@type RPToolsStateAction
-  local stateAction = { target = "state", action = "set", scope = scope, key = key, value = value, duration = duration }
+  local valueType
+  local typeID = TypeID(value)
+  if typeID == TYPE_BOOL then
+    valueType = "boolean"
+  elseif typeID == TYPE_NUMBER then
+    valueType = "number"
+  elseif typeID == TYPE_STRING then
+    valueType = "string"
+  else
+    return nil
+  end
+
+  ---@type RPToolsStateSetAction
+  local stateAction = { target = "state", action = "set", scope = scope, key = key, value = value, valueType = valueType, duration = duration }
 
   insertOrUpdateAction(node, stateAction)
 
@@ -443,6 +473,7 @@ local function addStateSet(node, scope, key, value, duration)
   return node
 end
 
+---@nodiscard
 ---@param node RPToolsNodeEntity
 ---@param scope RPToolsStateScope
 ---@param key string
@@ -452,7 +483,7 @@ local function addStateRemove(node, scope, key)
     return nil
   end
 
-  ---@type RPToolsStateAction
+  ---@type RPToolsStateRemoveAction
   local stateAction = { target = "state", action = "remove", scope = scope, key = key }
 
   insertOrUpdateAction(node, stateAction)

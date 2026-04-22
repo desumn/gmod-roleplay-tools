@@ -73,62 +73,80 @@ local COLOR_INACTIVE = Color(180, 180, 180)
 local COLOR_SHORTCUT_KEY = Color(200, 200, 210)
 local COLOR_SHORTCUT_DESC = Color(130, 130, 140)
 
----@param comparison RPToolsComparison
-local function formatComparison(comparison)
-  if comparison.equals ~= nil then
-    return "= " .. tostring(comparison.equals)
-  end
-  if comparison.notEquals ~= nil then
-    return "≠ " .. tostring(comparison.notEquals)
-  end
-
+---@param range RPToolsRange
+---@return string
+local function formatRange(range)
   local parts = {}
-  local exclusive = comparison.exclusive or {}
+  local exclusive = range.exclusive or {}
 
-  if comparison.min ~= nil then
+  if range.min ~= nil then
     local op = exclusive.min and ">" or "≥"
-    table.insert(parts, op .. " " .. tostring(comparison.min))
+    table.insert(parts, op .. " " .. tostring(range.min))
   end
-  if comparison.max ~= nil then
+  if range.max ~= nil then
     local op = exclusive.max and "<" or "≤"
-    table.insert(parts, op .. " " .. tostring(comparison.max))
+    table.insert(parts, op .. " " .. tostring(range.max))
   end
 
   return table.concat(parts, " and ")
 end
 
----@param condition RPToolsCondition
-local function formatCondition(condition)
-  if condition.type == "spatial" then
-    if condition.test == "distance" then
-      return "Distance " .. formatComparison(condition) .. "u"
-    elseif condition.test == "view_angle" then
-      if condition.min ~= nil then
-        local angleDeg = math.floor(math.deg(math.acos(condition.min)))
-        return "View angle ≤ " .. angleDeg .. "°"
-      end
-      return "View angle " .. formatComparison(condition)
-    elseif condition.test == "line_of_sight" then
-      return "Line of sight " .. formatComparison(condition)
-    end
-  elseif condition.type == "state" then
-    local scope = scopeNames[condition.scope] or "?"
-    return scope .. "." .. condition.key .. " " .. formatComparison(condition)
+---@generic T
+---@param equality RPToolsEquality<T>
+---@return string
+local function formatEquality(equality)
+  if equality.equals ~= nil then
+    return "= " .. tostring(equality.equals)
+  end
+  if equality.notEquals ~= nil then
+    return "≠ " .. tostring(equality.notEquals)
   end
   return "?"
 end
 
+---@param condition RPToolsCondition
+---@return string
+local function formatCondition(condition)
+  if condition.type == "spatial" then
+    if condition.test == "distance" then
+      return "Distance " .. formatRange(condition) .. "u"
+    elseif condition.test == "view_angle" then
+      local angleDeg = math.floor(math.deg(math.acos(condition.min)))
+      return "View angle ≤ " .. angleDeg .. "°"
+    elseif condition.test == "line_of_sight" then
+      return "Line of sight " .. formatEquality(condition)
+    else
+      error("format failed: invalid condition test" .. condition.test)
+    end
+  elseif condition.type == "state" then
+    local scope = scopeNames[condition.scope] or "?"
+    local key = scope .. "." .. condition.key
+    if condition.valueType == "boolean" or condition.valueType == "string" then
+      return key .. " " .. formatEquality(condition)
+    elseif condition.valueType == "number" then
+      return key .. " " .. formatRange(condition)
+    else
+      error("format failed: invalid condition test" .. condition.test)
+    end
+  else
+    error("unhandled condition type " .. condition.type)
+  end
+end
+
 ---@param action RPToolsAction
+---@return string
 local function formatAction(action)
   local prefix = targetNames[action.target] or "?"
 
-  if action.target == "player" or action.target == "broadcast" then
+  if action.target == "player" then
     if action.action == "send_message" then
       return prefix .. " Message"
     elseif action.action == "hud_message" then
-      return prefix .. " HUD message (" .. (action.duration or 0) .. "s)"
+      return prefix .. " HUD message (" .. action.duration .. "s)"
     elseif action.action == "play_sound" then
       return prefix .. " Sound"
+    else
+      error("format failed: invalid action type" .. action.action)
     end
   elseif action.target == "world" then
     if action.action == "play_sound" then
@@ -136,17 +154,23 @@ local function formatAction(action)
     elseif action.action == "loop_sound" then
       local iter = action.iterations and action.iterations > 0 and (" x" .. action.iterations) or " ∞"
       return prefix .. " Loop" .. iter
+    else
+      error("format failed: invalid action type" .. action.action)
     end
+  elseif action.target == "broadcast" then
+    return prefix .. " Message"
   elseif action.target == "state" then
     local scope = scopeNames[action.scope] or "?"
     if action.action == "set" then
-      return prefix .. " " .. scope .. "." .. action.key .. " = " .. tostring(action.value)
+      return prefix .. " " .. scope .. "." .. action.key .. " = " .. tostring(action.value) .. " (" .. action.valueType .. ")"
     elseif action.action == "remove" then
       return prefix .. " remove " .. scope .. "." .. action.key
+    else
+      error("format failed: invalid action type" .. action.action)
     end
+  else
+    error("format error: unknwon action target " .. action.target)
   end
-
-  return prefix .. " ?"
 end
 
 ---@param action RPToolsAction
@@ -154,20 +178,29 @@ end
 local function actionDetails(action)
   local details = {}
 
-  if action.message then
-    table.insert(details, '"' .. action.message .. '"')
-  end
-  if action.sound then
+  if action.target == "player" or action.target == "broadcast" then
+    if action.action == "send_message" or action.action == "hud_message" then
+      table.insert(details, '"' .. action.message .. '"')
+    elseif action.action == "play_sound" then
+      table.insert(details, action.sound)
+      if action.volume then
+        table.insert(details, "vol " .. action.volume)
+      end
+      if action.pitch then
+        table.insert(details, "pitch " .. action.pitch)
+      end
+    end
+  elseif action.target == "world" then
     table.insert(details, action.sound)
-  end
-  if action.volume then
-    table.insert(details, "vol " .. action.volume)
-  end
-  if action.pitch then
-    table.insert(details, "pitch " .. action.pitch)
-  end
-  if action.level then
-    table.insert(details, "level " .. action.level)
+    if action.volume then
+      table.insert(details, "vol " .. action.volume)
+    end
+    if action.pitch then
+      table.insert(details, "pitch " .. action.pitch)
+    end
+    if action.level then
+      table.insert(details, "level " .. action.level)
+    end
   end
 
   return details

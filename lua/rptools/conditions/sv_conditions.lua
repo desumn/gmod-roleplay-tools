@@ -1,58 +1,64 @@
 RPTools = RPTools or {}
 
----@class RPToolsComparison<T>
----@field equals? T
----@field notEquals? T
----@field min? T
----@field max? T
+---@class RPToolsRange
+---@field min? number
+---@field max? number
 ---@field exclusive? { min? : boolean, max? : boolean }
 
----@generic T
----@param value T
----@param comparison RPToolsComparison<T>
+---@param value number
+---@param range RPToolsRange
 ---@return boolean
-local function compare(value, comparison)
-  if comparison.equals ~= nil then
-    if value == nil then
-      return false
-    end
-    return value == comparison.equals
-  end
-
-  if comparison.notEquals ~= nil then
-    return value ~= comparison.notEquals
-  end
-
-  if value == nil then
-    return false
-  end
-  local min = comparison.min
-  local max = comparison.max
-
-  local exclusive = comparison.exclusive or { min = false, max = false }
-  exclusive.min = exclusive.min or false
-  exclusive.max = exclusive.max or false
-
-  local minCheck = true
-
-  if min ~= nil then
+local function checkRange(value, range)
+  local exclusive = { 
+    min = range.exclusive and range.exclusive.min or false,
+    max = range.exclusive and range.exclusive.max or false
+  }
+  
+  local minCondition = true
+  local maxCondition = true
+  
+  if range.min then
+    minCondition = range.min <= value
     if exclusive.min then
-      minCheck = min < value
-    else
-      minCheck = min <= value
+      minCondition = minCondition and range.min ~= value
     end
   end
-
-  local maxCheck = true
-  if max ~= nil then
+  
+  if range.max then
+    maxCondition = value <= range.max
     if exclusive.max then
-      maxCheck = value < max
-    else
-      maxCheck = value <= max
+      maxCondition = maxCondition and range.max ~= value
     end
   end
+  
+  return minCondition and maxCondition
+end
 
-  return minCheck and maxCheck
+---@alias RPToolsEquatableValues boolean | number | string
+
+---@class RPToolsEquality<T>
+---@field equals? T : RPToolsEquatableValues
+---@field notEquals? T
+
+---@generic T : RPToolsEquatableValues
+---@param value T
+---@param equality RPToolsEquality<T>
+---@return boolean
+local function checkEquality(value, equality)
+  
+  local equalsCondition = true
+  local notEqualsCondition = true
+  
+  if equality.equals ~= nil then
+    equalsCondition = value == equality.equals
+  end
+  
+  if equality.notEquals ~= nil then
+    notEqualsCondition = value ~= equality.notEquals
+  end
+  
+  return equalsCondition and notEqualsCondition
+  
 end
 
 local Data = {}
@@ -84,44 +90,74 @@ function Data.getLineOfSight(ply, node)
   return not tr.Hit
 end
 
----@class RPToolsSpatialCondition : RPToolsComparison<number|boolean>
+---@class RPToolsDistanceCondition : RPToolsRange
 ---@field type "spatial"
----@field test "distance"|"view_angle"|"line_of_sight"
+---@field test "distance"
+
+---@class RPToolsViewAngleCondition : RPToolsRange
+---@field type "spatial"
+---@field test "view_angle"
+
+---@class RPToolsLineOfSightCondition : RPToolsEquality<boolean>
+---@field type "spatial"
+---@field test "line_of_sight"
+
+---@alias RPToolsSpatialCondition RPToolsDistanceCondition | RPToolsViewAngleCondition | RPToolsLineOfSightCondition | RPToolsNewCond
 
 ---@param condition RPToolsSpatialCondition
 ---@param ply Player
 ---@param node RPToolsNodeEntity
 ---@return boolean
 local function evaluateSpatial(condition, ply, node)
-  local position = node:GetPos()
-
-  local value
-
   if condition.test == "distance" then
-    value = Data.getDistance(ply, node)
+    return checkRange(Data.getDistance(ply, node), condition)
   elseif condition.test == "view_angle" then
-    value = Data.getViewAngle(ply, node)
+    return checkRange(Data.getViewAngle(ply, node), condition)
   elseif condition.test == "line_of_sight" then
-    value = Data.getLineOfSight(ply, node)
+    return checkEquality(Data.getLineOfSight(ply, node), condition)
+  else
+    error("Unmatched condition type " .. condition.test)
   end
-
-  if value == nil then
-    return false
-  end
-  return compare(value, condition)
 end
 
----@class RPToolsStateCondition : RPToolsComparison<number|boolean>
+---@class RPToolsFlagCondition : RPToolsEquality<boolean>
 ---@field type "state"
----@field scope RPToolsStateScope
 ---@field key string
+---@field scope RPToolsStateScope
+---@field valueType "boolean"
+
+---@class RPToolsNumberCondition : RPToolsRange
+---@field type "state"
+---@field key string
+---@field scope RPToolsStateScope
+---@field valueType "number"
+
+---@class RPToolsStringCondition : RPToolsEquality<string>
+---@field type "state"
+---@field key string
+---@field scope RPToolsStateScope
+---@field valueType "string"
+
+---@alias RPToolsStateCondition RPToolsFlagCondition|RPToolsNumberCondition|RPToolsStringCondition
 
 ---@param condition RPToolsStateCondition
 ---@param ply? Player
 ---@return boolean
 local function evaluateState(condition, ply)
   local value = RPTools.State.Server.Get(condition.scope, condition.key, ply)
-  return compare(value, condition)
+  if value == nil then
+    return false
+  end
+  
+  if condition.valueType == "boolean" then
+    return checkEquality(value, condition)
+  elseif condition.valueType == "number" then
+    return checkRange(value, condition)
+  elseif condition.valueType == "string" then
+    return checkEquality(value, condition)
+  else
+    error("Invalid type for state condition " .. condition.valueType)
+  end
 end
 
 ---@alias RPToolsCondition RPToolsSpatialCondition | RPToolsStateCondition
@@ -133,16 +169,18 @@ end
 local function evaluate(conditions, ply, node)
   for _, condition in ipairs(conditions) do
     if condition.type == "spatial" then
+      ---@cast condition RPToolsSpatialCondition
       if not evaluateSpatial(condition, ply, node) then
         return false
       end
     elseif condition.type == "state" then
+      ---@cast condition RPToolsStateCondition
       if not evaluateState(condition, ply) then
         return false
       end
     end
   end
-
+  
   return true
 end
 
