@@ -261,7 +261,8 @@ local function addNumberCondition(node, scope, key, min, max, exclusive)
   end
 
   ---@type RPToolsNumberCondition
-  local stateCondition = { type = "state", scope = scope, key = key, min = min, max = max, exclusive = exclusive, valueType = "number" }
+  local stateCondition =
+    { type = "state", scope = scope, key = key, min = min, max = max, exclusive = exclusive, valueType = "number" }
 
   insertOrUpdateCondition(node, stateCondition)
   node:ReInitialize()
@@ -464,7 +465,15 @@ local function addStateSet(node, scope, key, value, duration)
   end
 
   ---@type RPToolsStateSetAction
-  local stateAction = { target = "state", action = "set", scope = scope, key = key, value = value, valueType = valueType, duration = duration }
+  local stateAction = {
+    target = "state",
+    action = "set",
+    scope = scope,
+    key = key,
+    value = value,
+    valueType = valueType,
+    duration = duration,
+  }
 
   insertOrUpdateAction(node, stateAction)
 

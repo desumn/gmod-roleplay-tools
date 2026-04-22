@@ -9,28 +9,28 @@ RPTools = RPTools or {}
 ---@param range RPToolsRange
 ---@return boolean
 local function checkRange(value, range)
-  local exclusive = { 
+  local exclusive = {
     min = range.exclusive and range.exclusive.min or false,
-    max = range.exclusive and range.exclusive.max or false
+    max = range.exclusive and range.exclusive.max or false,
   }
-  
+
   local minCondition = true
   local maxCondition = true
-  
+
   if range.min then
     minCondition = range.min <= value
     if exclusive.min then
       minCondition = minCondition and range.min ~= value
     end
   end
-  
+
   if range.max then
     maxCondition = value <= range.max
     if exclusive.max then
       maxCondition = maxCondition and range.max ~= value
     end
   end
-  
+
   return minCondition and maxCondition
 end
 
@@ -45,20 +45,18 @@ end
 ---@param equality RPToolsEquality<T>
 ---@return boolean
 local function checkEquality(value, equality)
-  
   local equalsCondition = true
   local notEqualsCondition = true
-  
+
   if equality.equals ~= nil then
     equalsCondition = value == equality.equals
   end
-  
+
   if equality.notEquals ~= nil then
     notEqualsCondition = value ~= equality.notEquals
   end
-  
+
   return equalsCondition and notEqualsCondition
-  
 end
 
 local Data = {}
@@ -148,7 +146,7 @@ local function evaluateState(condition, ply)
   if value == nil then
     return false
   end
-  
+
   if condition.valueType == "boolean" then
     return checkEquality(value, condition)
   elseif condition.valueType == "number" then
@@ -180,7 +178,7 @@ local function evaluate(conditions, ply, node)
       end
     end
   end
-  
+
   return true
 end
 

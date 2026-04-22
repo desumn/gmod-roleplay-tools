@@ -162,7 +162,16 @@ local function formatAction(action)
   elseif action.target == "state" then
     local scope = scopeNames[action.scope] or "?"
     if action.action == "set" then
-      return prefix .. " " .. scope .. "." .. action.key .. " = " .. tostring(action.value) .. " (" .. action.valueType .. ")"
+      return prefix
+        .. " "
+        .. scope
+        .. "."
+        .. action.key
+        .. " = "
+        .. tostring(action.value)
+        .. " ("
+        .. action.valueType
+        .. ")"
     elseif action.action == "remove" then
       return prefix .. " remove " .. scope .. "." .. action.key
     else

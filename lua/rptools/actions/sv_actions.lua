@@ -20,7 +20,6 @@ RPTools = RPTools or {}
 
 ---@alias RPToolsPlayerAction RPToolsMessageAction | RPToolsHUDMessageAction | RPToolsPlaySoundAction
 
-
 local Client = {}
 
 util.AddNetworkString("RPTools_MessageAction")
@@ -67,7 +66,7 @@ local function executePlayerAction(action, ply, node)
     action.pitch = action.pitch or 100
     Client.sendPlaySound(action, ply)
   else
-    error("Unhandled player action " .. action.action )
+    error("Unhandled player action " .. action.action)
   end
 end
 
@@ -110,7 +109,7 @@ local function executeWorldAction(action, node)
     }
     ent:Spawn()
   else
-    error("Unhandled player action " .. action.action )
+    error("Unhandled player action " .. action.action)
   end
 end
 
@@ -128,7 +127,7 @@ local function executeBroadcastAction(action, node)
     if action.action == "send_message" then
       Client.sendMessage(action, ply)
     else
-      error("Unhandled player action " .. action.action )
+      error("Unhandled player action " .. action.action)
     end
   end
 end
@@ -159,7 +158,7 @@ local function executeStateAction(action, ply, node)
   elseif action.action == "remove" then
     RPTools.State.Server.Remove(action.scope, action.key, ply)
   else
-    error("Unhandled player action " .. action.action )
+    error("Unhandled player action " .. action.action)
   end
 end
 
