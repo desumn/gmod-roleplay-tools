@@ -194,10 +194,10 @@ local function evaluateActivation(self, ply, result)
   local activate, deactivate
   if result and self.activePlayers[steamid] == nil then
     activate = true
-    self.activePlayers[ply:SteamID64()] = true
+    self.activePlayers[steamid] = true
   elseif not result and self.activePlayers[steamid] ~= nil then
     deactivate = true
-    self.activePlayers[ply:SteamID64()] = nil
+    self.activePlayers[steamid] = nil
   end
   return activate, deactivate
 end
