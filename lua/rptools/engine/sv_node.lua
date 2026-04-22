@@ -43,7 +43,7 @@ end
 ---@param name string
 ---@param callback fun(node : RPToolsNodeEntity, players : Player[])
 local function onPlayersDeactivation(name, callback)
-  hook.Add("RPTools_PlayersDeactivations", name, callback)
+  hook.Add("RPTools_PlayersDeactivation", name, callback)
 end
 
 ---@param name string

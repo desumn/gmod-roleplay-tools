@@ -35,7 +35,7 @@ local function sync(targets, node)
     state = node.state,
     activePlayers = node:CountActives(),
     playersInZone = node:CountInZone(),
-    normal = node.debug.hitNormal,
+    normal = node.debug.normal,
   }
 
   net.Start("rptools_sync_debug")

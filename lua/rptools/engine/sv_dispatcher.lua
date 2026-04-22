@@ -1,5 +1,3 @@
-local logModuleName = "Dispatcher"
-
 RPTools = RPTools or {}
 
 hook.Add("RPTools_NodeActivated", "rptools_dispatch_actions", function(node, players)

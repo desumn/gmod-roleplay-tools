@@ -12,7 +12,7 @@ function TOOL:LeftClick(trace)
   ---@cast ent RPToolsNodeEntity
   ent.conditions = {}
   ent.actions = {}
-  ent.debug = { hitNormal = trace.HitNormal }
+  ent.debug = { normal = trace.HitNormal }
   ent:SetPos(trace.HitPos)
 
   if IsValid(trace.Entity) and not trace.Entity:IsWorld() then

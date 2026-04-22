@@ -24,6 +24,26 @@ if CLIENT then
   include("rptools/debug/cl_inspector.lua")
 end
 
+concommand.Add("rptools_debug", function(ply)
+  if not ply:IsAdmin() then
+    return
+  end
+  ply:SetNW2Bool("rptools_debug", not ply:GetNW2Bool("rptools_debug", false))
+
+  local debugActive = ply:GetNW2Bool("rptools_debug")
+
+  if debugActive then
+    for _, ent in ipairs(ents.FindByClass("ent_rptools_node")) do
+      ---@cast ent RPToolsNodeEntity
+      RPTools.Sync.Sync({ ply }, ent)
+    end
+  else
+    for _, ent in ipairs(ents.FindByClass("ent_rptools_node")) do
+      ---@cast ent RPToolsNodeEntity
+      RPTools.Sync.RemoveSync({ ply }, ent:EntIndex())
+    end
+  end
+end)
 
 hook.Add("CanTool", "rptools_tool_check_admin", function(ply, trace, toolname)
   if string.StartsWith(toolname, "rptools_") then

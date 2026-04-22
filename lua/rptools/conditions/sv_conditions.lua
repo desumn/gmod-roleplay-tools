@@ -100,7 +100,7 @@ end
 ---@field type "spatial"
 ---@field test "line_of_sight"
 
----@alias RPToolsSpatialCondition RPToolsDistanceCondition | RPToolsViewAngleCondition | RPToolsLineOfSightCondition | RPToolsNewCond
+---@alias RPToolsSpatialCondition RPToolsDistanceCondition | RPToolsViewAngleCondition | RPToolsLineOfSightCondition
 
 ---@param condition RPToolsSpatialCondition
 ---@param ply Player

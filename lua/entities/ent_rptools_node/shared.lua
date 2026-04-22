@@ -2,7 +2,7 @@
 
 ---@class RPToolsNodeEntity : Entity
 ---@field ReInitialize fun(self : RPToolsNodeEntity)
----@field ClearPlayerRuntimeState fun(self : RPToolsNodeEntity, stamdID : SteamID64)
+---@field ClearPlayerRuntimeState fun(self : RPToolsNodeEntity, steamID : SteamID64)
 ---@field conditions RPToolsCondition[]
 ---@field actions RPToolsAction[]
 ---@field private playersInZone table<SteamID64, Player>
@@ -14,7 +14,7 @@
 ---@field private shouldEvaluate boolean
 ---@field private valueChangeEvent string
 ---@field state { paused : boolean, errorMessage : string }
----@field debug { hitNormal? : Vector }
+---@field debug { normal? : Vector }
 
 RPTools = RPTools or {}
 
