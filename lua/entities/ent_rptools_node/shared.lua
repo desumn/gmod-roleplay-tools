@@ -2,6 +2,7 @@
 
 ---@class RPToolsNodeEntity : Entity
 ---@field ReInitialize fun(self : RPToolsNodeEntity)
+---@field ClearPlayerRuntimeState fun(self : RPToolsNodeEntity, stamdID : SteamID64)
 ---@field conditions RPToolsCondition[]
 ---@field actions RPToolsAction[]
 ---@field private playersInZone table<SteamID64, Player>

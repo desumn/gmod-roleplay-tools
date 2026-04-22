@@ -129,3 +129,11 @@ hook.Add("CanTool", "rptools_tool_check_admin", function(ply, trace, toolname)
     end
   end
 end)
+
+hook.Add("PlayerDisconnected", "rptools_node_runtime_cleanup", function(ply)
+  local steamid = ply:SteamID64()
+  for _, node in ipairs(ents.FindByClass("ent_rptools_node")) do
+    ---@cast node RPToolsNodeEntity
+    node:ClearPlayerRuntimeState(steamid)
+  end
+end)

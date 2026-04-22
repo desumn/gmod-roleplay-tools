@@ -28,6 +28,36 @@ end
 
 ---@param scope RPToolsStateScope
 ---@param key string
+---@param ply? Player
+---@return boolean?
+local function getBoolean(scope, key, ply)
+  local value = get(scope, key, ply)
+  if TypeID(value) ~= TYPE_BOOL then return nil end
+  return value
+end
+
+---@param scope RPToolsStateScope
+---@param key string
+---@param ply? Player
+---@return number?
+local function getNumber(scope, key, ply)
+  local value = get(scope, key, ply)
+  if TypeID(value) ~= TYPE_NUMBER then return nil end
+  return value
+end
+
+---@param scope RPToolsStateScope
+---@param key string
+---@param ply? Player
+---@return string?
+local function getString(scope, key, ply)
+  local value = get(scope, key, ply)
+  if TypeID(value) ~= TYPE_STRING then return nil end
+  return value
+end
+
+---@param scope RPToolsStateScope
+---@param key string
 ---@param context? Player
 ---@return boolean, string?
 local function remove(scope, key, context)
@@ -115,6 +145,9 @@ end
 
 RPTools.State.Server = {
   Get = get,
+  GetBoolean = getBoolean,
+  GetNumber = getNumber,
+  GetString = getString,
   Set = set,
   Remove = remove,
   OnValueChange = onChange,

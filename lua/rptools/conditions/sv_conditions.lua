@@ -142,17 +142,16 @@ end
 ---@param ply? Player
 ---@return boolean
 local function evaluateState(condition, ply)
-  local value = RPTools.State.Server.Get(condition.scope, condition.key, ply)
-  if value == nil then
-    return false
-  end
 
   if condition.valueType == "boolean" then
-    return checkEquality(value, condition)
+    local value = RPTools.State.Server.GetBoolean(condition.scope, condition.key, ply)
+    return value ~= nil and checkEquality(value, condition)
   elseif condition.valueType == "number" then
-    return checkRange(value, condition)
+    local value = RPTools.State.Server.GetNumber(condition.scope, condition.key, ply)
+    return value ~= nil and checkRange(value, condition)
   elseif condition.valueType == "string" then
-    return checkEquality(value, condition)
+    local value = RPTools.State.Server.GetString(condition.scope, condition.key, ply)
+    return value ~= nil and checkEquality(value, condition)
   else
     error("Invalid type for state condition " .. condition.valueType)
   end
