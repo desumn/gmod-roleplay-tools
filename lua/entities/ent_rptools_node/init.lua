@@ -154,34 +154,43 @@ end
 
 ---@param self RPToolsNodeEntity
 function ENT:EndTouch(ent)
-  if not ent:IsPlayer() or not self.isSpatial then
-    return
-  end
+  if not ent:IsPlayer() or not self.isSpatial then return end
   ---@cast ent Player
-  self.playersInZone[ent:SteamID64()] = nil
-  local oldActives = self:CountActives()
-  self.activePlayers[ent:SteamID64()] = nil
-  local newActives = self:CountActives()
-
-  hook.Run("RPTools_PlayersDeactivation", self, { ent })
+  local steamid = ent:SteamID64()
+  self.playersInZone[steamid] = nil
+  
+  local wasActive = self.activePlayers[steamid] ~= nil
+  self.activePlayers[steamid] = nil
+  
+  if wasActive then
+    if self:CountActives() == 0 then
+      hook.Run("RPTools_NodeDeactivated", self)
+    else
+      hook.Run("RPTools_PlayersDeactivation", self, { ent })
+    end
+  end
 end
 
 ---@param self RPToolsNodeEntity
 ---@param ply Player
+---@return boolean?
 local function evaluatePlayerConditions(self, ply)
   local steamid = ply:SteamID64()
   local conditionsSuccess, result = pcall(RPTools.Conditions.Evaluate, self.conditions, ply, self)
   if not conditionsSuccess then
     self.state.paused = true
     self.state.errorMessage = tostring(result)
+    return nil
   end
-  return type(result) == "boolean" and result or nil
+  return result
 end
 
 ---@param self RPToolsNodeEntity
 ---@param ply Player
----@param result boolean, boolean
+---@param result boolean
+---@return boolean, boolean
 local function evaluateActivation(self, ply, result)
+  local steamid = ply:SteamID64()
   local activate, deactivate
   if result and self.activePlayers[steamid] == nil then
     activate = true
