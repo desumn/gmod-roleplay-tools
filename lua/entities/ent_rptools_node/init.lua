@@ -32,7 +32,7 @@ local function initSpatial(self, distances)
   self:SetCollisionBounds(boxMins, boxMaxs)
   self:SetSolid(SOLID_BBOX)
   self:SetTrigger(true)
-  
+
   local newInZone = {}
   local newActivePlayers = {}
   for _, ply in ipairs(ents.FindInBox(boxMins, boxMaxs)) do
@@ -81,7 +81,7 @@ end
 local function initReactive(self)
   self:SetSolid(SOLID_NONE)
   self.playersInZone = {}
-  
+
   self.keys = {
     [RPTools.State.Shared.SCOPE.GLOBAL] = {},
     [RPTools.State.Shared.SCOPE.PLAYER] = {},
@@ -89,7 +89,7 @@ local function initReactive(self)
   extractKeys(self)
   self.playersWithNewState = {}
   self:ReevaluateState()
-  
+
   subscribeToStateChange(self)
 end
 
@@ -112,14 +112,14 @@ function ENT:ReInitialize()
   local distances = extractDistances(self)
   unSubscribeFromStateChange(self)
   self:SetTrigger(false)
-  
+
   self.isSpatial = #distances ~= 0
   if self.isSpatial then
     initSpatial(self, distances)
   else
     initReactive(self)
   end
-  
+
   self.shouldEvaluate = true
 end
 
@@ -131,13 +131,13 @@ function ENT:Initialize()
   self.activeSounds = {}
   self.debug = self.debug or {}
   self.state = { paused = false, errorMessage = "" }
-  
+
   self:SetModel("models/hunter/plates/plate.mdl")
   self:SetMoveType(MOVETYPE_NONE)
   self:SetNotSolid(true)
-  
+
   self:ReInitialize()
-  
+
   hook.Run("RPTools_NodeCreated", self)
 end
 
@@ -162,11 +162,11 @@ function ENT:EndTouch(ent)
   local oldActives = self:CountActives()
   self.activePlayers[ent:SteamID64()] = nil
   local newActives = self:CountActives()
-  
+
   if newActives ~= 0 and oldActives > newActives then
     hook.Run("RPTools_PlayerDisqualified", self, ent)
   end
-  
+
   if oldActives > 0 and newActives == 0 then
     hook.Run("RPTools_NodeDeactivated", self, ent)
   end
@@ -220,17 +220,17 @@ function ENT:Think()
     return
   end
   local oldActives = self:CountActives()
-  
+
   local players = (self.isSpatial and self.playersInZone) or self.playersWithNewState
-  
+
   local activations, deactivations = evaluatePlayersConditions(self, players)
-  
+
   self.playersWithNewState = {}
-  
+
   local newActives = self:CountActives()
-  
+
   emitLifecycleHooks(self, oldActives, newActives, activations, deactivations)
-  
+
   if table.IsEmpty(self.playersInZone) then
     self.shouldEvaluate = false
     return

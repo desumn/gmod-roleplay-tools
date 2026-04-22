@@ -142,7 +142,6 @@ end
 ---@param ply? Player
 ---@return boolean
 local function evaluateState(condition, ply)
-
   if condition.valueType == "boolean" then
     local value = RPTools.State.Server.GetBoolean(condition.scope, condition.key, ply)
     return value ~= nil and checkEquality(value, condition)
